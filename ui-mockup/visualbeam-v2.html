@@ -51,18 +51,8 @@
         </div>
 
         <div class="control-group inspection-controls">
-            <label class="control-label">INSPECTION</label>
-            <div class="inspection-type">
-                <button class="type-btn" data-type="rapid" data-grid="24">Rapid</button>
-                <button class="type-btn active" data-type="routine" data-grid="12">Routine</button>
-                <button class="type-btn" data-type="standard" data-grid="6">Standard</button>
-                <button class="type-btn" data-type="detailed" data-grid="1">Detailed</button>
-            </div>
-            
-            <div class="control-divider"></div>
-            
             <label class="control-label">GRID</label>
-            <span class="grid-size" id="current-grid">12"</span>
+            <span class="grid-size" id="current-grid">1"</span>
             
             <div class="control-divider"></div>
             
@@ -78,7 +68,7 @@
 
         <div class="control-group tools">
             <div class="tool-set">
-                <button class="tool-btn active" data-tool="select" title="Select [S]">
+                <button class="tool-btn" data-tool="select" title="Select [S]">
                     <svg width="14" height="14" viewBox="0 0 14 14">
                         <path d="M2 2 L10 6 L6 8 L4 12 L2 2" fill="currentColor"/>
                     </svg>
@@ -88,14 +78,15 @@
                         <path d="M7 2 L7 12 M2 7 L12 7 M4 4 L2 7 L4 10 M10 4 L12 7 L10 10" stroke="currentColor" fill="none"/>
                     </svg>
                 </button>
-                <button class="tool-btn" data-tool="mark" title="Mark Defect [M]">
+                <button class="tool-btn active" data-tool="mark" title="Mark Defect [M]">
                     <svg width="14" height="14" viewBox="0 0 14 14">
                         <rect x="3" y="3" width="8" height="8" stroke="currentColor" fill="none" stroke-dasharray="2"/>
                     </svg>
                 </button>
-                <button class="tool-btn" data-tool="measure" title="Measure [D]">
+                <button class="tool-btn" data-tool="zoom" title="Zoom [Z]">
                     <svg width="14" height="14" viewBox="0 0 14 14">
-                        <path d="M2 12 L12 12 M2 9 L2 12 M12 9 L12 12 M7 10 L7 12" stroke="currentColor" fill="none"/>
+                        <circle cx="6" cy="6" r="4" stroke="currentColor" fill="none"/>
+                        <line x1="9" y1="9" x2="12" y2="12" stroke="currentColor"/>
                     </svg>
                 </button>
                 <button class="tool-btn" data-tool="photo" title="Photo Reference [P]">
@@ -119,29 +110,27 @@
         </div>
 
         <div class="control-group view-controls">
-            <button class="view-btn" id="toggle-bearings" title="Show/Hide Bearings">
-                <svg width="14" height="14" viewBox="0 0 14 14">
-                    <rect x="2" y="10" width="3" height="2" fill="currentColor"/>
-                    <rect x="9" y="10" width="3" height="2" fill="currentColor"/>
-                    <line x1="3.5" y1="10" x2="3.5" y2="8" stroke="currentColor"/>
-                    <line x1="10.5" y1="10" x2="10.5" y2="8" stroke="currentColor"/>
-                </svg>
-            </button>
+            <label>
+                <input type="checkbox" id="toggle-bearings" checked>
+                Bearings
+            </label>
+            <label>
+                <input type="checkbox" id="toggle-dimensions" checked>
+                Dimensions
+            </label>
             
-            <button class="view-btn" id="toggle-dimensions" title="Show/Hide Dimensions">
-                <svg width="14" height="14" viewBox="0 0 14 14">
-                    <line x1="2" y1="7" x2="12" y2="7" stroke="currentColor"/>
-                    <line x1="2" y1="5" x2="2" y2="9" stroke="currentColor"/>
-                    <line x1="12" y1="5" x2="12" y2="9" stroke="currentColor"/>
-                </svg>
+            <div class="control-divider"></div>
+            
+            <button class="view-btn" id="clear-selection" title="Clear Selection">
+                Clear
             </button>
             
             <div class="control-divider"></div>
             
-            <button class="view-btn zoom-out" title="Zoom Out [-]">−</button>
+            <button class="view-btn" id="zoom-out" title="Zoom Out [-]">−</button>
             <span class="zoom-level">100%</span>
-            <button class="view-btn zoom-in" title="Zoom In [+]">+</button>
-            <button class="view-btn zoom-fit" title="Fit [F]">⊡</button>
+            <button class="view-btn" id="zoom-in" title="Zoom In [+]">+</button>
+            <button class="view-btn" id="zoom-fit" title="Fit to Extents">⊡</button>
             
             <div class="control-divider"></div>
             
@@ -242,22 +231,42 @@
             </span>
             <span class="status-item">
                 <span class="status-label">BEAM:</span>
-                <span id="status-beam">Beam 2</span>
+                <span id="beam-id">Beam 2</span>
             </span>
             <span class="status-item">
                 <span class="status-label">INSPECTOR:</span>
-                <span id="inspector-name">J. Smith</span>
+                <span id="inspector">J. Smith</span>
+            </span>
+            <span class="status-item">
+                <span class="status-label">DIRECTION:</span>
+                <span id="direction">SOUTH</span>
             </span>
         </div>
         
         <div class="status-group">
             <span class="status-item">
-                <span class="status-label">BEARINGS:</span>
-                <span id="bearing-type">Elastomeric</span>
+                <span class="status-label">PROFILE:</span>
+                <span id="beam-profile">30WF210</span>
             </span>
             <span class="status-item">
-                <span class="status-label">SKEW:</span>
-                <span id="skew-angle">0°</span>
+                <span class="status-label">WEIGHT:</span>
+                <span id="beam-weight">210 lb/ft</span>
+            </span>
+            <span class="status-item">
+                <span class="status-label">DEPTH:</span>
+                <span id="beam-depth">30.375"</span>
+            </span>
+            <span class="status-item">
+                <span class="status-label">WEB:</span>
+                <span id="web-thickness">0.75"</span>
+            </span>
+            <span class="status-item">
+                <span class="status-label">FLANGE W:</span>
+                <span id="flange-width">15.125"</span>
+            </span>
+            <span class="status-item">
+                <span class="status-label">FLANGE T:</span>
+                <span id="flange-thickness">1.3125"</span>
             </span>
         </div>
 
@@ -267,10 +276,13 @@
                 <span id="cells-marked">0</span>
             </span>
             <span class="status-item">
-                <span class="status-label">MODE:</span>
-                <span id="mode-text">Routine Inspection</span>
+                <span class="status-label">GRID:</span>
+                <span id="current-grid-status">1"</span>
             </span>
-            <span class="status-timestamp" id="timestamp">--:--</span>
+            <span class="status-item">
+                <span class="status-label">TIME:</span>
+                <span id="current-time">--:--:--</span>
+            </span>
         </div>
     </footer>
 

@@ -2,10 +2,10 @@
 
 :root {
     /* Condition State Colors */
-    --cs-1: #4CAF50;
-    --cs-2: #FFC107;
-    --cs-3: #FF9800;
-    --cs-4: #F44336;
+    --cs-1: #90EE90;  /* Light green for Good */
+    --cs-2: #FFD700;  /* Gold for Fair */
+    --cs-3: #FFA500;  /* Orange for Poor */
+    --cs-4: #FF4444;  /* Red for Severe */
     
     /* Zone Colors */
     --zone-a: rgba(255, 0, 0, 0.1);    /* Bearing - Red */
@@ -30,12 +30,12 @@
     --danger: #F44336;
     
     /* Structural Elements */
-    --beam-color: #d0d0d0;
-    --beam-stroke: #333;
-    --bearing-color: #666;
-    --abutment-color: #888;
-    --grid-color: #e0e0e0;
-    --grid-major: #ccc;
+    --beam-color: #90EE90;  /* Default CS1 light green */
+    --beam-stroke: #666;
+    --bearing-color: #444;
+    --abutment-color: #666;
+    --grid-color: rgba(0, 0, 0, 0.1);
+    --grid-major: rgba(0, 0, 0, 0.2);
     
     /* Sizing */
     --control-height: 40px;
@@ -402,16 +402,30 @@ body {
 }
 
 .beam-web {
-    fill: #e8e8e8;
+    fill: var(--beam-color);
     stroke: var(--beam-stroke);
     stroke-width: 1;
 }
 
+/* Beam condition state colors */
+.beam-cs-1, .beam-flange.beam-cs-1, .beam-web.beam-cs-1 {
+    fill: var(--cs-1);
+}
+
+.beam-cs-2, .beam-flange.beam-cs-2, .beam-web.beam-cs-2 {
+    fill: var(--cs-2);
+}
+
+.beam-cs-3, .beam-flange.beam-cs-3, .beam-web.beam-cs-3 {
+    fill: var(--cs-3);
+}
+
+.beam-cs-4, .beam-flange.beam-cs-4, .beam-web.beam-cs-4 {
+    fill: var(--cs-4);
+}
+
 .beam-flange.hidden {
-    fill: var(--bg-canvas);
-    stroke: #aaa;
-    stroke-dasharray: 3, 2;
-    opacity: 0.5;
+    display: none;
 }
 
 .bearing {
@@ -462,22 +476,67 @@ body {
 /* Defects */
 .defect-cs-1 {
     fill: var(--cs-1);
-    opacity: 0.3;
 }
 
 .defect-cs-2 {
     fill: var(--cs-2);
-    opacity: 0.4;
 }
 
 .defect-cs-3 {
     fill: var(--cs-3);
-    opacity: 0.5;
 }
 
 .defect-cs-4 {
     fill: var(--cs-4);
-    opacity: 0.6;
+}
+
+/* Contour lines for selected regions */
+.contour-line {
+    fill: none;
+    stroke: #ff0000;
+    stroke-width: 2;
+    stroke-dasharray: 5, 5;
+}
+
+/* Dimensions */
+.dimension-line {
+    stroke: #333;
+    stroke-width: 0.5;
+}
+
+.dimension-line-minor {
+    stroke: #666;
+    stroke-width: 0.5;
+    stroke-dasharray: 2, 2;
+}
+
+.dimension-text {
+    font-size: 10px;
+    fill: #333;
+    text-anchor: middle;
+}
+
+.dimension-text-vertical {
+    font-size: 9px;
+    fill: #666;
+    text-anchor: middle;
+}
+
+/* Ordinates */
+.ordinate-line {
+    stroke: #333;
+    stroke-width: 1;
+}
+
+.ordinate-tick {
+    stroke: #333;
+    stroke-width: 1;
+}
+
+.ordinate-text {
+    font-size: 10px;
+    fill: #333;
+    text-anchor: middle;
 }
 
 /* Coordinate Display */
