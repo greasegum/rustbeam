@@ -1,0 +1,712 @@
+/* VisualBeam V2 - Bridge Geometry Aware Interface */
+
+:root {
+    /* Condition State Colors */
+    --cs-1: #4CAF50;
+    --cs-2: #FFC107;
+    --cs-3: #FF9800;
+    --cs-4: #F44336;
+    
+    /* Zone Colors */
+    --zone-a: rgba(255, 0, 0, 0.1);    /* Bearing - Red */
+    --zone-b: rgba(255, 165, 0, 0.1);  /* Quarter - Orange */
+    --zone-c: rgba(255, 255, 0, 0.1);  /* Mid-span - Yellow */
+    --zone-d: rgba(128, 0, 128, 0.1);  /* Ends - Purple */
+    
+    /* UI Colors */
+    --bg-primary: #1a1a1a;
+    --bg-secondary: #242424;
+    --bg-tertiary: #2d2d2d;
+    --bg-canvas: #f8f8f8;
+    --border: #333;
+    --border-light: #444;
+    --text-primary: #e0e0e0;
+    --text-secondary: #999;
+    --text-dim: #666;
+    --accent: #2196F3;
+    --accent-hover: #1976D2;
+    --success: #4CAF50;
+    --warning: #FFC107;
+    --danger: #F44336;
+    
+    /* Structural Elements */
+    --beam-color: #d0d0d0;
+    --beam-stroke: #333;
+    --bearing-color: #666;
+    --abutment-color: #888;
+    --grid-color: #e0e0e0;
+    --grid-major: #ccc;
+    
+    /* Sizing */
+    --control-height: 40px;
+    --status-height: 28px;
+    --text-xs: 10px;
+    --text-sm: 11px;
+    --text-md: 12px;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', system-ui, sans-serif;
+    font-size: var(--text-sm);
+    color: var(--text-primary);
+    background: var(--bg-canvas);
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    -webkit-font-smoothing: antialiased;
+}
+
+/* Control Band */
+.control-band {
+    height: var(--control-height);
+    background: var(--bg-primary);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    padding: 0 12px;
+    gap: 20px;
+    flex-shrink: 0;
+}
+
+.control-group {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.control-group.view-controls {
+    margin-left: auto;
+}
+
+/* Brand and Setup */
+.brand {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.logo {
+    color: var(--accent);
+}
+
+.brand-text {
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: -0.3px;
+}
+
+.btn-setup {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 5px 10px;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border);
+    color: var(--text-secondary);
+    font-size: var(--text-sm);
+    border-radius: 3px;
+    cursor: pointer;
+    transition: all 0.15s;
+}
+
+.btn-setup:hover {
+    background: var(--bg-tertiary);
+    color: var(--text-primary);
+    border-color: var(--border-light);
+}
+
+/* Beam Info Display */
+.beam-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 0 12px;
+    border-left: 1px solid var(--border);
+}
+
+.info-item {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.info-label {
+    font-size: var(--text-xs);
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.info-value {
+    font-size: var(--text-sm);
+    color: var(--text-primary);
+    font-weight: 500;
+}
+
+.info-divider {
+    width: 1px;
+    height: 24px;
+    background: var(--border);
+}
+
+/* Inspection Controls */
+.inspection-controls {
+    border-left: 1px solid var(--border);
+    padding-left: 12px;
+}
+
+.inspection-type {
+    display: flex;
+    gap: 2px;
+    background: var(--bg-secondary);
+    padding: 2px;
+    border-radius: 3px;
+}
+
+.type-btn {
+    padding: 4px 8px;
+    background: transparent;
+    border: none;
+    color: var(--text-secondary);
+    font-size: var(--text-xs);
+    font-weight: 500;
+    cursor: pointer;
+    border-radius: 2px;
+    transition: all 0.15s;
+}
+
+.type-btn:hover {
+    background: var(--bg-tertiary);
+    color: var(--text-primary);
+}
+
+.type-btn.active {
+    background: var(--accent);
+    color: white;
+}
+
+.control-label {
+    font-size: var(--text-xs);
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.grid-size {
+    font-size: var(--text-md);
+    color: var(--accent);
+    font-weight: 600;
+    min-width: 30px;
+    text-align: center;
+}
+
+.zone-toggle {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 5px 10px;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border);
+    color: var(--text-secondary);
+    font-size: var(--text-sm);
+    border-radius: 3px;
+    cursor: pointer;
+    transition: all 0.15s;
+}
+
+.zone-toggle:hover,
+.zone-toggle.active {
+    background: var(--bg-tertiary);
+    color: var(--accent);
+    border-color: var(--accent);
+}
+
+/* Tool Controls */
+.tool-set {
+    display: flex;
+    gap: 2px;
+}
+
+.tool-btn {
+    width: 28px;
+    height: 28px;
+    background: transparent;
+    border: 1px solid transparent;
+    color: var(--text-secondary);
+    cursor: pointer;
+    border-radius: 3px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s;
+}
+
+.tool-btn:hover {
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+}
+
+.tool-btn.active {
+    background: var(--bg-secondary);
+    border-color: var(--accent);
+    color: var(--accent);
+}
+
+/* Condition State Buttons */
+.condition-states {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.cs-btn {
+    width: 24px;
+    height: 24px;
+    border: 1px solid;
+    background: transparent;
+    font-size: var(--text-xs);
+    font-weight: 600;
+    cursor: pointer;
+    border-radius: 3px;
+    transition: all 0.15s;
+}
+
+.cs-btn.cs-1 {
+    border-color: var(--cs-1);
+    color: var(--cs-1);
+}
+
+.cs-btn.cs-1.active,
+.cs-btn.cs-1:hover {
+    background: var(--cs-1);
+    color: white;
+}
+
+.cs-btn.cs-2 {
+    border-color: var(--cs-2);
+    color: var(--cs-2);
+}
+
+.cs-btn.cs-2.active,
+.cs-btn.cs-2:hover {
+    background: var(--cs-2);
+    color: var(--bg-primary);
+}
+
+.cs-btn.cs-3 {
+    border-color: var(--cs-3);
+    color: var(--cs-3);
+}
+
+.cs-btn.cs-3.active,
+.cs-btn.cs-3:hover {
+    background: var(--cs-3);
+    color: white;
+}
+
+.cs-btn.cs-4 {
+    border-color: var(--cs-4);
+    color: var(--cs-4);
+}
+
+.cs-btn.cs-4.active,
+.cs-btn.cs-4:hover {
+    background: var(--cs-4);
+    color: white;
+}
+
+/* View Controls */
+.view-btn {
+    width: 24px;
+    height: 24px;
+    background: transparent;
+    border: 1px solid transparent;
+    color: var(--text-secondary);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    font-weight: 600;
+    border-radius: 2px;
+    transition: all 0.15s;
+}
+
+.view-btn:hover {
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+}
+
+.view-btn.active {
+    background: var(--bg-secondary);
+    border-color: var(--accent);
+    color: var(--accent);
+}
+
+.zoom-level {
+    font-size: var(--text-xs);
+    color: var(--text-secondary);
+    min-width: 45px;
+    text-align: center;
+    font-variant-numeric: tabular-nums;
+}
+
+.control-divider {
+    width: 1px;
+    height: 20px;
+    background: var(--border);
+}
+
+.action-btn {
+    padding: 5px 12px;
+    background: var(--accent);
+    border: none;
+    color: white;
+    font-size: var(--text-sm);
+    font-weight: 500;
+    cursor: pointer;
+    border-radius: 3px;
+    transition: opacity 0.15s;
+}
+
+.action-btn:hover {
+    background: var(--accent-hover);
+}
+
+/* Canvas Area */
+.canvas-area {
+    flex: 1;
+    position: relative;
+    background: var(--bg-canvas);
+    overflow: hidden;
+}
+
+#beam-canvas {
+    width: 100%;
+    height: 100%;
+    display: block;
+}
+
+/* Structural Elements Styles */
+.beam-flange {
+    fill: var(--beam-color);
+    stroke: var(--beam-stroke);
+    stroke-width: 1;
+}
+
+.beam-web {
+    fill: #e8e8e8;
+    stroke: var(--beam-stroke);
+    stroke-width: 1;
+}
+
+.beam-flange.hidden {
+    fill: var(--bg-canvas);
+    stroke: #aaa;
+    stroke-dasharray: 3, 2;
+    opacity: 0.5;
+}
+
+.bearing {
+    fill: var(--bearing-color);
+    stroke: var(--beam-stroke);
+    stroke-width: 1;
+}
+
+.abutment {
+    fill: var(--abutment-color);
+    stroke: var(--beam-stroke);
+    stroke-width: 1;
+    opacity: 0.3;
+}
+
+/* Grid */
+.grid-line {
+    stroke: var(--grid-color);
+    stroke-width: 0.5;
+}
+
+.grid-line-major {
+    stroke: var(--grid-major);
+    stroke-width: 0.75;
+}
+
+/* Zones */
+.zone-overlay {
+    opacity: 0.3;
+}
+
+.zone-a-area {
+    fill: url(#zone-a);
+}
+
+.zone-b-area {
+    fill: url(#zone-b);
+}
+
+.zone-c-area {
+    fill: url(#zone-c);
+}
+
+.zone-d-area {
+    fill: var(--zone-d);
+}
+
+/* Defects */
+.defect-cs-1 {
+    fill: var(--cs-1);
+    opacity: 0.3;
+}
+
+.defect-cs-2 {
+    fill: var(--cs-2);
+    opacity: 0.4;
+}
+
+.defect-cs-3 {
+    fill: var(--cs-3);
+    opacity: 0.5;
+}
+
+.defect-cs-4 {
+    fill: var(--cs-4);
+    opacity: 0.6;
+}
+
+/* Coordinate Display */
+.coordinate-display {
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+    background: rgba(0, 0, 0, 0.8);
+    padding: 6px 10px;
+    border-radius: 3px;
+    display: flex;
+    gap: 12px;
+}
+
+.coord-item {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.coord-label {
+    font-size: var(--text-xs);
+    color: #aaa;
+    text-transform: uppercase;
+}
+
+.coord-item span:last-child {
+    font-family: 'SF Mono', Monaco, monospace;
+    font-size: var(--text-sm);
+    color: white;
+}
+
+/* Zone Legend */
+.zone-legend {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: rgba(255, 255, 255, 0.95);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    padding: 10px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.zone-legend h4 {
+    font-size: var(--text-sm);
+    margin-bottom: 8px;
+    color: var(--bg-primary);
+}
+
+.zone-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 3px 0;
+    font-size: var(--text-xs);
+    color: var(--bg-primary);
+}
+
+.zone-color {
+    width: 16px;
+    height: 16px;
+    border: 1px solid var(--border);
+}
+
+.zone-color.zone-a {
+    background: var(--zone-a);
+}
+
+.zone-color.zone-b {
+    background: var(--zone-b);
+}
+
+.zone-color.zone-c {
+    background: var(--zone-c);
+}
+
+.zone-color.zone-d {
+    background: var(--zone-d);
+}
+
+/* End Labels */
+.end-label {
+    position: absolute;
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 4px 8px;
+    border-radius: 3px;
+    font-size: var(--text-xs);
+    pointer-events: none;
+}
+
+.left-end {
+    top: 50%;
+    left: 10px;
+    transform: translateY(-50%);
+}
+
+.right-end {
+    top: 50%;
+    right: 10px;
+    transform: translateY(-50%);
+}
+
+.end-text {
+    display: block;
+    font-weight: 600;
+}
+
+.end-condition {
+    display: block;
+    color: #aaa;
+    font-size: 9px;
+}
+
+/* Status Bar */
+.status-bar {
+    height: var(--status-height);
+    background: var(--bg-secondary);
+    border-top: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    padding: 0 12px;
+    gap: 24px;
+    flex-shrink: 0;
+}
+
+.status-group {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.status-group:last-child {
+    margin-left: auto;
+}
+
+.status-item {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: var(--text-xs);
+}
+
+.status-label {
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+}
+
+.status-item span:last-child {
+    color: var(--text-primary);
+}
+
+.status-timestamp {
+    font-family: 'SF Mono', Monaco, monospace;
+    font-size: var(--text-xs);
+    color: var(--text-secondary);
+}
+
+/* Dimensions */
+.dimension-line {
+    stroke: #666;
+    stroke-width: 0.75;
+    fill: none;
+}
+
+.dimension-text {
+    font-family: 'SF Mono', Monaco, monospace;
+    font-size: 10px;
+    fill: #666;
+    text-anchor: middle;
+}
+
+.dimension-arrow {
+    fill: #666;
+    stroke: none;
+}
+
+/* Photo Markers */
+.photo-marker {
+    cursor: pointer;
+    transition: transform 0.15s;
+}
+
+.photo-marker:hover {
+    transform: scale(1.1);
+}
+
+.photo-marker-circle {
+    fill: var(--accent);
+    stroke: white;
+    stroke-width: 2;
+}
+
+.photo-marker-text {
+    fill: white;
+    font-size: 12px;
+    font-weight: 600;
+    text-anchor: middle;
+    dominant-baseline: central;
+}
+
+/* Responsive */
+@media (max-width: 1200px) {
+    .control-band {
+        overflow-x: auto;
+        scrollbar-width: thin;
+    }
+    
+    .beam-info {
+        min-width: 250px;
+    }
+}
+
+@media (max-width: 768px) {
+    .control-band {
+        height: auto;
+        flex-wrap: wrap;
+        padding: 8px;
+    }
+    
+    .control-group {
+        width: 100%;
+        justify-content: space-between;
+        margin-bottom: 8px;
+    }
+    
+    .control-group:last-child {
+        margin-bottom: 0;
+    }
+}
