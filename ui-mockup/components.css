@@ -1,0 +1,406 @@
+/* Component-specific styles for engineering drawing elements */
+
+/* Engineering Drawing Canvas Components */
+.engineering-canvas {
+    background: white;
+    position: relative;
+}
+
+/* Grid System - Matching Engineering Drawing Standards */
+.engineering-grid {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+}
+
+.grid-major-line {
+    stroke: var(--grid-line);
+    stroke-width: 1px;
+    fill: none;
+}
+
+.grid-minor-line {
+    stroke: var(--grid-minor);
+    stroke-width: 0.5px;
+    fill: none;
+    stroke-dasharray: 2, 2;
+}
+
+/* Beam Cross-Section Rendering */
+.beam-section {
+    position: relative;
+}
+
+.beam-intact {
+    fill: var(--primary-green);
+    stroke: var(--grid-line);
+    stroke-width: 2px;
+}
+
+.beam-defect {
+    fill: var(--defect-red);
+    stroke: var(--grid-line);
+    stroke-width: 2px;
+    opacity: 0.8;
+}
+
+/* Dimension Lines and Annotations */
+.dimension-line {
+    stroke: var(--annotation-black);
+    stroke-width: 0.75px;
+    fill: none;
+}
+
+.dimension-arrow {
+    fill: var(--annotation-black);
+}
+
+.dimension-text {
+    font-family: 'SF Mono', Monaco, 'Cascadia Code', monospace;
+    font-size: 11px;
+    fill: var(--annotation-black);
+    text-anchor: middle;
+    dominant-baseline: text-after-edge;
+}
+
+/* Leader Lines and Callouts */
+.leader-line {
+    stroke: var(--annotation-black);
+    stroke-width: 0.75px;
+    fill: none;
+}
+
+.leader-arrow {
+    fill: var(--annotation-black);
+    stroke: none;
+}
+
+.callout-bubble {
+    fill: white;
+    stroke: var(--annotation-black);
+    stroke-width: 1px;
+}
+
+.callout-text {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    font-size: 12px;
+    fill: var(--annotation-black);
+}
+
+/* Section Loss Patterns */
+.section-loss-pattern {
+    fill: url(#crosshatch-pattern);
+    stroke: var(--grid-line);
+    stroke-width: 1.5px;
+}
+
+/* Pattern Definitions */
+.pattern-crosshatch {
+    stroke: var(--defect-critical);
+    stroke-width: 0.5px;
+}
+
+/* Measurement Indicators */
+.measurement-box {
+    background: rgba(255, 255, 255, 0.95);
+    border: 1px solid var(--grid-line);
+    padding: 4px 8px;
+    font-family: 'SF Mono', Monaco, 'Cascadia Code', monospace;
+    font-size: 11px;
+    position: absolute;
+    pointer-events: none;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Interactive Hover States */
+.grid-cell-interactive {
+    cursor: crosshair;
+    transition: all 0.15s;
+}
+
+.grid-cell-interactive:hover {
+    outline: 2px solid var(--ui-primary);
+    outline-offset: -2px;
+    z-index: 10;
+}
+
+/* Defect Marking Indicators */
+.defect-marker {
+    position: absolute;
+    pointer-events: none;
+}
+
+.defect-marker-corrosion {
+    background: repeating-linear-gradient(
+        45deg,
+        transparent,
+        transparent 3px,
+        var(--defect-red) 3px,
+        var(--defect-red) 6px
+    );
+    opacity: 0.6;
+}
+
+.defect-marker-crack {
+    background: linear-gradient(
+        90deg,
+        transparent 48%,
+        var(--defect-critical) 48%,
+        var(--defect-critical) 52%,
+        transparent 52%
+    );
+}
+
+.defect-marker-deformation {
+    background: radial-gradient(
+        ellipse at center,
+        var(--severity-medium) 0%,
+        transparent 70%
+    );
+    opacity: 0.7;
+}
+
+/* Engineering Title Block */
+.title-block {
+    position: absolute;
+    bottom: 20px;
+    right: 20px;
+    width: 400px;
+    background: white;
+    border: 2px solid var(--grid-line);
+}
+
+.title-block-header {
+    background: var(--panel-gray);
+    padding: 8px 12px;
+    border-bottom: 1px solid var(--grid-line);
+    font-weight: 600;
+    font-size: 14px;
+}
+
+.title-block-content {
+    padding: 12px;
+}
+
+.title-block-row {
+    display: grid;
+    grid-template-columns: 120px 1fr;
+    padding: 6px 0;
+    border-bottom: 1px solid var(--border-gray);
+    font-size: 12px;
+}
+
+.title-block-label {
+    font-weight: 500;
+    color: var(--ui-text-secondary);
+}
+
+.title-block-value {
+    color: var(--ui-text);
+}
+
+/* Legend Component */
+.legend-box {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background: white;
+    border: 1px solid var(--grid-line);
+    padding: 12px;
+    min-width: 200px;
+}
+
+.legend-title {
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid var(--border-gray);
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 4px 0;
+    font-size: 11px;
+}
+
+.legend-color {
+    width: 24px;
+    height: 16px;
+    border: 1px solid var(--grid-line);
+}
+
+/* Scale Indicator */
+.scale-indicator {
+    position: absolute;
+    bottom: 20px;
+    left: 20px;
+    background: white;
+    border: 1px solid var(--grid-line);
+    padding: 8px 12px;
+    font-family: 'SF Mono', Monaco, 'Cascadia Code', monospace;
+    font-size: 11px;
+}
+
+.scale-bar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.scale-ruler {
+    width: 100px;
+    height: 20px;
+    background: repeating-linear-gradient(
+        90deg,
+        var(--grid-line) 0px,
+        var(--grid-line) 1px,
+        transparent 1px,
+        transparent 10px
+    );
+    border: 1px solid var(--grid-line);
+}
+
+/* Inspection Photo Markers */
+.photo-marker {
+    position: absolute;
+    width: 32px;
+    height: 32px;
+    background: var(--ui-primary);
+    border: 2px solid white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    transition: transform 0.2s;
+}
+
+.photo-marker:hover {
+    transform: scale(1.1);
+}
+
+.photo-marker-tooltip {
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--ui-text);
+    color: white;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+    white-space: nowrap;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.2s;
+    margin-bottom: 8px;
+}
+
+.photo-marker:hover .photo-marker-tooltip {
+    opacity: 1;
+}
+
+/* Drawing Tools Cursor States */
+.cursor-crosshair {
+    cursor: crosshair;
+}
+
+.cursor-move {
+    cursor: move;
+}
+
+.cursor-draw {
+    cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"><circle cx="8" cy="8" r="1" fill="black"/><line x1="8" y1="0" x2="8" y2="16" stroke="black" stroke-width="0.5"/><line x1="0" y1="8" x2="16" y2="8" stroke="black" stroke-width="0.5"/></svg>') 8 8, crosshair;
+}
+
+/* Print-Optimized Styles */
+@media print {
+    .sidebar,
+    .header-bar,
+    .footer-bar,
+    .canvas-toolbar {
+        display: none;
+    }
+    
+    .canvas-viewport {
+        margin: 0;
+        border: none;
+        background: white;
+    }
+    
+    .beam-intact {
+        fill: white;
+        stroke: black;
+        stroke-width: 1.5px;
+    }
+    
+    .beam-defect {
+        fill: none;
+        stroke: black;
+        stroke-width: 1.5px;
+        stroke-dasharray: 5, 3;
+    }
+    
+    .defect-marker-corrosion,
+    .defect-marker-crack,
+    .defect-marker-deformation {
+        print-color-adjust: exact;
+        -webkit-print-color-adjust: exact;
+    }
+}
+
+/* Responsive Adjustments for Tablets */
+@media (max-width: 1024px) {
+    .sidebar-left {
+        width: 240px;
+    }
+    
+    .sidebar-right {
+        width: 280px;
+    }
+    
+    .tool-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .stat-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+    .main-content {
+        flex-direction: column;
+    }
+    
+    .sidebar {
+        width: 100% !important;
+        max-height: 200px;
+    }
+    
+    .canvas-viewport {
+        margin: var(--spacing-sm);
+    }
+    
+    .header-bar {
+        flex-wrap: wrap;
+        height: auto;
+        padding: var(--spacing-sm);
+    }
+    
+    .view-controls {
+        order: 3;
+        width: 100%;
+        margin-top: var(--spacing-sm);
+    }
+}

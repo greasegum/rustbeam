@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VisualBeam - Structural Beam Inspection System</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="components.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Header Bar -->
+        <header class="header-bar">
+            <div class="header-left">
+                <h1 class="app-title">VisualBeam</h1>
+                <span class="project-name">Project: Bridge A-47 Inspection</span>
+            </div>
+            <div class="header-center">
+                <div class="view-controls">
+                    <button class="view-btn active" data-view="elevation">Elevation</button>
+                    <button class="view-btn" data-view="plan">Plan</button>
+                    <button class="view-btn" data-view="3d">3D</button>
+                </div>
+            </div>
+            <div class="header-right">
+                <button class="btn-icon" title="Settings">⚙️</button>
+                <button class="btn-icon" title="Help">❓</button>
+                <button class="btn-primary">Export Report</button>
+            </div>
+        </header>
+
+        <!-- Main Content Area -->
+        <div class="main-content">
+            <!-- Left Sidebar - Tools -->
+            <aside class="sidebar sidebar-left">
+                <div class="tool-section">
+                    <h3 class="section-title">Beam Configuration</h3>
+                    <div class="form-group">
+                        <label>Beam Profile</label>
+                        <select class="form-select">
+                            <option>36" WF 300#</option>
+                            <option>30" WF 210#</option>
+                            <option>24" WF 160#</option>
+                            <option>21" WF 142#</option>
+                            <option>18" WF 114#</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Length (ft)</label>
+                        <input type="number" class="form-input" value="40" />
+                    </div>
+                    <div class="form-group">
+                        <label>Grid Size</label>
+                        <select class="form-select">
+                            <option>6" × 6"</option>
+                            <option selected>12" × 12"</option>
+                            <option>24" × 24"</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="tool-section">
+                    <h3 class="section-title">Defect Marking</h3>
+                    <div class="tool-grid">
+                        <button class="tool-btn active" data-defect="corrosion">
+                            <span class="tool-icon">🔴</span>
+                            <span class="tool-label">Corrosion</span>
+                        </button>
+                        <button class="tool-btn" data-defect="crack">
+                            <span class="tool-icon">⚡</span>
+                            <span class="tool-label">Crack</span>
+                        </button>
+                        <button class="tool-btn" data-defect="deformation">
+                            <span class="tool-icon">〰️</span>
+                            <span class="tool-label">Deformation</span>
+                        </button>
+                        <button class="tool-btn" data-defect="missing">
+                            <span class="tool-icon">❌</span>
+                            <span class="tool-label">Missing</span>
+                        </button>
+                    </div>
+                    <div class="severity-selector">
+                        <label>Severity</label>
+                        <div class="severity-options">
+                            <button class="severity-btn low">Low</button>
+                            <button class="severity-btn medium active">Med</button>
+                            <button class="severity-btn high">High</button>
+                            <button class="severity-btn critical">Critical</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="tool-section">
+                    <h3 class="section-title">Annotation Tools</h3>
+                    <div class="tool-list">
+                        <button class="tool-btn-wide">
+                            <span class="tool-icon">📏</span>
+                            <span>Dimension</span>
+                        </button>
+                        <button class="tool-btn-wide">
+                            <span class="tool-icon">💬</span>
+                            <span>Text Note</span>
+                        </button>
+                        <button class="tool-btn-wide">
+                            <span class="tool-icon">↗️</span>
+                            <span>Leader Line</span>
+                        </button>
+                        <button class="tool-btn-wide">
+                            <span class="tool-icon">📷</span>
+                            <span>Photo Marker</span>
+                        </button>
+                    </div>
+                </div>
+            </aside>
+
+            <!-- Canvas Area -->
+            <main class="canvas-container">
+                <div class="canvas-toolbar">
+                    <div class="toolbar-group">
+                        <button class="toolbar-btn" title="Pan">✋</button>
+                        <button class="toolbar-btn active" title="Select">↖️</button>
+                        <button class="toolbar-btn" title="Draw">✏️</button>
+                        <button class="toolbar-btn" title="Erase">🧹</button>
+                    </div>
+                    <div class="toolbar-group">
+                        <button class="toolbar-btn" title="Undo">↶</button>
+                        <button class="toolbar-btn" title="Redo">↷</button>
+                    </div>
+                    <div class="toolbar-group">
+                        <button class="toolbar-btn" title="Zoom In">🔍+</button>
+                        <button class="toolbar-btn" title="Zoom Out">🔍-</button>
+                        <button class="toolbar-btn" title="Fit to Screen">⛶</button>
+                    </div>
+                    <div class="toolbar-group">
+                        <span class="zoom-level">100%</span>
+                    </div>
+                </div>
+
+                <!-- Main Canvas -->
+                <div class="canvas-viewport">
+                    <canvas id="inspection-canvas"></canvas>
+                    <!-- Overlay for grid visualization -->
+                    <div class="grid-overlay">
+                        <!-- Grid cells would be dynamically generated -->
+                        <div class="beam-visualization">
+                            <div class="beam-flange-top"></div>
+                            <div class="beam-web">
+                                <!-- Grid cells example -->
+                                <div class="grid-row">
+                                    <div class="grid-cell"></div>
+                                    <div class="grid-cell"></div>
+                                    <div class="grid-cell defect-low"></div>
+                                    <div class="grid-cell defect-medium"></div>
+                                    <div class="grid-cell"></div>
+                                </div>
+                            </div>
+                            <div class="beam-flange-bottom"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Canvas Status Bar -->
+                <div class="canvas-status">
+                    <span class="status-item">Grid: 12" × 12"</span>
+                    <span class="status-item">Cursor: X: 24.5" Y: 36.0"</span>
+                    <span class="status-item">Defects: 14 marked</span>
+                    <span class="status-item">Area: 28.5 sq ft affected</span>
+                </div>
+            </main>
+
+            <!-- Right Sidebar - Properties & History -->
+            <aside class="sidebar sidebar-right">
+                <div class="panel-tabs">
+                    <button class="tab-btn active">Properties</button>
+                    <button class="tab-btn">History</button>
+                    <button class="tab-btn">Layers</button>
+                </div>
+
+                <div class="panel-content">
+                    <!-- Properties Panel -->
+                    <div class="properties-panel">
+                        <h3 class="section-title">Selected Element</h3>
+                        <div class="property-list">
+                            <div class="property-item">
+                                <label>Type:</label>
+                                <span>Corrosion</span>
+                            </div>
+                            <div class="property-item">
+                                <label>Location:</label>
+                                <span>Web - Grid C4-C6</span>
+                            </div>
+                            <div class="property-item">
+                                <label>Area:</label>
+                                <span>3.5 sq ft</span>
+                            </div>
+                            <div class="property-item">
+                                <label>Severity:</label>
+                                <span class="severity-badge medium">Medium</span>
+                            </div>
+                        </div>
+
+                        <div class="property-actions">
+                            <button class="btn-secondary">Edit Details</button>
+                            <button class="btn-danger">Delete</button>
+                        </div>
+                    </div>
+
+                    <!-- Statistics -->
+                    <div class="statistics-panel">
+                        <h3 class="section-title">Inspection Statistics</h3>
+                        <div class="stat-grid">
+                            <div class="stat-card">
+                                <div class="stat-value">14</div>
+                                <div class="stat-label">Total Defects</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-value">28.5</div>
+                                <div class="stat-label">Affected Area (sq ft)</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-value">12%</div>
+                                <div class="stat-label">Coverage</div>
+                            </div>
+                            <div class="stat-card critical">
+                                <div class="stat-value">2</div>
+                                <div class="stat-label">Critical Items</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </aside>
+        </div>
+
+        <!-- Footer Status Bar -->
+        <footer class="footer-bar">
+            <div class="footer-left">
+                <span class="status-text">Ready</span>
+                <span class="separator">|</span>
+                <span class="mode-indicator">🟢 Inspection Mode</span>
+            </div>
+            <div class="footer-center">
+                <span class="coordinates">Beam: 36" WF 300# | Length: 40ft | Inspector: J. Smith</span>
+            </div>
+            <div class="footer-right">
+                <span class="timestamp">Last saved: 2 minutes ago</span>
+                <button class="btn-text">Save Now</button>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Modal for Export -->
+    <div class="modal" id="export-modal" style="display: none;">
+        <div class="modal-content">
+            <h2>Export Inspection Report</h2>
+            <div class="export-options">
+                <label class="export-option">
+                    <input type="radio" name="format" value="pdf" checked>
+                    <span>PDF Report</span>
+                </label>
+                <label class="export-option">
+                    <input type="radio" name="format" value="dwg">
+                    <span>AutoCAD DWG</span>
+                </label>
+                <label class="export-option">
+                    <input type="radio" name="format" value="png">
+                    <span>High-Res Image</span>
+                </label>
+            </div>
+            <div class="modal-actions">
+                <button class="btn-secondary">Cancel</button>
+                <button class="btn-primary">Export</button>
+            </div>
+        </div>
+    </div>
+    <script src="app.js"></script>
+</body>
+</html>
