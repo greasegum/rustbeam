@@ -14,6 +14,13 @@ This Rust implementation draws inspiration from the existing phaserBeam applicat
 - Enhanced rendering performance through direct GPU access
 - Type safety at compile time rather than runtime
 
+### Beam Catalog Data
+The comprehensive beam catalog from phaserBeam has been ported to Rust in `src/data/beam_catalog.rs`. This includes:
+- Over 150 wide flange (WF) beam profiles from 8" to 36" depths
+- Complete dimensional data (depth, web thickness, flange dimensions, weight)
+- Helper functions for querying beams by ID, depth range, or weight range
+- Calculated properties like cross-sectional area and moment of inertia
+
 ## Build and Development Commands
 
 ### Rust Project Setup (once implemented)
