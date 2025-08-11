@@ -2,6 +2,9 @@
 
 class VisualBeam {
     constructor() {
+        // Load configuration from setup page if available
+        this.loadConfiguration();
+        
         // Beam profiles with actual dimensions (inches)
         this.beamProfiles = {
             '36wf300': { depth: 36.75, flangeWidth: 16.625, flangeThickness: 1.6875, webThickness: 0.9375, weight: 300 },
@@ -400,6 +403,69 @@ class VisualBeam {
             `1:${Math.round(48 / this.state.scale)}`;
         document.getElementById('status-grid').textContent = 
             `${this.state.gridSize}" × ${this.state.gridSize}"`;
+    }
+
+    loadConfiguration() {
+        const savedConfig = localStorage.getItem('beamConfig');
+        if (savedConfig) {
+            try {
+                const config = JSON.parse(savedConfig);
+                
+                // Apply configuration to state
+                this.state.profile = config.profile || '36wf300';
+                this.state.length = config.lengthFt || 40;
+                this.state.topFlangeVisible = config.topFlangeVisible !== false;
+                
+                // Store additional config for reference
+                this.config = config;
+                
+                // Update UI elements if they exist
+                setTimeout(() => {
+                    if (document.getElementById('beam-profile')) {
+                        document.getElementById('beam-profile').value = this.state.profile;
+                    }
+                    if (document.getElementById('beam-length')) {
+                        document.getElementById('beam-length').value = this.state.length;
+                    }
+                    if (document.getElementById('top-flange-toggle')) {
+                        const toggle = document.getElementById('top-flange-toggle');
+                        toggle.classList.toggle('active', !this.state.topFlangeVisible);
+                        const topFlange = toggle.querySelector('.top-flange');
+                        if (topFlange) {
+                            topFlange.setAttribute('opacity', this.state.topFlangeVisible ? '1' : '0.3');
+                        }
+                    }
+                    
+                    // Update title with direction and beam ID
+                    if (config.beamId && config.direction) {
+                        const title = `${config.beamId}, ${this.capitalize(config.direction)} Elevation`;
+                        // Add title to canvas
+                        this.beamTitle = title;
+                        
+                        // Set end labels based on direction
+                        this.endLabels = this.getEndLabels(config.direction);
+                    }
+                    
+                    this.updateStatus();
+                }, 100);
+            } catch (e) {
+                console.error('Failed to load beam configuration:', e);
+            }
+        }
+    }
+
+    getEndLabels(direction) {
+        const labels = {
+            'north': { left: 'West', right: 'East' },
+            'south': { left: 'East', right: 'West' },
+            'east': { left: 'North', right: 'South' },
+            'west': { left: 'South', right: 'North' }
+        };
+        return labels[direction] || labels['south'];
+    }
+
+    capitalize(str) {
+        return str ? str.charAt(0).toUpperCase() + str.slice(1) : '';
     }
 }
 
