@@ -364,13 +364,13 @@ class VisualBeamV2 {
         });
         layer.appendChild(topFlange);
         
-        // Web
-        const webX = x + (beamLength * scale - profile.webThickness * scale) / 2;
+        // Web - runs horizontally the full length of the beam
+        const webY = y + profile.flangeThickness * scale;
         const web = this.createSVGElement('rect', {
-            x: webX,
-            y: y + profile.flangeThickness * scale,
-            width: profile.webThickness * scale,
-            height: (beamDepth - 2 * profile.flangeThickness) * scale,
+            x: x,
+            y: webY,
+            width: beamLength * scale,
+            height: profile.webThickness * scale,
             class: 'beam-web'
         });
         layer.appendChild(web);
