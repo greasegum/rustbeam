@@ -584,6 +584,25 @@ body {
     display: block;
 }
 
+/* Export Palette */
+.export-palette {
+    position: absolute;
+    top: 50%;
+    right: 1rem;
+    transform: translateY(-50%);
+    background: var(--bg-dark);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    width: 320px;
+    display: none;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    z-index: 1000;
+}
+
+.export-palette.active {
+    display: block;
+}
+
 .palette-header {
     padding: 0.75rem;
     border-bottom: 1px solid var(--border);
@@ -639,6 +658,82 @@ body {
     background: var(--primary);
     border-color: var(--primary);
     color: white;
+}
+
+/* Export buttons */
+.export-section {
+    margin-bottom: 1rem;
+}
+
+.export-section h5 {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    color: var(--text-secondary);
+    margin-bottom: 0.75rem;
+}
+
+.export-btn {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    width: 100%;
+    padding: 0.75rem;
+    background: var(--bg-light);
+    border: 1px solid var(--border-light);
+    border-radius: 4px;
+    color: var(--text-light);
+    cursor: pointer;
+    margin-bottom: 0.5rem;
+    text-align: left;
+    transition: all 0.2s;
+}
+
+.export-btn:hover {
+    background: var(--primary);
+    border-color: var(--primary);
+    color: white;
+}
+
+.export-btn svg {
+    flex-shrink: 0;
+    margin-top: 2px;
+}
+
+.export-btn span {
+    display: block;
+    font-weight: 500;
+    margin-bottom: 0.25rem;
+}
+
+.export-btn small {
+    display: block;
+    font-size: 0.75rem;
+    opacity: 0.8;
+}
+
+.export-options {
+    padding-top: 1rem;
+    border-top: 1px solid var(--border);
+}
+
+.export-options h5 {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    color: var(--text-secondary);
+    margin-bottom: 0.75rem;
+}
+
+.export-options label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+    font-size: 0.875rem;
+    cursor: pointer;
+}
+
+.export-options input[type="checkbox"] {
+    accent-color: var(--primary);
 }
 
 .transform-section label {
