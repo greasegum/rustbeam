@@ -1,0 +1,573 @@
+/* VisualBeam V3 - Mobile Optimized Inspector */
+
+:root {
+    /* Colors */
+    --primary: #2196F3;
+    --primary-dark: #1976D2;
+    --cs-1: #90EE90;
+    --cs-2: #FFD700;
+    --cs-3: #FFA500;
+    --cs-4: #FF4444;
+    --bg-dark: #1a1a1a;
+    --bg-medium: #242424;
+    --bg-light: #2d2d2d;
+    --bg-canvas: #f8f8f8;
+    --text-light: #e0e0e0;
+    --text-dim: #999;
+    --border: #333;
+    --border-light: #444;
+    
+    /* Sizes */
+    --header-height: 88px;
+    --toolbar-height: 48px;
+    --status-height: 32px;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', system-ui, sans-serif;
+    background: var(--bg-canvas);
+    color: var(--text-light);
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    touch-action: none;
+    -webkit-font-smoothing: antialiased;
+}
+
+/* Header */
+.main-header {
+    background: var(--bg-dark);
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+}
+
+.header-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.75rem 1rem;
+    height: 44px;
+}
+
+.brand {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: 600;
+}
+
+.logo {
+    color: var(--primary);
+}
+
+.beam-info {
+    flex: 1;
+    text-align: center;
+    font-size: 0.875rem;
+    color: var(--text-dim);
+}
+
+.separator {
+    margin: 0 0.5rem;
+    opacity: 0.5;
+}
+
+.menu-btn {
+    background: none;
+    border: none;
+    color: var(--text-light);
+    padding: 0.5rem;
+    cursor: pointer;
+}
+
+/* Mode Tabs */
+.mode-tabs {
+    display: flex;
+    background: var(--bg-medium);
+    height: 44px;
+}
+
+.mode-tab {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.25rem;
+    background: none;
+    border: none;
+    color: var(--text-dim);
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    position: relative;
+    transition: all 0.3s;
+}
+
+.mode-tab.active {
+    color: var(--primary);
+    background: var(--bg-light);
+}
+
+.mode-tab.active::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: var(--primary);
+}
+
+.mode-tab svg {
+    width: 16px;
+    height: 16px;
+}
+
+/* Toolbars */
+.toolbar-container {
+    background: var(--bg-medium);
+    border-bottom: 1px solid var(--border);
+    height: var(--toolbar-height);
+    flex-shrink: 0;
+}
+
+.mode-toolbar {
+    display: none;
+    height: 100%;
+    padding: 0 1rem;
+    align-items: center;
+    gap: 1rem;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+.mode-toolbar.active {
+    display: flex;
+}
+
+.tool-group {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-shrink: 0;
+}
+
+.tool-group label {
+    font-size: 0.75rem;
+    color: var(--text-dim);
+    white-space: nowrap;
+}
+
+.tool-group.ml-auto {
+    margin-left: auto;
+}
+
+.tool-divider {
+    width: 1px;
+    height: 24px;
+    background: var(--border-light);
+    flex-shrink: 0;
+}
+
+.tool-btn {
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: none;
+    border: 1px solid transparent;
+    border-radius: 4px;
+    color: var(--text-light);
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.tool-btn:hover {
+    background: var(--bg-light);
+}
+
+.tool-btn.active {
+    background: var(--bg-light);
+    border-color: var(--primary);
+    color: var(--primary);
+}
+
+/* Condition State Buttons */
+.cs-group {
+    background: var(--bg-light);
+    padding: 0.25rem;
+    border-radius: 4px;
+}
+
+.cs-btn {
+    width: 28px;
+    height: 28px;
+    border: 2px solid transparent;
+    border-radius: 4px;
+    font-weight: 600;
+    font-size: 0.875rem;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.cs-btn.cs-1 {
+    background: var(--cs-1);
+    color: #000;
+}
+
+.cs-btn.cs-2 {
+    background: var(--cs-2);
+    color: #000;
+}
+
+.cs-btn.cs-3 {
+    background: var(--cs-3);
+    color: #000;
+}
+
+.cs-btn.cs-4 {
+    background: var(--cs-4);
+    color: #fff;
+}
+
+.cs-btn.active {
+    border-color: #fff;
+    box-shadow: 0 0 0 2px rgba(255,255,255,0.3);
+}
+
+/* Action Buttons */
+.action-btn {
+    padding: 0.5rem 1rem;
+    background: var(--bg-light);
+    border: 1px solid var(--border-light);
+    border-radius: 4px;
+    color: var(--text-light);
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    white-space: nowrap;
+    transition: all 0.2s;
+}
+
+.action-btn:hover {
+    background: var(--bg-dark);
+}
+
+.action-btn.primary {
+    background: var(--primary);
+    border-color: var(--primary);
+    color: white;
+}
+
+.action-btn.primary:hover {
+    background: var(--primary-dark);
+}
+
+/* Zoom Controls */
+.zoom-btn {
+    width: 32px;
+    height: 32px;
+    background: var(--bg-light);
+    border: 1px solid var(--border-light);
+    color: var(--text-light);
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.zoom-btn:first-of-type {
+    border-radius: 4px 0 0 4px;
+}
+
+.zoom-btn:last-of-type {
+    border-radius: 0 4px 4px 0;
+}
+
+.zoom-btn:hover {
+    background: var(--bg-dark);
+}
+
+.zoom-level {
+    padding: 0 0.5rem;
+    font-size: 0.875rem;
+    background: var(--bg-light);
+    border: 1px solid var(--border-light);
+    border-left: none;
+    border-right: none;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    min-width: 60px;
+    justify-content: center;
+}
+
+/* Canvas Area */
+.canvas-container {
+    flex: 1;
+    position: relative;
+    overflow: hidden;
+    background: var(--bg-canvas);
+}
+
+#beam-canvas {
+    width: 100%;
+    height: 100%;
+    touch-action: none;
+}
+
+/* Touch Controls */
+.touch-controls {
+    position: absolute;
+    bottom: 1rem;
+    right: 1rem;
+    display: none;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.touch-btn {
+    width: 48px;
+    height: 48px;
+    background: rgba(0,0,0,0.8);
+    border: 1px solid var(--border);
+    border-radius: 50%;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+
+/* Coordinate Display */
+.coord-display {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    background: rgba(0,0,0,0.8);
+    padding: 0.5rem 0.75rem;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    display: flex;
+    gap: 1rem;
+}
+
+.coord-display strong {
+    color: var(--primary);
+}
+
+/* Status Bar */
+.status-bar {
+    height: var(--status-height);
+    background: var(--bg-medium);
+    border-top: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 1rem;
+    font-size: 0.75rem;
+    flex-shrink: 0;
+}
+
+.status-group {
+    display: flex;
+    gap: 1rem;
+}
+
+.status-item {
+    display: flex;
+    gap: 0.25rem;
+}
+
+.status-item .label {
+    color: var(--text-dim);
+}
+
+/* Mobile Menu */
+.mobile-menu {
+    position: fixed;
+    top: 0;
+    left: -100%;
+    width: 280px;
+    height: 100%;
+    background: var(--bg-dark);
+    box-shadow: 2px 0 8px rgba(0,0,0,0.3);
+    transition: left 0.3s;
+    z-index: 1000;
+}
+
+.mobile-menu.open {
+    left: 0;
+}
+
+.menu-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem;
+    border-bottom: 1px solid var(--border);
+}
+
+.menu-header h3 {
+    font-size: 1.125rem;
+}
+
+.close-menu {
+    width: 32px;
+    height: 32px;
+    background: none;
+    border: none;
+    color: var(--text-light);
+    font-size: 1.5rem;
+    cursor: pointer;
+}
+
+.menu-content {
+    padding: 1rem;
+}
+
+.menu-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem;
+    width: 100%;
+    background: none;
+    border: none;
+    color: var(--text-light);
+    text-decoration: none;
+    font-size: 0.875rem;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: background 0.2s;
+}
+
+.menu-item:hover {
+    background: var(--bg-medium);
+}
+
+.menu-divider {
+    height: 1px;
+    background: var(--border);
+    margin: 1rem 0;
+}
+
+/* SVG Styles */
+.beam-flange,
+.beam-web {
+    fill: var(--cs-1);
+    stroke: #666;
+    stroke-width: 1;
+}
+
+.bearing {
+    fill: #444;
+    stroke: #333;
+    stroke-width: 1;
+}
+
+.abutment,
+.bridge-seat,
+.backwall,
+.breastwall {
+    fill: #888;
+    stroke: #333;
+    stroke-width: 1;
+    opacity: 0.5;
+}
+
+.grid-line {
+    stroke: rgba(0,0,0,0.1);
+    stroke-width: 0.5;
+}
+
+.grid-line-major {
+    stroke: rgba(0,0,0,0.2);
+    stroke-width: 0.75;
+}
+
+.defect-cs-1 { fill: var(--cs-1); }
+.defect-cs-2 { fill: var(--cs-2); }
+.defect-cs-3 { fill: var(--cs-3); }
+.defect-cs-4 { fill: var(--cs-4); }
+
+.dimension-line {
+    stroke: #333;
+    stroke-width: 0.5;
+}
+
+.dimension-text,
+.ordinate-text {
+    font-size: 10px;
+    fill: #333;
+    text-anchor: middle;
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+    .beam-info {
+        font-size: 0.75rem;
+    }
+    
+    .mode-tab span {
+        display: none;
+    }
+    
+    .tool-group label {
+        display: none;
+    }
+    
+    .desktop-only {
+        display: none;
+    }
+    
+    .touch-controls {
+        display: flex;
+    }
+    
+    .coord-display {
+        font-size: 0.625rem;
+        padding: 0.375rem 0.5rem;
+    }
+    
+    #annotation-style {
+        width: 80px;
+    }
+}
+
+@media (max-width: 480px) {
+    .status-bar {
+        font-size: 0.625rem;
+    }
+    
+    .status-group {
+        gap: 0.5rem;
+    }
+    
+    .tool-btn {
+        width: 32px;
+        height: 32px;
+    }
+    
+    .cs-btn {
+        width: 24px;
+        height: 24px;
+        font-size: 0.75rem;
+    }
+    
+    .action-btn {
+        padding: 0.375rem 0.75rem;
+        font-size: 0.75rem;
+    }
+}
