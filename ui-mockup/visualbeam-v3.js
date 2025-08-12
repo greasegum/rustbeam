@@ -183,7 +183,7 @@ class VisualBeamV3 {
         // Action buttons
         document.getElementById('clear-all')?.addEventListener('click', () => this.clearAll());
         document.getElementById('delete-annotation')?.addEventListener('click', () => this.deleteSelectedAnnotation());
-        document.getElementById('export-btn')?.addEventListener('click', () => this.exportDrawing());
+        // Export button moved to menu
 
         // Mobile menu
         document.getElementById('menu-toggle')?.addEventListener('click', () => this.toggleMenu());
@@ -1150,6 +1150,8 @@ class VisualBeamV3 {
         } else if (this.state.isDragging) {
             this.state.isDragging = false;
             this.applyDefectsToSelection();
+        } else if (this.state.tool === 'region' && this.state.mode === 'edit') {
+            this.selectContiguousRegion(e);
         } else if (this.state.tool === 'mark' && this.state.mode === 'edit') {
             this.markSingleCell(e);
         } else if (this.state.tool === 'erase' && this.state.mode === 'edit') {
@@ -1288,6 +1290,65 @@ class VisualBeamV3 {
         
         document.getElementById('cells-marked').textContent = this.state.cellsMarked;
         this.state.selectedCells.clear();
+        this.render();
+    }
+
+    selectContiguousRegion(e) {
+        const coords = this.getCanvasCoordinates(e);
+        const gridSize = this.state.gridSize;
+        const clickedX = Math.floor(coords.x / gridSize) * gridSize;
+        const clickedY = Math.floor(coords.y / gridSize) * gridSize;
+        
+        // Find if clicked on an existing defect
+        const clickedDefect = this.state.defects.find(d => 
+            d.x === clickedX && d.y === clickedY
+        );
+        
+        if (!clickedDefect) return;  // Nothing to select
+        
+        const targetCS = clickedDefect.conditionState;
+        const visited = new Set();
+        const toVisit = [`${clickedX},${clickedY}`];
+        const selected = new Set();
+        
+        // Flood fill algorithm to find all connected cells with same condition state
+        while (toVisit.length > 0) {
+            const current = toVisit.pop();
+            if (visited.has(current)) continue;
+            visited.add(current);
+            
+            const [x, y] = current.split(',').map(Number);
+            
+            // Check if this cell has the same condition state
+            const defect = this.state.defects.find(d => d.x === x && d.y === y);
+            if (defect && defect.conditionState === targetCS) {
+                selected.add(current);
+                
+                // Add neighboring cells to check
+                const neighbors = [
+                    `${x + gridSize},${y}`,
+                    `${x - gridSize},${y}`,
+                    `${x},${y + gridSize}`,
+                    `${x},${y - gridSize}`
+                ];
+                
+                neighbors.forEach(n => {
+                    if (!visited.has(n)) {
+                        toVisit.push(n);
+                    }
+                });
+            }
+        }
+        
+        // Apply current condition state to all selected cells
+        selected.forEach(cellKey => {
+            const [x, y] = cellKey.split(',').map(Number);
+            const defect = this.state.defects.find(d => d.x === x && d.y === y);
+            if (defect) {
+                defect.conditionState = this.state.conditionState;
+            }
+        });
+        
         this.render();
     }
 
