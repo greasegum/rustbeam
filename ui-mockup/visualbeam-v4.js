@@ -365,8 +365,22 @@ class VisualBeamInspector {
         const coords = this.getCanvasCoordinates(e);
         this.state.dragStart = coords;
         
+        // Middle mouse button (button === 1) for zooming in edit mode
+        if (e.button === 1 && this.state.mode === 'edit') {
+            e.preventDefault();
+            this.state.isMiddleMouseDown = true;
+            this.state.zoomStart = { x: e.clientX, y: e.clientY };
+            this.state.initialZoom = this.state.zoom;
+            this.svg.style.cursor = 'zoom-in';
+            return;
+        }
+        
         if (this.state.tool === 'pan') {
             this.state.isPanning = true;
+            this.state.panStart = {
+                x: e.clientX - this.state.pan.x,
+                y: e.clientY - this.state.pan.y
+            };
             this.svg.style.cursor = 'grabbing';
         } else if (this.state.tool === 'rectangle') {
             this.state.isDragging = true;
@@ -396,11 +410,21 @@ class VisualBeamInspector {
         const gridY = Math.floor(coords.y / this.state.gridSize);
         document.getElementById('grid-cell').textContent = `${gridX},${gridY}`;
         
+        // Handle middle mouse zoom drag
+        if (this.state.isMiddleMouseDown) {
+            const deltaY = e.clientY - this.state.zoomStart.y;
+            const zoomFactor = 1 - deltaY * 0.005;
+            this.state.zoom = Math.max(0.25, Math.min(4, this.state.initialZoom * zoomFactor));
+            this.render();
+            document.querySelectorAll('.zoom-level').forEach(el => {
+                el.textContent = Math.round(this.state.zoom * 100) + '%';
+            });
+            return;
+        }
+        
         if (this.state.isPanning) {
-            const dx = e.clientX - this.lastMouseX || 0;
-            const dy = e.clientY - this.lastMouseY || 0;
-            this.state.pan.x += dx;
-            this.state.pan.y += dy;
+            this.state.pan.x = e.clientX - this.state.panStart.x;
+            this.state.pan.y = e.clientY - this.state.panStart.y;
             this.render();
         } else if (this.state.isDragging && this.state.tool === 'rectangle') {
             this.state.dragEnd = coords;
@@ -417,6 +441,14 @@ class VisualBeamInspector {
      * Handle mouse up event
      */
     handleMouseUp(e) {
+        // Reset middle mouse zoom
+        if (this.state.isMiddleMouseDown) {
+            this.state.isMiddleMouseDown = false;
+            this.svg.style.cursor = 'default';
+            this.updateCursor();
+            return;
+        }
+        
         if (this.state.isPanning) {
             this.state.isPanning = false;
             this.svg.style.cursor = this.state.tool === 'pan' ? 'move' : 'default';
@@ -442,17 +474,25 @@ class VisualBeamInspector {
     handleWheel(e) {
         e.preventDefault();
         
-        if (this.state.tool === 'pan') {
-            // Scrollwheel pans horizontally in pan mode
+        if (this.state.mode === 'edit') {
+            // In edit mode, scrollwheel always pans left-right
+            const delta = 30;
+            this.state.pan.x += e.deltaY > 0 ? -delta : delta;
+            this.render();
+        } else if (this.state.tool === 'pan') {
+            // In pan mode, scrollwheel pans horizontally
             const delta = 30;
             this.state.pan.x += e.deltaY > 0 ? -delta : delta;
             this.render();
         } else if (this.state.tool === 'zoom' || this.state.mode === 'view') {
-            // Scrollwheel zooms
+            // In zoom mode or view mode, scrollwheel zooms
             const zoomFactor = e.deltaY > 0 ? 0.9 : 1.1;
             this.state.zoom *= zoomFactor;
             this.state.zoom = Math.max(0.25, Math.min(4, this.state.zoom));
             this.render();
+            document.querySelectorAll('.zoom-level').forEach(el => {
+                el.textContent = Math.round(this.state.zoom * 100) + '%';
+            });
         }
     }
 
@@ -848,41 +888,45 @@ class VisualBeamInspector {
     drawBeam(x, y, length, depth, scale) {
         const layer = document.getElementById('beam-layer');
         
-        // Draw beam outline
+        // Draw beam as green rectangle matching reference
         const beam = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
         beam.setAttribute('x', x);
         beam.setAttribute('y', y);
         beam.setAttribute('width', length * scale);
         beam.setAttribute('height', depth * scale);
-        beam.setAttribute('fill', '#4a5568');
+        beam.setAttribute('fill', '#00ff00');
         beam.setAttribute('stroke', '#000');
         beam.setAttribute('stroke-width', '2');
         layer.appendChild(beam);
         
-        // Draw flanges
+        // Draw horizontal lines to show flanges
         const flangeHeight = this.config.profileData.flangeHeight * scale;
+        const webHeight = (this.config.profileData.depth - 2 * this.config.profileData.flangeHeight) * scale;
         
-        // Top flange
-        const topFlange = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
-        topFlange.setAttribute('x', x);
-        topFlange.setAttribute('y', y);
-        topFlange.setAttribute('width', length * scale);
-        topFlange.setAttribute('height', flangeHeight);
-        topFlange.setAttribute('fill', '#2d3748');
-        topFlange.setAttribute('stroke', '#000');
-        topFlange.setAttribute('stroke-width', '1');
-        layer.appendChild(topFlange);
+        // Top flange line
+        const topLine = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+        topLine.setAttribute('x1', x);
+        topLine.setAttribute('y1', y + flangeHeight);
+        topLine.setAttribute('x2', x + length * scale);
+        topLine.setAttribute('y2', y + flangeHeight);
+        topLine.setAttribute('stroke', '#000');
+        topLine.setAttribute('stroke-width', '1');
+        layer.appendChild(topLine);
         
-        // Bottom flange
-        const bottomFlange = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
-        bottomFlange.setAttribute('x', x);
-        bottomFlange.setAttribute('y', y + (depth * scale) - flangeHeight);
-        bottomFlange.setAttribute('width', length * scale);
-        bottomFlange.setAttribute('height', flangeHeight);
-        bottomFlange.setAttribute('fill', '#2d3748');
-        bottomFlange.setAttribute('stroke', '#000');
-        bottomFlange.setAttribute('stroke-width', '1');
-        layer.appendChild(bottomFlange);
+        // Bottom flange line
+        const bottomLine = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+        bottomLine.setAttribute('x1', x);
+        bottomLine.setAttribute('y1', y + flangeHeight + webHeight);
+        bottomLine.setAttribute('x2', x + length * scale);
+        bottomLine.setAttribute('y2', y + flangeHeight + webHeight);
+        bottomLine.setAttribute('stroke', '#000');
+        bottomLine.setAttribute('stroke-width', '1');
+        layer.appendChild(bottomLine);
+        
+        // Draw beam end dimensions if visible
+        if (this.state.showDimensions) {
+            this.drawBeamEndDimensions(x, y, depth, scale);
+        }
         
         // Draw ordinates if ruler is visible
         if (this.state.rulerVisible) {
@@ -892,55 +936,120 @@ class VisualBeamInspector {
     
     drawAbutments(x, y, length, depth, scale) {
         const layer = document.getElementById('abutment-layer');
-        const abutmentWidth = 40 * scale;
-        const abutmentHeight = (depth + 20) * scale;
+        const breastwallWidth = (this.config.breastwallFt * 12 + this.config.breastwallIn) * scale;
+        const backwallClearance = (this.config.backwallClearanceFt * 12 + this.config.backwallClearanceIn) * scale;
+        const abutmentHeight = (depth + 40) * scale;
+        const seatWidth = 12 * scale; // 12" seat width
+        const seatHeight = 6 * scale; // 6" seat height
         
-        // Left abutment
+        // Draw left abutment (full block)
+        const leftAbutmentGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+        
+        // Main abutment block
         const leftAbutment = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
-        leftAbutment.setAttribute('x', x - abutmentWidth);
-        leftAbutment.setAttribute('y', y - 10 * scale);
-        leftAbutment.setAttribute('width', abutmentWidth);
+        leftAbutment.setAttribute('x', x - breastwallWidth - seatWidth);
+        leftAbutment.setAttribute('y', y - 20 * scale);
+        leftAbutment.setAttribute('width', breastwallWidth);
         leftAbutment.setAttribute('height', abutmentHeight);
-        leftAbutment.setAttribute('fill', '#666');
-        leftAbutment.setAttribute('stroke', '#333');
-        leftAbutment.setAttribute('stroke-width', '1');
-        layer.appendChild(leftAbutment);
+        leftAbutment.setAttribute('fill', '#999');
+        leftAbutment.setAttribute('stroke', '#000');
+        leftAbutment.setAttribute('stroke-width', '2');
+        leftAbutmentGroup.appendChild(leftAbutment);
         
-        // Right abutment
+        // Left seat
+        const leftSeat = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+        leftSeat.setAttribute('x', x - seatWidth);
+        leftSeat.setAttribute('y', y + depth * scale - seatHeight);
+        leftSeat.setAttribute('width', seatWidth);
+        leftSeat.setAttribute('height', seatHeight);
+        leftSeat.setAttribute('fill', '#666');
+        leftSeat.setAttribute('stroke', '#000');
+        leftSeat.setAttribute('stroke-width', '1');
+        leftAbutmentGroup.appendChild(leftSeat);
+        
+        // Backwall line
+        const leftBackwallLine = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+        leftBackwallLine.setAttribute('x1', x - breastwallWidth - seatWidth);
+        leftBackwallLine.setAttribute('y1', y - 20 * scale);
+        leftBackwallLine.setAttribute('x2', x - breastwallWidth - seatWidth);
+        leftBackwallLine.setAttribute('y2', y + abutmentHeight);
+        leftBackwallLine.setAttribute('stroke', '#000');
+        leftBackwallLine.setAttribute('stroke-width', '3');
+        leftAbutmentGroup.appendChild(leftBackwallLine);
+        
+        layer.appendChild(leftAbutmentGroup);
+        
+        // Draw right abutment (full block)
+        const rightAbutmentGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+        
+        // Main abutment block
         const rightAbutment = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
-        rightAbutment.setAttribute('x', x + length * scale);
-        rightAbutment.setAttribute('y', y - 10 * scale);
-        rightAbutment.setAttribute('width', abutmentWidth);
+        rightAbutment.setAttribute('x', x + length * scale + seatWidth);
+        rightAbutment.setAttribute('y', y - 20 * scale);
+        rightAbutment.setAttribute('width', breastwallWidth);
         rightAbutment.setAttribute('height', abutmentHeight);
-        rightAbutment.setAttribute('fill', '#666');
-        rightAbutment.setAttribute('stroke', '#333');
-        rightAbutment.setAttribute('stroke-width', '1');
-        layer.appendChild(rightAbutment);
+        rightAbutment.setAttribute('fill', '#999');
+        rightAbutment.setAttribute('stroke', '#000');
+        rightAbutment.setAttribute('stroke-width', '2');
+        rightAbutmentGroup.appendChild(rightAbutment);
+        
+        // Right seat
+        const rightSeat = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+        rightSeat.setAttribute('x', x + length * scale);
+        rightSeat.setAttribute('y', y + depth * scale - seatHeight);
+        rightSeat.setAttribute('width', seatWidth);
+        rightSeat.setAttribute('height', seatHeight);
+        rightSeat.setAttribute('fill', '#666');
+        rightSeat.setAttribute('stroke', '#000');
+        rightSeat.setAttribute('stroke-width', '1');
+        rightAbutmentGroup.appendChild(rightSeat);
+        
+        // Backwall line
+        const rightBackwallLine = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+        rightBackwallLine.setAttribute('x1', x + length * scale + seatWidth + breastwallWidth);
+        rightBackwallLine.setAttribute('y1', y - 20 * scale);
+        rightBackwallLine.setAttribute('x2', x + length * scale + seatWidth + breastwallWidth);
+        rightBackwallLine.setAttribute('y2', y + abutmentHeight);
+        rightBackwallLine.setAttribute('stroke', '#000');
+        rightBackwallLine.setAttribute('stroke-width', '3');
+        rightAbutmentGroup.appendChild(rightBackwallLine);
+        
+        layer.appendChild(rightAbutmentGroup);
     }
     
     drawBearings(x, y, length, depth, scale) {
         const layer = document.getElementById('bearing-layer');
         const bearingDist = this.config.bearingDistanceFt * 12 + this.config.bearingDistanceIn;
+        const seatHeight = 6 * scale;
         
-        // Left bearing
-        const leftBearing = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-        leftBearing.setAttribute('cx', x + bearingDist * scale);
-        leftBearing.setAttribute('cy', y + depth * scale + 10);
-        leftBearing.setAttribute('r', 8);
-        leftBearing.setAttribute('fill', '#4a5568');
+        // Left bearing pad on seat
+        const leftBearingGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+        
+        const leftBearing = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+        leftBearing.setAttribute('x', x - 8 * scale);
+        leftBearing.setAttribute('y', y + depth * scale - seatHeight - 2 * scale);
+        leftBearing.setAttribute('width', 16 * scale);
+        leftBearing.setAttribute('height', 2 * scale);
+        leftBearing.setAttribute('fill', '#333');
         leftBearing.setAttribute('stroke', '#000');
-        leftBearing.setAttribute('stroke-width', '2');
-        layer.appendChild(leftBearing);
+        leftBearing.setAttribute('stroke-width', '1');
+        leftBearingGroup.appendChild(leftBearing);
         
-        // Right bearing
-        const rightBearing = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-        rightBearing.setAttribute('cx', x + (length - bearingDist) * scale);
-        rightBearing.setAttribute('cy', y + depth * scale + 10);
-        rightBearing.setAttribute('r', 8);
-        rightBearing.setAttribute('fill', '#4a5568');
+        // Right bearing pad on seat
+        const rightBearingGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+        
+        const rightBearing = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+        rightBearing.setAttribute('x', x + length * scale - 8 * scale);
+        rightBearing.setAttribute('y', y + depth * scale - seatHeight - 2 * scale);
+        rightBearing.setAttribute('width', 16 * scale);
+        rightBearing.setAttribute('height', 2 * scale);
+        rightBearing.setAttribute('fill', '#333');
         rightBearing.setAttribute('stroke', '#000');
-        rightBearing.setAttribute('stroke-width', '2');
-        layer.appendChild(rightBearing);
+        rightBearing.setAttribute('stroke-width', '1');
+        rightBearingGroup.appendChild(rightBearing);
+        
+        layer.appendChild(leftBearingGroup);
+        layer.appendChild(rightBearingGroup);
         
         // Draw centerlines if dimensions are shown
         if (this.state.showDimensions) {
@@ -990,41 +1099,261 @@ class VisualBeamInspector {
         layer.appendChild(text);
     }
     
-    drawOrdinates(x, y, length, depth, scale) {
-        const layer = document.getElementById('beam-layer');
-        const ordinateY = this.state.ordinateOrigin === 'left' ? 
-            y + depth * scale + 20 : 
-            y - 30;
+    drawBeamEndDimensions(x, y, depth, scale) {
+        const layer = document.getElementById('dimension-layer');
+        const flangeHeight = this.config.profileData.flangeHeight;
+        const webHeight = this.config.profileData.depth - 2 * flangeHeight;
         
-        // Draw engineer's scale
-        const scaleBar = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+        // Right side dimensions
+        const dimX = x - 60;
         
-        // Draw alternating bars for each foot
-        const feet = Math.floor(length / 12);
-        for (let i = 0; i <= feet; i++) {
-            const barX = x + (i * 12 * scale);
-            const bar = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
-            bar.setAttribute('x', barX);
-            bar.setAttribute('y', ordinateY);
-            bar.setAttribute('width', Math.min(12 * scale, (length - i * 12) * scale));
-            bar.setAttribute('height', 10);
-            bar.setAttribute('fill', i % 2 === 0 ? '#000' : '#fff');
-            bar.setAttribute('stroke', '#000');
-            bar.setAttribute('stroke-width', '0.5');
-            layer.appendChild(bar);
-            
-            // Add foot markers
-            const marker = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-            marker.setAttribute('x', barX);
-            marker.setAttribute('y', ordinateY + 25);
-            marker.setAttribute('text-anchor', 'middle');
-            marker.setAttribute('fill', '#fff');
-            marker.setAttribute('font-size', '10');
-            marker.textContent = i.toString();
-            layer.appendChild(marker);
+        // Top flange dimension
+        const topFlangeGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+        
+        // Dimension line with arrows
+        const topLine = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+        topLine.setAttribute('x1', dimX);
+        topLine.setAttribute('y1', y);
+        topLine.setAttribute('x2', dimX);
+        topLine.setAttribute('y2', y + flangeHeight * scale);
+        topLine.setAttribute('stroke', '#fff');
+        topLine.setAttribute('stroke-width', '1');
+        topFlangeGroup.appendChild(topLine);
+        
+        // Extension lines
+        const ext1 = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+        ext1.setAttribute('x1', dimX - 5);
+        ext1.setAttribute('y1', y);
+        ext1.setAttribute('x2', x);
+        ext1.setAttribute('y2', y);
+        ext1.setAttribute('stroke', '#fff');
+        ext1.setAttribute('stroke-width', '0.5');
+        topFlangeGroup.appendChild(ext1);
+        
+        const ext2 = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+        ext2.setAttribute('x1', dimX - 5);
+        ext2.setAttribute('y1', y + flangeHeight * scale);
+        ext2.setAttribute('x2', x);
+        ext2.setAttribute('y2', y + flangeHeight * scale);
+        ext2.setAttribute('stroke', '#fff');
+        ext2.setAttribute('stroke-width', '0.5');
+        topFlangeGroup.appendChild(ext2);
+        
+        // Text (convert to fractional inches)
+        const topText = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        topText.setAttribute('x', dimX - 10);
+        topText.setAttribute('y', y + flangeHeight * scale / 2);
+        topText.setAttribute('text-anchor', 'end');
+        topText.setAttribute('fill', '#fff');
+        topText.setAttribute('font-size', '10');
+        topText.textContent = this.formatInches(flangeHeight);
+        topFlangeGroup.appendChild(topText);
+        
+        layer.appendChild(topFlangeGroup);
+        
+        // Web dimension
+        const webGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+        
+        const webLine = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+        webLine.setAttribute('x1', dimX);
+        webLine.setAttribute('y1', y + flangeHeight * scale);
+        webLine.setAttribute('x2', dimX);
+        webLine.setAttribute('y2', y + (flangeHeight + webHeight) * scale);
+        webLine.setAttribute('stroke', '#fff');
+        webLine.setAttribute('stroke-width', '1');
+        webGroup.appendChild(webLine);
+        
+        const webText = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        webText.setAttribute('x', dimX - 10);
+        webText.setAttribute('y', y + (flangeHeight + webHeight/2) * scale);
+        webText.setAttribute('text-anchor', 'end');
+        webText.setAttribute('fill', '#fff');
+        webText.setAttribute('font-size', '10');
+        webText.textContent = this.formatInches(webHeight);
+        webGroup.appendChild(webText);
+        
+        layer.appendChild(webGroup);
+        
+        // Bottom flange dimension
+        const bottomFlangeGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+        
+        const bottomDimLine = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+        bottomDimLine.setAttribute('x1', dimX);
+        bottomDimLine.setAttribute('y1', y + (depth - flangeHeight) * scale);
+        bottomDimLine.setAttribute('x2', dimX);
+        bottomDimLine.setAttribute('y2', y + depth * scale);
+        bottomDimLine.setAttribute('stroke', '#fff');
+        bottomDimLine.setAttribute('stroke-width', '1');
+        bottomFlangeGroup.appendChild(bottomDimLine);
+        
+        const ext3 = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+        ext3.setAttribute('x1', dimX - 5);
+        ext3.setAttribute('y1', y + depth * scale);
+        ext3.setAttribute('x2', x);
+        ext3.setAttribute('y2', y + depth * scale);
+        ext3.setAttribute('stroke', '#fff');
+        ext3.setAttribute('stroke-width', '0.5');
+        bottomFlangeGroup.appendChild(ext3);
+        
+        const bottomText = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        bottomText.setAttribute('x', dimX - 10);
+        bottomText.setAttribute('y', y + (depth - flangeHeight/2) * scale);
+        bottomText.setAttribute('text-anchor', 'end');
+        bottomText.setAttribute('fill', '#fff');
+        bottomText.setAttribute('font-size', '10');
+        bottomText.textContent = this.formatInches(flangeHeight);
+        bottomFlangeGroup.appendChild(bottomText);
+        
+        layer.appendChild(bottomFlangeGroup);
+        
+        // Overall depth dimension
+        const overallDimX = dimX - 30;
+        const overallGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+        
+        const overallLine = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+        overallLine.setAttribute('x1', overallDimX);
+        overallLine.setAttribute('y1', y);
+        overallLine.setAttribute('x2', overallDimX);
+        overallLine.setAttribute('y2', y + depth * scale);
+        overallLine.setAttribute('stroke', '#fff');
+        overallLine.setAttribute('stroke-width', '1');
+        overallGroup.appendChild(overallLine);
+        
+        const overallText = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        overallText.setAttribute('x', overallDimX - 10);
+        overallText.setAttribute('y', y + depth * scale / 2);
+        overallText.setAttribute('text-anchor', 'end');
+        overallText.setAttribute('fill', '#fff');
+        overallText.setAttribute('font-size', '10');
+        overallText.textContent = this.formatInches(depth);
+        overallGroup.appendChild(overallText);
+        
+        layer.appendChild(overallGroup);
+    }
+    
+    formatInches(inches) {
+        const feet = Math.floor(inches / 12);
+        const remainingInches = inches % 12;
+        
+        // Convert decimal inches to fractions
+        const wholePart = Math.floor(remainingInches);
+        const decimalPart = remainingInches - wholePart;
+        
+        let fraction = '';
+        if (decimalPart > 0) {
+            // Common fractions
+            if (Math.abs(decimalPart - 0.5) < 0.01) fraction = '1/2';
+            else if (Math.abs(decimalPart - 0.25) < 0.01) fraction = '1/4';
+            else if (Math.abs(decimalPart - 0.75) < 0.01) fraction = '3/4';
+            else if (Math.abs(decimalPart - 0.125) < 0.01) fraction = '1/8';
+            else if (Math.abs(decimalPart - 0.375) < 0.01) fraction = '3/8';
+            else if (Math.abs(decimalPart - 0.625) < 0.01) fraction = '5/8';
+            else if (Math.abs(decimalPart - 0.875) < 0.01) fraction = '7/8';
+            else if (Math.abs(decimalPart - 0.0625) < 0.01) fraction = '1/16';
+            else if (Math.abs(decimalPart - 0.1875) < 0.01) fraction = '3/16';
+            else if (Math.abs(decimalPart - 0.3125) < 0.01) fraction = '5/16';
+            else if (Math.abs(decimalPart - 0.4375) < 0.01) fraction = '7/16';
+            else if (Math.abs(decimalPart - 0.5625) < 0.01) fraction = '9/16';
+            else if (Math.abs(decimalPart - 0.6875) < 0.01) fraction = '11/16';
+            else if (Math.abs(decimalPart - 0.8125) < 0.01) fraction = '13/16';
+            else if (Math.abs(decimalPart - 0.9375) < 0.01) fraction = '15/16';
         }
         
-        layer.appendChild(scaleBar);
+        if (feet > 0) {
+            if (wholePart > 0 || fraction) {
+                const inchPart = wholePart > 0 ? 
+                    (fraction ? `${wholePart}-${fraction}` : `${wholePart}`) : 
+                    fraction;
+                return `${feet}'-${inchPart}"`;
+            } else {
+                return `${feet}'-0"`;
+            }
+        } else {
+            if (wholePart > 0) {
+                return fraction ? `${wholePart}-${fraction}"` : `${wholePart}"`;
+            } else if (fraction) {
+                return `${fraction}"`;
+            } else {
+                return '0"';
+            }
+        }
+    }
+    
+    drawOrdinates(x, y, length, depth, scale) {
+        const layer = document.getElementById('dimension-layer');
+        
+        // Always draw at bottom, origin just affects numbering direction
+        const ordinateY = y + depth * scale + 60;
+        const barHeight = 10;
+        
+        // Create group for ordinates
+        const ordinateGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+        
+        // Draw engineer's scale with alternating black and white bars
+        for (let i = 0; i < length; i += 12) {
+            const xPos = x + i * scale;
+            const barWidth = Math.min(12, length - i) * scale;
+            const footIndex = i / 12;
+            
+            // Alternate between black and white
+            const fillColor = footIndex % 2 === 0 ? '#000' : '#fff';
+            
+            // Draw the bar
+            const bar = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+            bar.setAttribute('x', xPos);
+            bar.setAttribute('y', ordinateY - barHeight / 2);
+            bar.setAttribute('width', barWidth);
+            bar.setAttribute('height', barHeight);
+            bar.setAttribute('fill', fillColor);
+            bar.setAttribute('stroke', '#000');
+            bar.setAttribute('stroke-width', '1');
+            ordinateGroup.appendChild(bar);
+            
+            // Add inch subdivisions for each foot
+            if (barWidth === 12 * scale) {
+                for (let j = 1; j < 12; j++) {
+                    const inchX = xPos + j * scale;
+                    const tickHeight = j % 3 === 0 ? 6 : 3; // Longer ticks at 3" intervals
+                    
+                    const inchTick = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                    inchTick.setAttribute('x1', inchX);
+                    inchTick.setAttribute('y1', ordinateY - tickHeight);
+                    inchTick.setAttribute('x2', inchX);
+                    inchTick.setAttribute('y2', ordinateY + tickHeight);
+                    inchTick.setAttribute('stroke', fillColor === '#000' ? '#fff' : '#000');
+                    inchTick.setAttribute('stroke-width', '0.5');
+                    ordinateGroup.appendChild(inchTick);
+                }
+            }
+            
+            // Add foot numbers (reverse if origin is right)
+            const footNumber = this.state.ordinateOrigin === 'left' ? footIndex : Math.floor(length / 12) - footIndex;
+            const label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+            label.setAttribute('x', xPos);
+            label.setAttribute('y', ordinateY + 20);
+            label.setAttribute('text-anchor', 'start');
+            label.setAttribute('fill', '#fff');
+            label.setAttribute('font-size', '12');
+            label.setAttribute('font-weight', 'bold');
+            label.textContent = footNumber.toString();
+            ordinateGroup.appendChild(label);
+        }
+        
+        // Add final foot marker if needed
+        const totalFeet = Math.floor(length / 12);
+        const finalX = x + totalFeet * 12 * scale;
+        const finalNumber = this.state.ordinateOrigin === 'left' ? totalFeet : 0;
+        const finalLabel = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        finalLabel.setAttribute('x', finalX);
+        finalLabel.setAttribute('y', ordinateY + 20);
+        finalLabel.setAttribute('text-anchor', 'start');
+        finalLabel.setAttribute('fill', '#fff');
+        finalLabel.setAttribute('font-size', '12');
+        finalLabel.setAttribute('font-weight', 'bold');
+        finalLabel.textContent = finalNumber.toString();
+        ordinateGroup.appendChild(finalLabel);
+        
+        layer.appendChild(ordinateGroup);
     }
     
     drawGrid(x, y, length, depth, scale) {
