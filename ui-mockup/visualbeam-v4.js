@@ -899,7 +899,7 @@ class VisualBeamInspector {
         beam.setAttribute('stroke-width', '2');
         layer.appendChild(beam);
         
-        // Draw horizontal lines to show flanges
+        // Draw horizontal lines to show flanges - MUST BE VISIBLE
         const flangeHeight = this.config.profileData.flangeHeight * scale;
         const webHeight = (this.config.profileData.depth - 2 * this.config.profileData.flangeHeight) * scale;
         
@@ -910,7 +910,7 @@ class VisualBeamInspector {
         topLine.setAttribute('x2', x + length * scale);
         topLine.setAttribute('y2', y + flangeHeight);
         topLine.setAttribute('stroke', '#000');
-        topLine.setAttribute('stroke-width', '1');
+        topLine.setAttribute('stroke-width', '2');
         layer.appendChild(topLine);
         
         // Bottom flange line
@@ -920,7 +920,7 @@ class VisualBeamInspector {
         bottomLine.setAttribute('x2', x + length * scale);
         bottomLine.setAttribute('y2', y + flangeHeight + webHeight);
         bottomLine.setAttribute('stroke', '#000');
-        bottomLine.setAttribute('stroke-width', '1');
+        bottomLine.setAttribute('stroke-width', '2');
         layer.appendChild(bottomLine);
         
         // Draw beam end dimensions if visible
@@ -936,85 +936,41 @@ class VisualBeamInspector {
     
     drawAbutments(x, y, length, depth, scale) {
         const layer = document.getElementById('abutment-layer');
-        const breastwallWidth = (this.config.breastwallFt * 12 + this.config.breastwallIn) * scale;
-        const backwallClearance = (this.config.backwallClearanceFt * 12 + this.config.backwallClearanceIn) * scale;
-        const abutmentHeight = (depth + 40) * scale;
-        const seatWidth = 12 * scale; // 12" seat width
-        const seatHeight = 6 * scale; // 6" seat height
+        const seatWidth = (this.config.seatLeft || 10) * scale; // Use configured seat width or default
+        const abutmentDepth = 40 * scale; // Depth of abutment behind beam
+        const abutmentHeight = (depth + 30) * scale; // Height extends below beam
         
-        // Draw left abutment (full block)
-        const leftAbutmentGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+        // Simple left abutment - grey block with seat
+        const leftGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
         
-        // Main abutment block
+        // Left abutment block (extends behind and below beam)
         const leftAbutment = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
-        leftAbutment.setAttribute('x', x - breastwallWidth - seatWidth);
-        leftAbutment.setAttribute('y', y - 20 * scale);
-        leftAbutment.setAttribute('width', breastwallWidth);
+        leftAbutment.setAttribute('x', x - abutmentDepth);
+        leftAbutment.setAttribute('y', y - 10 * scale);
+        leftAbutment.setAttribute('width', abutmentDepth + seatWidth);
         leftAbutment.setAttribute('height', abutmentHeight);
-        leftAbutment.setAttribute('fill', '#999');
+        leftAbutment.setAttribute('fill', '#808080');
         leftAbutment.setAttribute('stroke', '#000');
         leftAbutment.setAttribute('stroke-width', '2');
-        leftAbutmentGroup.appendChild(leftAbutment);
+        leftGroup.appendChild(leftAbutment);
         
-        // Left seat
-        const leftSeat = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
-        leftSeat.setAttribute('x', x - seatWidth);
-        leftSeat.setAttribute('y', y + depth * scale - seatHeight);
-        leftSeat.setAttribute('width', seatWidth);
-        leftSeat.setAttribute('height', seatHeight);
-        leftSeat.setAttribute('fill', '#666');
-        leftSeat.setAttribute('stroke', '#000');
-        leftSeat.setAttribute('stroke-width', '1');
-        leftAbutmentGroup.appendChild(leftSeat);
+        layer.appendChild(leftGroup);
         
-        // Backwall line
-        const leftBackwallLine = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-        leftBackwallLine.setAttribute('x1', x - breastwallWidth - seatWidth);
-        leftBackwallLine.setAttribute('y1', y - 20 * scale);
-        leftBackwallLine.setAttribute('x2', x - breastwallWidth - seatWidth);
-        leftBackwallLine.setAttribute('y2', y + abutmentHeight);
-        leftBackwallLine.setAttribute('stroke', '#000');
-        leftBackwallLine.setAttribute('stroke-width', '3');
-        leftAbutmentGroup.appendChild(leftBackwallLine);
+        // Simple right abutment - grey block with seat
+        const rightGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
         
-        layer.appendChild(leftAbutmentGroup);
-        
-        // Draw right abutment (full block)
-        const rightAbutmentGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
-        
-        // Main abutment block
+        // Right abutment block (extends behind and below beam)
         const rightAbutment = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
-        rightAbutment.setAttribute('x', x + length * scale + seatWidth);
-        rightAbutment.setAttribute('y', y - 20 * scale);
-        rightAbutment.setAttribute('width', breastwallWidth);
+        rightAbutment.setAttribute('x', x + length * scale - seatWidth);
+        rightAbutment.setAttribute('y', y - 10 * scale);
+        rightAbutment.setAttribute('width', abutmentDepth + seatWidth);
         rightAbutment.setAttribute('height', abutmentHeight);
-        rightAbutment.setAttribute('fill', '#999');
+        rightAbutment.setAttribute('fill', '#808080');
         rightAbutment.setAttribute('stroke', '#000');
         rightAbutment.setAttribute('stroke-width', '2');
-        rightAbutmentGroup.appendChild(rightAbutment);
+        rightGroup.appendChild(rightAbutment);
         
-        // Right seat
-        const rightSeat = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
-        rightSeat.setAttribute('x', x + length * scale);
-        rightSeat.setAttribute('y', y + depth * scale - seatHeight);
-        rightSeat.setAttribute('width', seatWidth);
-        rightSeat.setAttribute('height', seatHeight);
-        rightSeat.setAttribute('fill', '#666');
-        rightSeat.setAttribute('stroke', '#000');
-        rightSeat.setAttribute('stroke-width', '1');
-        rightAbutmentGroup.appendChild(rightSeat);
-        
-        // Backwall line
-        const rightBackwallLine = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-        rightBackwallLine.setAttribute('x1', x + length * scale + seatWidth + breastwallWidth);
-        rightBackwallLine.setAttribute('y1', y - 20 * scale);
-        rightBackwallLine.setAttribute('x2', x + length * scale + seatWidth + breastwallWidth);
-        rightBackwallLine.setAttribute('y2', y + abutmentHeight);
-        rightBackwallLine.setAttribute('stroke', '#000');
-        rightBackwallLine.setAttribute('stroke-width', '3');
-        rightAbutmentGroup.appendChild(rightBackwallLine);
-        
-        layer.appendChild(rightAbutmentGroup);
+        layer.appendChild(rightGroup);
     }
     
     drawBearings(x, y, length, depth, scale) {
@@ -1359,9 +1315,9 @@ class VisualBeamInspector {
     drawGrid(x, y, length, depth, scale) {
         const layer = document.getElementById('grid-layer');
         
-        // Create transparent grid overlay only on beam area
+        // Create grid overlay with better visibility
         const gridGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
-        gridGroup.setAttribute('opacity', '0.3');
+        gridGroup.setAttribute('opacity', '0.5'); // More visible
         
         // Draw vertical lines (1" spacing)
         for (let i = 0; i <= length; i++) {
@@ -1371,7 +1327,7 @@ class VisualBeamInspector {
             line.setAttribute('x2', x + i * scale);
             line.setAttribute('y2', y + depth * scale);
             line.setAttribute('stroke', '#000');
-            line.setAttribute('stroke-width', '0.25');
+            line.setAttribute('stroke-width', '0.5'); // Thicker lines
             gridGroup.appendChild(line);
         }
         
@@ -1384,7 +1340,7 @@ class VisualBeamInspector {
             line.setAttribute('x2', x + length * scale);
             line.setAttribute('y2', y + i * scale);
             line.setAttribute('stroke', '#000');
-            line.setAttribute('stroke-width', '0.25');
+            line.setAttribute('stroke-width', '0.5'); // Thicker lines
             gridGroup.appendChild(line);
         }
         
