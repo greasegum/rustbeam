@@ -81,7 +81,6 @@ class VisualBeamV3 {
         this.updateUI();
         this.calculateScale();
         this.render();
-        this.startClock();
         this.updateStatusBar();
         this.updateViewOrientation();
     }
@@ -271,16 +270,6 @@ class VisualBeamV3 {
         document.getElementById('beam-depth').textContent = profile.depth + '"';
         document.getElementById('web-thickness').textContent = profile.webThickness + '"';
         document.getElementById('inspector').textContent = this.config.inspector;
-    }
-
-    startClock() {
-        const updateClock = () => {
-            const now = new Date();
-            document.getElementById('current-time').textContent = 
-                now.toLocaleTimeString('en-US', { hour12: false });
-        };
-        updateClock();
-        setInterval(updateClock, 1000);
     }
 
     render() {
