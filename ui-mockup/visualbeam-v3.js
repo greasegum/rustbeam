@@ -493,8 +493,8 @@ class VisualBeamV3 {
         const layer = document.getElementById('grid-layer');
         if (!layer) return;
         
-        const gridSpacing = this.state.gridSize * scale;  // 1" grid
-        const profile = this.config.profileData;
+        const gridSize = this.state.gridSize;  // 1" grid size in inches
+        const gridSpacing = gridSize * scale;  // Scaled grid spacing
         
         // Create a clipping path for the beam area only
         const clipPath = this.createSVGElement('clipPath', {
@@ -527,61 +527,77 @@ class VisualBeamV3 {
             'clip-path': 'url(#beam-clip)'
         });
         
-        // Draw grid cells as interactive rectangles
-        for (let i = 0; i < beamLength / this.state.gridSize; i++) {
-            for (let j = 0; j < beamDepth / this.state.gridSize; j++) {
+        // Calculate number of grid cells
+        const numCellsX = Math.ceil(beamLength / gridSize);
+        const numCellsY = Math.ceil(beamDepth / gridSize);
+        
+        // Draw grid cells as interactive rectangles (1"x1" grid)
+        for (let i = 0; i < numCellsX; i++) {
+            for (let j = 0; j < numCellsY; j++) {
                 const cellX = x + i * gridSpacing;
                 const cellY = y + j * gridSpacing;
                 
-                // Create interactive grid cell
-                const cell = this.createSVGElement('rect', {
-                    x: cellX,
-                    y: cellY,
-                    width: gridSpacing,
-                    height: gridSpacing,
-                    class: 'grid-cell',
-                    'data-grid-x': i,
-                    'data-grid-y': j,
-                    fill: 'none',
-                    stroke: (i % 12 === 0 || j % 12 === 0) ? 'rgba(0,0,0,0.2)' : 'rgba(0,0,0,0.1)',
-                    'stroke-width': 0.5,
-                    'pointer-events': 'all'
-                });
-                
-                gridGroup.appendChild(cell);
+                // Only draw cells within beam bounds
+                if (cellX < x + beamLength * scale && cellY < y + beamDepth * scale) {
+                    const cellWidth = Math.min(gridSpacing, x + beamLength * scale - cellX);
+                    const cellHeight = Math.min(gridSpacing, y + beamDepth * scale - cellY);
+                    
+                    // Create interactive grid cell
+                    const cell = this.createSVGElement('rect', {
+                        x: cellX,
+                        y: cellY,
+                        width: cellWidth,
+                        height: cellHeight,
+                        class: 'grid-cell',
+                        'data-grid-x': i,
+                        'data-grid-y': j,
+                        fill: 'none',
+                        stroke: 'rgba(0,0,0,0.15)',
+                        'stroke-width': 0.25,
+                        'pointer-events': 'all'
+                    });
+                    
+                    gridGroup.appendChild(cell);
+                }
             }
         }
         
-        // Add major grid lines for visibility
+        // Add major grid lines at 12" intervals (1 foot)
         // Vertical lines at 12" intervals
-        for (let i = 0; i <= beamLength / this.state.gridSize; i += 12) {
-            const xPos = x + i * gridSpacing;
-            if (xPos <= x + beamLength * scale) {
-                const line = this.createSVGElement('line', {
-                    x1: xPos,
-                    y1: y,
-                    x2: xPos,
-                    y2: y + beamDepth * scale,
-                    class: 'grid-line-major',
-                    'pointer-events': 'none'
-                });
-                gridGroup.appendChild(line);
+        for (let i = 0; i <= numCellsX; i++) {
+            if (i % 12 === 0) {  // Every 12 inches
+                const xPos = x + i * gridSpacing;
+                if (xPos <= x + beamLength * scale) {
+                    const line = this.createSVGElement('line', {
+                        x1: xPos,
+                        y1: y,
+                        x2: xPos,
+                        y2: y + beamDepth * scale,
+                        stroke: 'rgba(0,0,0,0.3)',
+                        'stroke-width': 0.5,
+                        'pointer-events': 'none'
+                    });
+                    gridGroup.appendChild(line);
+                }
             }
         }
         
         // Horizontal lines at 12" intervals
-        for (let i = 0; i <= beamDepth / this.state.gridSize; i += 12) {
-            const yPos = y + i * gridSpacing;
-            if (yPos <= y + beamDepth * scale) {
-                const line = this.createSVGElement('line', {
-                    x1: x,
-                    y1: yPos,
-                    x2: x + beamLength * scale,
-                    y2: yPos,
-                    class: 'grid-line-major',
-                    'pointer-events': 'none'
-                });
-                gridGroup.appendChild(line);
+        for (let j = 0; j <= numCellsY; j++) {
+            if (j % 12 === 0) {  // Every 12 inches
+                const yPos = y + j * gridSpacing;
+                if (yPos <= y + beamDepth * scale) {
+                    const line = this.createSVGElement('line', {
+                        x1: x,
+                        y1: yPos,
+                        x2: x + beamLength * scale,
+                        y2: yPos,
+                        stroke: 'rgba(0,0,0,0.3)',
+                        'stroke-width': 0.5,
+                        'pointer-events': 'none'
+                    });
+                    gridGroup.appendChild(line);
+                }
             }
         }
         
