@@ -459,6 +459,56 @@ class VisualBeamV3 {
             class: 'bearing'
         });
         layer.appendChild(rightBearing);
+        
+        // Draw bearing centerlines if both dimensions and bearings are shown
+        if (this.state.showDimensions) {
+            // Left bearing centerline
+            const leftCL = this.createSVGElement('line', {
+                x1: x + bearingOffset * scale,
+                y1: y - 10 * scale,
+                x2: x + bearingOffset * scale,
+                y2: y + beamDepth * scale + 10 * scale,
+                stroke: '#FF5722',
+                'stroke-width': 1,
+                'stroke-dasharray': '4 2',
+                opacity: 0.7
+            });
+            layer.appendChild(leftCL);
+            
+            // Right bearing centerline
+            const rightCL = this.createSVGElement('line', {
+                x1: x + (beamLength - bearingOffset) * scale,
+                y1: y - 10 * scale,
+                x2: x + (beamLength - bearingOffset) * scale,
+                y2: y + beamDepth * scale + 10 * scale,
+                stroke: '#FF5722',
+                'stroke-width': 1,
+                'stroke-dasharray': '4 2',
+                opacity: 0.7
+            });
+            layer.appendChild(rightCL);
+            
+            // Add CL labels
+            const leftLabel = this.createSVGElement('text', {
+                x: x + bearingOffset * scale + 5,
+                y: y - 15 * scale,
+                fill: '#FF5722',
+                'font-size': '10',
+                'font-weight': 'bold'
+            });
+            leftLabel.textContent = 'CL';
+            layer.appendChild(leftLabel);
+            
+            const rightLabel = this.createSVGElement('text', {
+                x: x + (beamLength - bearingOffset) * scale + 5,
+                y: y - 15 * scale,
+                fill: '#FF5722',
+                'font-size': '10',
+                'font-weight': 'bold'
+            });
+            rightLabel.textContent = 'CL';
+            layer.appendChild(rightLabel);
+        }
     }
 
     drawZones(x, y, beamLength, beamDepth, scale) {

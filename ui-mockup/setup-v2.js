@@ -246,68 +246,115 @@ class BeamSetup {
         const backwallLeft = parseInt(document.getElementById('backwall-left').value);
         const backwallRight = parseInt(document.getElementById('backwall-right').value);
         
+        const seatHeight = 6;  // Height of bridge seat in inches
+        const backwallHeight = beamDepth + 12;  // Backwall extends above beam
+        
         // Left abutment (monolithic)
         if (seatLeft > 0) {
+            // Main abutment body (large grey block)
+            const abutmentBody = this.createSVGElement('rect', {
+                x: x - backwallLeft * scale - 20 * scale,
+                y: y - 15 * scale,
+                width: (backwallLeft + 20) * scale,
+                height: (backwallHeight + 40) * scale,
+                fill: '#BDBDBD',
+                stroke: '#666',
+                'stroke-width': 1.5,
+                opacity: 0.8
+            });
+            group.appendChild(abutmentBody);
+            
             // Bridge seat (horizontal surface)
             const seatRect = this.createSVGElement('rect', {
                 x: x - seatLeft * scale,
-                y: y + beamDepth * scale - 4 * scale,
+                y: y + beamDepth * scale - seatHeight * scale,
                 width: seatLeft * scale,
-                height: 20 * scale,
-                class: 'bridge-seat'
+                height: seatHeight * scale + 20 * scale,
+                fill: '#9E9E9E',
+                stroke: '#666',
+                'stroke-width': 1.5,
+                opacity: 0.9
             });
             group.appendChild(seatRect);
             
             // Backwall (vertical at beam end)
             const backwallRect = this.createSVGElement('rect', {
                 x: x - backwallLeft * scale,
-                y: y - 10 * scale,
+                y: y - 6 * scale,
                 width: backwallLeft * scale,
-                height: (beamDepth + 10) * scale,
-                class: 'backwall'
+                height: backwallHeight * scale,
+                fill: '#9E9E9E',
+                stroke: '#666',
+                'stroke-width': 1.5,
+                opacity: 0.9
             });
             group.appendChild(backwallRect);
             
             // Breastwall (drops from inner edge of seat)
             const breastwallRect = this.createSVGElement('rect', {
                 x: x - seatLeft * scale,
-                y: y + beamDepth * scale + 16 * scale,
-                width: 4 * scale,
-                height: 30 * scale,
-                class: 'breastwall'
+                y: y + beamDepth * scale + seatHeight * scale,
+                width: 6 * scale,
+                height: 24 * scale,
+                fill: '#9E9E9E',
+                stroke: '#666',
+                'stroke-width': 1.5,
+                opacity: 0.9
             });
             group.appendChild(breastwallRect);
         }
         
         // Right abutment (mirror)
         if (seatRight > 0) {
+            // Main abutment body
+            const abutmentBody = this.createSVGElement('rect', {
+                x: x + beamLength * scale,
+                y: y - 15 * scale,
+                width: (backwallRight + 20) * scale,
+                height: (backwallHeight + 40) * scale,
+                fill: '#BDBDBD',
+                stroke: '#666',
+                'stroke-width': 1.5,
+                opacity: 0.8
+            });
+            group.appendChild(abutmentBody);
+            
             // Bridge seat
             const seatRect = this.createSVGElement('rect', {
                 x: x + beamLength * scale,
-                y: y + beamDepth * scale - 4 * scale,
+                y: y + beamDepth * scale - seatHeight * scale,
                 width: seatRight * scale,
-                height: 20 * scale,
-                class: 'bridge-seat'
+                height: seatHeight * scale + 20 * scale,
+                fill: '#9E9E9E',
+                stroke: '#666',
+                'stroke-width': 1.5,
+                opacity: 0.9
             });
             group.appendChild(seatRect);
             
             // Backwall
             const backwallRect = this.createSVGElement('rect', {
                 x: x + beamLength * scale,
-                y: y - 10 * scale,
+                y: y - 6 * scale,
                 width: backwallRight * scale,
-                height: (beamDepth + 10) * scale,
-                class: 'backwall'
+                height: backwallHeight * scale,
+                fill: '#9E9E9E',
+                stroke: '#666',
+                'stroke-width': 1.5,
+                opacity: 0.9
             });
             group.appendChild(backwallRect);
             
             // Breastwall
             const breastwallRect = this.createSVGElement('rect', {
-                x: x + beamLength * scale + seatRight * scale - 4 * scale,
-                y: y + beamDepth * scale + 16 * scale,
-                width: 4 * scale,
-                height: 30 * scale,
-                class: 'breastwall'
+                x: x + beamLength * scale + seatRight * scale - 6 * scale,
+                y: y + beamDepth * scale + seatHeight * scale,
+                width: 6 * scale,
+                height: 24 * scale,
+                fill: '#9E9E9E',
+                stroke: '#666',
+                'stroke-width': 1.5,
+                opacity: 0.9
             });
             group.appendChild(breastwallRect);
         }
