@@ -819,7 +819,7 @@ class VisualBeamInspector {
      * Calculate scale based on viewport
      */
     calculateScale() {
-        const padding = 150;
+        const padding = 50;
         const svgRect = this.svg.getBoundingClientRect();
         const svgWidth = svgRect.width - 2 * padding;
         const svgHeight = svgRect.height - 2 * padding;
@@ -827,8 +827,12 @@ class VisualBeamInspector {
         const beamLength = this.config.lengthFt * 12 + this.config.lengthIn;
         const beamDepth = this.config.profileData.depth;
         
-        const scaleX = svgWidth / beamLength;
-        const scaleY = svgHeight / beamDepth;
+        // Account for abutments in the total width (beam is about 62% of total)
+        const totalWidth = beamLength / 0.62;
+        const totalHeight = beamDepth * 3; // Allow space above and below
+        
+        const scaleX = svgWidth / totalWidth;
+        const scaleY = svgHeight / totalHeight;
         
         this.scale = Math.min(scaleX, scaleY, 4);
     }
@@ -888,9 +892,9 @@ class VisualBeamInspector {
     drawBeam(x, y, length, depth, scale) {
         const layer = document.getElementById('beam-layer');
         
-        // Calculate flange dimensions
-        const flangeHeight = this.config.profileData.flangeHeight * scale;
-        const webHeight = (this.config.profileData.depth - 2 * this.config.profileData.flangeHeight) * scale;
+        // Calculate flange dimensions - proportionally thinner (12% of depth each)
+        const flangeHeight = depth * scale * 0.12;
+        const webHeight = depth * scale * 0.76;
         
         // Draw beam flanges and web as separate rectangles for clarity
         // Top flange
@@ -940,34 +944,33 @@ class VisualBeamInspector {
     drawAbutments(x, y, length, depth, scale) {
         const layer = document.getElementById('abutment-layer');
         
-        // Get parametric dimensions from config
-        const bearingDist = (this.config.bearingDistanceFt * 12 + this.config.bearingDistanceIn) * scale;
-        const breastwallWidth = (this.config.breastwallFt * 12 + this.config.breastwallIn) * scale;
-        const backwallClearance = (this.config.backwallClearanceFt * 12 + this.config.backwallClearanceIn) * scale;
+        // Proportional dimensions based on normalized coords
+        // Left abutment extends from 0.124 to beam start at 0.373 (about 25% of total width)
+        const abutmentWidth = length * scale * 0.4; // Proportionally wider
+        const breastwallWidth = abutmentWidth * 0.5;
+        const seatWidth = abutmentWidth * 0.5;
         
         // Seat dimensions
-        const seatWidth = bearingDist; // Seat extends to bearing centerline
-        const seatHeight = 8 * scale; // 8" seat height
-        const abutmentTotalHeight = (depth + 40) * scale; // Total height extends below beam
-        const abutmentTopExtension = 10 * scale; // Extension above beam
+        const seatHeight = depth * scale * 0.3; // Proportionally taller seat
+        const abutmentTotalHeight = depth * scale * 3.5; // Extends well below beam
+        const abutmentTopExtension = depth * scale * 0.15; // Small extension above
         
-        // LEFT ABUTMENT - 6-faceted shape
+        // LEFT ABUTMENT - Complex shape based on normalized coords
         const leftPath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
         
         // Calculate left abutment points
-        const leftBackwallX = x - seatWidth - breastwallWidth;
-        const leftSeatX = x - seatWidth;
+        const leftBackwallX = x - abutmentWidth;
+        const leftBreastwallX = x - seatWidth;
         const leftBearingX = x; // Beam starts here
         
-        // Build the 6-faceted path for left abutment
+        // Build the complex path for left abutment (matching entity_9 proportions)
         let leftD = `M ${leftBackwallX} ${y - abutmentTopExtension} `; // Start at top of backwall
-        leftD += `L ${leftBackwallX} ${y + abutmentTotalHeight} `; // Down backwall
-        leftD += `L ${leftSeatX} ${y + abutmentTotalHeight} `; // Across bottom
-        leftD += `L ${leftSeatX} ${y + depth * scale} `; // Up to seat level
-        leftD += `L ${leftBearingX} ${y + depth * scale} `; // Across seat
-        leftD += `L ${leftBearingX} ${y + depth * scale - seatHeight} `; // Up seat face
-        leftD += `L ${leftSeatX} ${y + depth * scale - seatHeight} `; // Back to breastwall
-        leftD += `L ${leftSeatX} ${y - abutmentTopExtension} `; // Up breastwall
+        leftD += `L ${leftBreastwallX} ${y - abutmentTopExtension} `; // Across top to breastwall
+        leftD += `L ${leftBreastwallX} ${y + depth * scale * 0.8} `; // Down breastwall to seat level
+        leftD += `L ${leftBearingX} ${y + depth * scale * 0.8} `; // Across top of seat
+        leftD += `L ${leftBearingX} ${y + depth * scale * 1.2} `; // Down seat face
+        leftD += `L ${leftBackwallX} ${y + depth * scale * 1.2} `; // Across to backwall base
+        leftD += `L ${leftBackwallX} ${y - abutmentTopExtension} `; // Up backwall
         leftD += `Z`; // Close path
         
         leftPath.setAttribute('d', leftD);
@@ -986,23 +989,22 @@ class VisualBeamInspector {
         leftBackwallLine.setAttribute('stroke-width', '3');
         layer.appendChild(leftBackwallLine);
         
-        // RIGHT ABUTMENT - 6-faceted shape (mirrored)
+        // RIGHT ABUTMENT - Complex shape (mirrored)
         const rightPath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
         
         // Calculate right abutment points
         const rightBearingX = x + length * scale; // Beam ends here
-        const rightSeatX = x + length * scale + seatWidth;
-        const rightBackwallX = x + length * scale + seatWidth + breastwallWidth;
+        const rightBreastwallX = x + length * scale + seatWidth;
+        const rightBackwallX = x + length * scale + abutmentWidth;
         
-        // Build the 6-faceted path for right abutment
+        // Build the complex path for right abutment (mirrored)
         let rightD = `M ${rightBackwallX} ${y - abutmentTopExtension} `; // Start at top of backwall
-        rightD += `L ${rightBackwallX} ${y + abutmentTotalHeight} `; // Down backwall
-        rightD += `L ${rightSeatX} ${y + abutmentTotalHeight} `; // Across bottom
-        rightD += `L ${rightSeatX} ${y + depth * scale} `; // Up to seat level
-        rightD += `L ${rightBearingX} ${y + depth * scale} `; // Across seat
-        rightD += `L ${rightBearingX} ${y + depth * scale - seatHeight} `; // Up seat face
-        rightD += `L ${rightSeatX} ${y + depth * scale - seatHeight} `; // Forward to breastwall
-        rightD += `L ${rightSeatX} ${y - abutmentTopExtension} `; // Up breastwall
+        rightD += `L ${rightBreastwallX} ${y - abutmentTopExtension} `; // Across top to breastwall
+        rightD += `L ${rightBreastwallX} ${y + depth * scale * 0.8} `; // Down breastwall to seat level
+        rightD += `L ${rightBearingX} ${y + depth * scale * 0.8} `; // Across top of seat
+        rightD += `L ${rightBearingX} ${y + depth * scale * 1.2} `; // Down seat face
+        rightD += `L ${rightBackwallX} ${y + depth * scale * 1.2} `; // Across to backwall base
+        rightD += `L ${rightBackwallX} ${y - abutmentTopExtension} `; // Up backwall
         rightD += `Z`; // Close path
         
         rightPath.setAttribute('d', rightD);
@@ -1025,17 +1027,18 @@ class VisualBeamInspector {
     drawBearings(x, y, length, depth, scale) {
         const layer = document.getElementById('bearing-layer');
         
-        // Calculate bearing positions from config
-        const bearingCL = this.config.bearingClFt * 12 + this.config.bearingClIn;
-        const bearingOffset = (length - bearingCL) / 2;
-        const bearingWidth = 18 * scale;
-        const bearingHeight = 3 * scale; // Each rectangle is 3" tall
+        // Calculate bearing positions - more central based on normalized coords
+        // Bearings at about 0.422-0.571 (roughly 25% and 75% along beam)
+        const leftBearingPos = length * scale * 0.25;
+        const rightBearingPos = length * scale * 0.75;
+        const bearingWidth = length * scale * 0.15; // Proportionally wider
+        const bearingHeight = depth * scale * 0.08; // Each rectangle proportional to beam
         
         // Bearings sit just below the beam
         const bearingY = y + depth * scale;
         
         // LEFT BEARING - Two stacked rectangles
-        const leftBearingX = x + bearingOffset * scale - bearingWidth / 2;
+        const leftBearingX = x + leftBearingPos - bearingWidth / 2;
         
         // Top rectangle of left bearing
         const leftTop = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
@@ -1060,7 +1063,7 @@ class VisualBeamInspector {
         layer.appendChild(leftBottom);
         
         // RIGHT BEARING - Two stacked rectangles
-        const rightBearingX = x + (length - bearingOffset) * scale - bearingWidth / 2;
+        const rightBearingX = x + rightBearingPos - bearingWidth / 2;
         
         // Top rectangle of right bearing
         const rightTop = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
@@ -1088,9 +1091,9 @@ class VisualBeamInspector {
         if (this.state.showDimensions) {
             // Left bearing centerline
             const leftCL = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-            leftCL.setAttribute('x1', x + bearingOffset * scale);
+            leftCL.setAttribute('x1', x + leftBearingPos);
             leftCL.setAttribute('y1', y - 10 * scale);
-            leftCL.setAttribute('x2', x + bearingOffset * scale);
+            leftCL.setAttribute('x2', x + leftBearingPos);
             leftCL.setAttribute('y2', y + depth * scale + 10 * scale);
             leftCL.setAttribute('stroke', '#FF5722');
             leftCL.setAttribute('stroke-width', '1');
@@ -1100,9 +1103,9 @@ class VisualBeamInspector {
             
             // Right bearing centerline
             const rightCL = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-            rightCL.setAttribute('x1', x + (length - bearingOffset) * scale);
+            rightCL.setAttribute('x1', x + rightBearingPos);
             rightCL.setAttribute('y1', y - 10 * scale);
-            rightCL.setAttribute('x2', x + (length - bearingOffset) * scale);
+            rightCL.setAttribute('x2', x + rightBearingPos);
             rightCL.setAttribute('y2', y + depth * scale + 10 * scale);
             rightCL.setAttribute('stroke', '#FF5722');
             rightCL.setAttribute('stroke-width', '1');
