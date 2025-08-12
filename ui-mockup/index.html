@@ -116,6 +116,7 @@
             display: flex;
             align-items: center;
             gap: 0.5rem;
+            flex-wrap: wrap;
         }
 
         .card-badge {
@@ -134,7 +135,7 @@
             color: var(--bg-primary);
         }
 
-        .card-badge.beta {
+        .card-badge.mobile {
             background: var(--warning);
             color: var(--bg-primary);
         }
@@ -215,6 +216,24 @@
             color: var(--text-secondary);
         }
 
+        .highlight-box {
+            background: linear-gradient(135deg, rgba(33, 150, 243, 0.1), rgba(144, 238, 144, 0.1));
+            border: 2px solid var(--accent);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+
+        .highlight-box h3 {
+            color: var(--accent);
+            margin-bottom: 0.5rem;
+        }
+
+        .highlight-box p {
+            color: var(--text-primary);
+        }
+
         footer {
             margin-top: 4rem;
             padding-top: 2rem;
@@ -246,6 +265,20 @@
             0%, 100% { opacity: 1; }
             50% { opacity: 0.5; }
         }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .cards {
+                grid-template-columns: 1fr;
+            }
+        }
     </style>
 </head>
 <body>
@@ -264,53 +297,63 @@
             <p class="tagline">Rust-Based Structural Beam Inspection System</p>
             <div class="status-indicator">
                 <span class="status-dot"></span>
-                <span>Active Development</span>
+                <span>Active Development - Mobile Optimized</span>
             </div>
         </header>
 
+        <div class="highlight-box">
+            <h3>🎉 New Mobile-Optimized Interfaces Available!</h3>
+            <p>Experience our latest responsive designs with improved geometry accuracy and touch-friendly controls.</p>
+        </div>
+
         <section class="section">
-            <h2 class="section-title">🚀 Live Applications</h2>
+            <h2 class="section-title">🚀 Live Applications - Mobile Ready</h2>
             <div class="cards">
-                <a href="visualbeam-v2.html" class="card">
+                <a href="visualbeam-v3.html" class="card">
                     <div class="card-title">
-                        VisualBeam Inspector
+                        VisualBeam Inspector V3
                         <span class="card-badge new">Latest</span>
+                        <span class="card-badge mobile">Mobile</span>
                     </div>
                     <p class="card-description">
-                        Production-ready beam inspection interface with bridge geometry awareness
+                        Mobile-optimized inspection interface with three distinct modes
                     </p>
                     <ul class="card-features">
-                        <li>Interactive 1" grid marking system</li>
-                        <li>CS1-CS4 condition state tracking</li>
-                        <li>Pan, zoom, and selection tools</li>
-                        <li>Ordinates and dimensions</li>
-                        <li>Real-time coordinate display</li>
+                        <li>Edit mode with grid marking tools</li>
+                        <li>Annotate mode for dimensions and notes</li>
+                        <li>View/Export mode with pan and zoom</li>
+                        <li>Touch-optimized controls</li>
+                        <li>Responsive from desktop to phone</li>
+                        <li>Mode-specific toolbars</li>
                     </ul>
                     <div class="tech-stack">
-                        <span class="tech-badge">JavaScript</span>
+                        <span class="tech-badge">Mobile-First</span>
+                        <span class="tech-badge">Touch</span>
                         <span class="tech-badge">SVG</span>
-                        <span class="tech-badge">Canvas</span>
+                        <span class="tech-badge">Responsive</span>
                     </div>
                 </a>
 
-                <a href="setup.html" class="card">
+                <a href="setup-v2.html" class="card">
                     <div class="card-title">
-                        Beam Setup Configuration
-                        <span class="card-badge">Essential</span>
+                        Beam Setup V2
+                        <span class="card-badge new">Updated</span>
+                        <span class="card-badge mobile">Mobile</span>
                     </div>
                     <p class="card-description">
-                        Configure beam parameters, bridge geometry, and inspection settings
+                        Enhanced configuration with live previews and correct geometry
                     </p>
                     <ul class="card-features">
-                        <li>Beam profile selection</li>
-                        <li>Length and bearing configuration</li>
-                        <li>Abutment geometry settings</li>
-                        <li>Top flange visibility control</li>
-                        <li>Elevation direction setup</li>
+                        <li>Elevation preview with correct geometry</li>
+                        <li>Beam cross-section visualization</li>
+                        <li>Monolithic abutment structure</li>
+                        <li>Full-length beam web between flanges</li>
+                        <li>Mobile-friendly tabbed interface</li>
+                        <li>Touch-optimized forms</li>
                     </ul>
                     <div class="tech-stack">
-                        <span class="tech-badge">Forms</span>
-                        <span class="tech-badge">LocalStorage</span>
+                        <span class="tech-badge">Responsive</span>
+                        <span class="tech-badge">Live Preview</span>
                         <span class="tech-badge">Validation</span>
                     </div>
                 </a>
@@ -328,9 +371,9 @@
                     <strong>Bridge Geometry</strong>
                     <span>Structural relationships guide</span>
                 </a>
-                <a href="README.md" class="link-item" target="_blank">
-                    <strong>UI Documentation</strong>
-                    <span>Interface components guide</span>
+                <a href="geometry-config.js" class="link-item" target="_blank">
+                    <strong>Geometry Config</strong>
+                    <span>Bridge geometry calculations</span>
                 </a>
                 <a href="https://github.com/greasegum/rustbeam" class="link-item" target="_blank">
                     <strong>GitHub Repository</strong>
@@ -354,7 +397,7 @@
                         <li>Beam catalog with 150+ profiles</li>
                         <li>Grid-based coordinate system</li>
                         <li>Defect severity classification</li>
-                        <li>Comprehensive unit tests</li>
+                        <li>Mobile-optimized UI mockups</li>
                     </ul>
                 </div>
 
@@ -369,8 +412,8 @@
                     <ul class="card-features">
                         <li>Native GPU rendering</li>
                         <li>WASM bindings</li>
-                        <li>Platform abstraction</li>
-                        <li>UI primitives</li>
+                        <li>Touch gesture support</li>
+                        <li>Mobile performance optimization</li>
                     </ul>
                 </div>
 
@@ -386,7 +429,7 @@
                         <li>DXF parser/generator</li>
                         <li>Layer mapping system</li>
                         <li>XML exchange format</li>
-                        <li>Metadata preservation</li>
+                        <li>Cloud sync capabilities</li>
                     </ul>
                 </div>
             </div>
@@ -395,14 +438,19 @@
         <section class="section">
             <h2 class="section-title">🗂️ Archived Versions</h2>
             <div class="cards">
-                <a href="archive/index.html" class="card">
+                <a href="archive/visualbeam-v2.html" class="card">
                     <div class="card-title">
-                        Original UI Mockup
+                        VisualBeam V2
                         <span class="card-badge archived">Archived</span>
                     </div>
                     <p class="card-description">
-                        Initial beam inspection interface prototype
+                        Previous version with bridge geometry awareness
                     </p>
+                    <ul class="card-features">
+                        <li>Desktop-focused interface</li>
+                        <li>Single toolbar design</li>
+                        <li>Basic touch support</li>
+                    </ul>
                 </a>
 
                 <a href="archive/visualbeam.html" class="card">
@@ -413,7 +461,67 @@
                     <p class="card-description">
                         First iteration of the inspection interface
                     </p>
+                    <ul class="card-features">
+                        <li>Initial grid system</li>
+                        <li>Basic marking tools</li>
+                        <li>Desktop-only design</li>
+                    </ul>
                 </a>
+
+                <a href="archive/setup.html" class="card">
+                    <div class="card-title">
+                        Setup V1
+                        <span class="card-badge archived">Archived</span>
+                    </div>
+                    <p class="card-description">
+                        Original setup configuration page
+                    </p>
+                    <ul class="card-features">
+                        <li>Basic form layout</li>
+                        <li>No preview functionality</li>
+                        <li>Desktop-oriented</li>
+                    </ul>
+                </a>
+
+                <a href="archive/index.html" class="card">
+                    <div class="card-title">
+                        Original Mockup
+                        <span class="card-badge archived">Archived</span>
+                    </div>
+                    <p class="card-description">
+                        Initial concept and prototype
+                    </p>
+                </a>
+            </div>
+        </section>
+
+        <section class="section">
+            <h2 class="section-title">✨ Latest Features</h2>
+            <div class="links-grid">
+                <div class="link-item">
+                    <strong>Mobile Optimization</strong>
+                    <span>Touch controls and responsive layouts</span>
+                </div>
+                <div class="link-item">
+                    <strong>Three-Mode Interface</strong>
+                    <span>Edit, Annotate, and View/Export modes</span>
+                </div>
+                <div class="link-item">
+                    <strong>Correct Geometry</strong>
+                    <span>Accurate abutment and beam rendering</span>
+                </div>
+                <div class="link-item">
+                    <strong>Live Previews</strong>
+                    <span>Real-time elevation and section views</span>
+                </div>
+                <div class="link-item">
+                    <strong>Touch Gestures</strong>
+                    <span>Pinch-zoom and pan support</span>
+                </div>
+                <div class="link-item">
+                    <strong>Mode-Specific Tools</strong>
+                    <span>Contextual toolbars per mode</span>
+                </div>
             </div>
         </section>
 
@@ -433,6 +541,10 @@
                     <span>wgpu for native performance</span>
                 </div>
                 <div class="link-item">
+                    <strong>Mobile Support</strong>
+                    <span>Touch events and responsive design</span>
+                </div>
+                <div class="link-item">
                     <strong>Testing</strong>
                     <span>Built-in cargo test suite</span>
                 </div>
@@ -440,15 +552,14 @@
                     <strong>Documentation</strong>
                     <span>Rustdoc with examples</span>
                 </div>
-                <div class="link-item">
-                    <strong>Benchmarking</strong>
-                    <span>Criterion for performance</span>
-                </div>
             </div>
         </section>
 
         <footer>
             <p>VisualBeam &copy; 2024 | Built with Rust for Engineering Excellence</p>
+            <p style="margin-top: 0.5rem; font-size: 0.875rem;">
+                Mobile-optimized for field inspections | Desktop-powerful for office work
+            </p>
             <p style="margin-top: 0.5rem; font-size: 0.875rem;">
                 🤖 Generated with <a href="https://claude.ai/code" style="color: var(--accent); text-decoration: none;">Claude Code</a>
             </p>
