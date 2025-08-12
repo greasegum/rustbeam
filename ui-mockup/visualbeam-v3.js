@@ -41,6 +41,7 @@ class VisualBeamV3 {
             mode: 'edit',  // edit, annotate, view
             tool: 'mark',
             conditionState: 1,
+            brushRadius: 1,  // Brush radius in inches
             gridSize: 1,  // 1" grid
             zoom: 1,
             pan: { x: 0, y: 0 },
@@ -110,6 +111,11 @@ class VisualBeamV3 {
                     this.state.conditionState = parseInt(btn.dataset.cs);
                 }
             });
+        });
+
+        // Brush radius selector
+        document.getElementById('brush-radius')?.addEventListener('change', (e) => {
+            this.state.brushRadius = parseInt(e.target.value);
         });
 
         // View controls
@@ -260,7 +266,6 @@ class VisualBeamV3 {
     updateUI() {
         document.getElementById('project-name').textContent = this.config.projectName;
         document.getElementById('beam-id').textContent = this.config.beamId;
-        document.getElementById('grid-size').textContent = this.state.gridSize + '"';
     }
 
     updateStatusBar() {
@@ -1169,45 +1174,76 @@ class VisualBeamV3 {
 
     markSingleCell(e) {
         const coords = this.getCanvasCoordinates(e);
-        const gridX = Math.floor(coords.x / this.state.gridSize) * this.state.gridSize;
-        const gridY = Math.floor(coords.y / this.state.gridSize) * this.state.gridSize;
+        const centerX = coords.x;
+        const centerY = coords.y;
+        const radius = this.state.brushRadius;
+        const gridSize = this.state.gridSize;
         
-        const existing = this.state.defects.find(d => 
-            d.x === gridX && d.y === gridY
-        );
-        
-        if (existing) {
-            existing.conditionState = this.state.conditionState;
-        } else {
-            this.state.defects.push({
-                x: gridX,
-                y: gridY,
-                width: this.state.gridSize,
-                height: this.state.gridSize,
-                conditionState: this.state.conditionState
-            });
-            this.state.cellsMarked++;
-            document.getElementById('cells-marked').textContent = this.state.cellsMarked;
+        // Mark all cells within the brush radius
+        for (let dx = -radius + 1; dx <= radius - 1; dx++) {
+            for (let dy = -radius + 1; dy <= radius - 1; dy++) {
+                // Calculate distance from center to determine if cell is within circular radius
+                const distance = Math.sqrt(dx * dx + dy * dy);
+                if (distance <= radius) {
+                    const cellX = Math.floor((centerX + dx * gridSize) / gridSize) * gridSize;
+                    const cellY = Math.floor((centerY + dy * gridSize) / gridSize) * gridSize;
+                    
+                    // Check if cell is within beam bounds
+                    if (cellX >= 0 && cellY >= 0) {
+                        const existing = this.state.defects.find(d => 
+                            d.x === cellX && d.y === cellY
+                        );
+                        
+                        if (existing) {
+                            existing.conditionState = this.state.conditionState;
+                        } else {
+                            this.state.defects.push({
+                                x: cellX,
+                                y: cellY,
+                                width: gridSize,
+                                height: gridSize,
+                                conditionState: this.state.conditionState
+                            });
+                            this.state.cellsMarked++;
+                        }
+                    }
+                }
+            }
         }
         
+        document.getElementById('cells-marked').textContent = this.state.cellsMarked;
         this.render();
     }
 
     eraseCell(e) {
         const coords = this.getCanvasCoordinates(e);
-        const gridX = Math.floor(coords.x / this.state.gridSize) * this.state.gridSize;
-        const gridY = Math.floor(coords.y / this.state.gridSize) * this.state.gridSize;
+        const centerX = coords.x;
+        const centerY = coords.y;
+        const radius = this.state.brushRadius;
+        const gridSize = this.state.gridSize;
         
-        const index = this.state.defects.findIndex(d => 
-            d.x === gridX && d.y === gridY
-        );
-        
-        if (index !== -1) {
-            this.state.defects.splice(index, 1);
-            this.state.cellsMarked = Math.max(0, this.state.cellsMarked - 1);
-            document.getElementById('cells-marked').textContent = this.state.cellsMarked;
-            this.render();
+        // Erase all cells within the brush radius
+        for (let dx = -radius + 1; dx <= radius - 1; dx++) {
+            for (let dy = -radius + 1; dy <= radius - 1; dy++) {
+                const distance = Math.sqrt(dx * dx + dy * dy);
+                if (distance <= radius) {
+                    const cellX = Math.floor((centerX + dx * gridSize) / gridSize) * gridSize;
+                    const cellY = Math.floor((centerY + dy * gridSize) / gridSize) * gridSize;
+                    
+                    const index = this.state.defects.findIndex(d => 
+                        d.x === cellX && d.y === cellY
+                    );
+                    
+                    if (index !== -1) {
+                        this.state.defects.splice(index, 1);
+                        this.state.cellsMarked = Math.max(0, this.state.cellsMarked - 1);
+                    }
+                }
+            }
         }
+        
+        document.getElementById('cells-marked').textContent = this.state.cellsMarked;
+        this.render();
     }
 
     addPhotoMarker(e) {
