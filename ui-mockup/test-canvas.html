@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Canvas Test</title>
+</head>
+<body>
+    <h1>Testing Canvas</h1>
+    <script>
+        console.log("Loading visualbeam-v3.js...");
+    </script>
+    <script src="visualbeam-v3.js"></script>
+    <script>
+        console.log("Script loaded");
+        window.onerror = function(msg, url, lineNo, columnNo, error) {
+            console.error('Error: ', msg, 'Line:', lineNo, 'Column:', columnNo);
+            console.error('Stack:', error?.stack);
+            return false;
+        };
+    </script>
+</body>
+</html>
