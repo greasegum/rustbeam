@@ -50,6 +50,7 @@ class VisualBeamV3 {
             showAbutments: true,
             showDimensions: true,
             showGrid: true,
+            showPhotos: true,
             ordinateOrigin: 'left',  // 'left' or 'right' - reversible
             defects: [],
             selectedCells: new Set(),
@@ -149,6 +150,11 @@ class VisualBeamV3 {
 
         document.getElementById('show-abutments')?.addEventListener('change', (e) => {
             this.state.showAbutments = e.target.checked;
+            this.render();
+        });
+
+        document.getElementById('show-photos')?.addEventListener('change', (e) => {
+            this.state.showPhotos = e.target.checked;
             this.render();
         });
 
@@ -549,6 +555,21 @@ class VisualBeamV3 {
                         stroke: 'rgba(0,0,0,0.15)',
                         'stroke-width': 0.25,
                         'pointer-events': 'all'
+                    });
+                    
+                    // Add hover effects
+                    cell.addEventListener('mouseenter', (e) => {
+                        if (this.state.mode === 'edit' && (this.state.tool === 'mark' || this.state.tool === 'erase')) {
+                            e.target.setAttribute('stroke', '#2196F3');
+                            e.target.setAttribute('stroke-width', '1');
+                            e.target.setAttribute('fill', 'rgba(33, 150, 243, 0.1)');
+                        }
+                    });
+                    
+                    cell.addEventListener('mouseleave', (e) => {
+                        e.target.setAttribute('stroke', 'rgba(0,0,0,0.15)');
+                        e.target.setAttribute('stroke-width', '0.25');
+                        e.target.setAttribute('fill', 'none');
                     });
                     
                     gridGroup.appendChild(cell);
@@ -955,27 +976,69 @@ class VisualBeamV3 {
         if (!layer) return;
         
         this.state.annotations.forEach(annotation => {
-            if (annotation.type === 'photo') {
+            if (annotation.type === 'photo' && this.state.showPhotos) {
                 const g = this.createSVGElement('g', {
-                    class: 'photo-marker'
+                    class: 'photo-marker',
+                    style: 'cursor: pointer;'
                 });
                 
+                // Outer ring for visibility
+                const outerRing = this.createSVGElement('circle', {
+                    cx: x + annotation.x * scale,
+                    cy: y + annotation.y * scale,
+                    r: 18,
+                    fill: 'white',
+                    stroke: '#FF5722',
+                    'stroke-width': 3,
+                    opacity: 0.9
+                });
+                
+                // Inner circle
                 const circle = this.createSVGElement('circle', {
                     cx: x + annotation.x * scale,
                     cy: y + annotation.y * scale,
-                    r: 12,
+                    r: 14,
+                    fill: '#FF5722',
                     class: 'photo-marker-circle'
                 });
                 
-                const text = this.createSVGElement('text', {
+                // Camera icon
+                const icon = this.createSVGElement('text', {
                     x: x + annotation.x * scale,
-                    y: y + annotation.y * scale + 4,
-                    class: 'photo-marker-text',
-                    'text-anchor': 'middle'
+                    y: y + annotation.y * scale + 1,
+                    fill: 'white',
+                    'font-size': '16',
+                    'font-family': 'monospace',
+                    'text-anchor': 'middle',
+                    'dominant-baseline': 'middle'
+                });
+                icon.textContent = '📷';
+                
+                // Photo number
+                const numberBg = this.createSVGElement('circle', {
+                    cx: x + annotation.x * scale + 12,
+                    cy: y + annotation.y * scale - 12,
+                    r: 10,
+                    fill: '#333',
+                    stroke: 'white',
+                    'stroke-width': 2
+                });
+                
+                const text = this.createSVGElement('text', {
+                    x: x + annotation.x * scale + 12,
+                    y: y + annotation.y * scale - 12,
+                    fill: 'white',
+                    'font-size': '12',
+                    'font-weight': 'bold',
+                    'text-anchor': 'middle',
+                    'dominant-baseline': 'middle'
                 });
                 text.textContent = annotation.id;
                 
+                g.appendChild(outerRing);
                 g.appendChild(circle);
+                g.appendChild(icon);
+                g.appendChild(numberBg);
                 g.appendChild(text);
                 layer.appendChild(g);
             }
