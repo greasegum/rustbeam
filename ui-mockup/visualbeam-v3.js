@@ -45,7 +45,6 @@ class VisualBeamV3 {
             gridSize: 1,  // 1" grid
             zoom: 1,
             pan: { x: 0, y: 0 },
-            showZones: false,
             showBearings: true,
             showAbutments: true,
             showDimensions: true,
@@ -130,11 +129,6 @@ class VisualBeamV3 {
         // Toggle controls
         document.getElementById('show-dimensions')?.addEventListener('change', (e) => {
             this.state.showDimensions = e.target.checked;
-            this.render();
-        });
-
-        document.getElementById('show-zones')?.addEventListener('change', (e) => {
-            this.state.showZones = e.target.checked;
             this.render();
         });
 
@@ -307,10 +301,6 @@ class VisualBeamV3 {
         // Draw in correct order (matching sketch reference)
         this.drawAbutments(beamX, beamY, beamLength, beamDepth, scale);
         this.drawBearings(beamX, beamY, beamLength, beamDepth, scale);
-        
-        if (this.state.showZones) {
-            this.drawZones(beamX, beamY, beamLength, beamDepth, scale);
-        }
         
         if (this.state.showGrid) {
             this.drawGrid(beamX, beamY, beamLength, beamDepth, scale);
