@@ -933,48 +933,102 @@ class VisualBeamV3 {
         if (!layer) return;
         
         const ordinateY = y + beamDepth * scale + 60;
+        const barHeight = 10;  // Height of the scale bars
         
         // Create group for ordinates
         const ordinateGroup = this.createSVGElement('g', {
             class: 'ordinates'
         });
         
-        // Draw baseline
-        const baseline = this.createSVGElement('line', {
-            x1: x - 10,
-            y1: ordinateY,
-            x2: x + beamLength * scale + 10,
-            y2: ordinateY,
-            class: 'ordinate-line',
-            stroke: '#333',
+        // Draw engineer's scale with alternating black and white bars
+        // Draw bars for every foot (12 inches)
+        for (let i = 0; i < beamLength; i += 12) {
+            const xPos = x + i * scale;
+            const barWidth = Math.min(12, beamLength - i) * scale;
+            const footIndex = i / 12;
+            
+            // Alternate between black and white
+            const fillColor = footIndex % 2 === 0 ? '#000' : '#fff';
+            const strokeColor = '#000';
+            
+            // Draw the bar
+            const bar = this.createSVGElement('rect', {
+                x: xPos,
+                y: ordinateY - barHeight / 2,
+                width: barWidth,
+                height: barHeight,
+                fill: fillColor,
+                stroke: strokeColor,
+                'stroke-width': 1
+            });
+            ordinateGroup.appendChild(bar);
+            
+            // Add inch subdivisions for each foot (smaller marks)
+            if (barWidth === 12 * scale) {  // Only if it's a complete foot
+                for (let j = 1; j < 12; j++) {
+                    const inchX = xPos + j * scale;
+                    const tickHeight = j % 3 === 0 ? 6 : 3;  // Longer ticks at 3" intervals
+                    
+                    const inchTick = this.createSVGElement('line', {
+                        x1: inchX,
+                        y1: ordinateY - tickHeight,
+                        x2: inchX,
+                        y2: ordinateY + tickHeight,
+                        stroke: fillColor === '#000' ? '#fff' : '#000',
+                        'stroke-width': 0.5
+                    });
+                    ordinateGroup.appendChild(inchTick);
+                }
+            }
+        }
+        
+        // Draw top and bottom border lines
+        const topBorder = this.createSVGElement('line', {
+            x1: x,
+            y1: ordinateY - barHeight / 2,
+            x2: x + beamLength * scale,
+            y2: ordinateY - barHeight / 2,
+            stroke: '#000',
             'stroke-width': 1
         });
-        ordinateGroup.appendChild(baseline);
+        ordinateGroup.appendChild(topBorder);
+        
+        const bottomBorder = this.createSVGElement('line', {
+            x1: x,
+            y1: ordinateY + barHeight / 2,
+            x2: x + beamLength * scale,
+            y2: ordinateY + barHeight / 2,
+            stroke: '#000',
+            'stroke-width': 1
+        });
+        ordinateGroup.appendChild(bottomBorder);
         
         // Draw origin indicator arrow
         const originX = this.state.ordinateOrigin === 'left' ? x : x + beamLength * scale;
         const arrowDir = this.state.ordinateOrigin === 'left' ? 1 : -1;
         
         const arrow = this.createSVGElement('path', {
-            d: `M ${originX} ${ordinateY - 10} L ${originX + 15 * arrowDir} ${ordinateY} L ${originX} ${ordinateY + 10}`,
-            fill: '#333',
+            d: `M ${originX} ${ordinateY - 15} L ${originX + 15 * arrowDir} ${ordinateY - barHeight / 2 - 5} L ${originX} ${ordinateY}`,
+            fill: '#FF5722',
+            stroke: '#000',
+            'stroke-width': 0.5,
             class: 'ordinate-arrow'
         });
         ordinateGroup.appendChild(arrow);
         
-        // Draw ordinates every 12 inches (1 foot)
+        // Draw major tick marks and labels at foot intervals
         for (let i = 0; i <= beamLength; i += 12) {
             const distance = this.state.ordinateOrigin === 'left' ? i : beamLength - i;
             const xPos = x + i * scale;
             
-            // Tick mark
+            // Major tick mark
             const tick = this.createSVGElement('line', {
                 x1: xPos,
-                y1: ordinateY - 8,
+                y1: ordinateY - barHeight / 2 - 5,
                 x2: xPos,
-                y2: ordinateY + 8,
-                stroke: '#333',
-                'stroke-width': 1,
+                y2: ordinateY + barHeight / 2 + 5,
+                stroke: '#000',
+                'stroke-width': 1.5,
                 class: 'ordinate-tick'
             });
             ordinateGroup.appendChild(tick);
@@ -982,29 +1036,29 @@ class VisualBeamV3 {
             // Label
             const label = this.createSVGElement('text', {
                 x: xPos,
-                y: ordinateY + 20,
+                y: ordinateY + barHeight / 2 + 18,
                 class: 'ordinate-text',
                 'text-anchor': 'middle',
-                'font-size': '10px',
-                fill: '#333'
+                'font-size': '11px',
+                'font-weight': 'bold',
+                fill: '#000'
             });
             
-            // Format as feet and inches
+            // Format as feet
             const feet = Math.floor(distance / 12);
-            const inches = distance % 12;
-            label.textContent = inches === 0 ? `${feet}'` : `${feet}'-${inches}"`;
+            label.textContent = `${feet}'`;
             ordinateGroup.appendChild(label);
         }
         
-        // Add label for origin
+        // Add origin label
         const originLabel = this.createSVGElement('text', {
             x: originX + (this.state.ordinateOrigin === 'left' ? -20 : 20),
-            y: ordinateY,
+            y: ordinateY + barHeight / 2 + 18,
             class: 'ordinate-origin-label',
             'text-anchor': this.state.ordinateOrigin === 'left' ? 'end' : 'start',
-            'font-size': '11px',
+            'font-size': '12px',
             'font-weight': 'bold',
-            fill: '#333'
+            fill: '#FF5722'
         });
         originLabel.textContent = '0';
         ordinateGroup.appendChild(originLabel);
