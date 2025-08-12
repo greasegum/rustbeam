@@ -25,6 +25,8 @@ class VisualBeamV3 {
                 seatRight: 18,
                 backwallLeft: 2,
                 backwallRight: 2,
+                breastwallFt: 38,
+                breastwallIn: 0,
                 direction: 'south',
                 inspector: 'J. Smith'
             };
@@ -340,6 +342,7 @@ class VisualBeamV3 {
     }
 
     drawAbutments(x, y, beamLength, beamDepth, scale) {
+        if (!this.state.showAbutments) return;
         const layer = document.getElementById('abutment-layer');
         if (!layer) return;
         
