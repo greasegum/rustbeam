@@ -46,6 +46,7 @@ class VisualBeamV3 {
             pan: { x: 0, y: 0 },
             showZones: false,
             showBearings: true,
+            showAbutments: true,
             showDimensions: true,
             showGrid: true,
             ordinateOrigin: 'left',  // 'left' or 'right' - reversible
@@ -104,7 +105,11 @@ class VisualBeamV3 {
             btn.addEventListener('click', (e) => {
                 document.querySelectorAll('.cs-btn').forEach(b => b.classList.remove('active'));
                 btn.classList.add('active');
-                this.state.conditionState = parseInt(btn.dataset.cs);
+                if (btn.dataset.cs === 'holes') {
+                    this.state.conditionState = 'holes';
+                } else {
+                    this.state.conditionState = parseInt(btn.dataset.cs);
+                }
             });
         });
 
@@ -129,6 +134,16 @@ class VisualBeamV3 {
 
         document.getElementById('show-grid')?.addEventListener('change', (e) => {
             this.state.showGrid = e.target.checked;
+            this.render();
+        });
+
+        document.getElementById('show-bearings')?.addEventListener('change', (e) => {
+            this.state.showBearings = e.target.checked;
+            this.render();
+        });
+
+        document.getElementById('show-abutments')?.addEventListener('change', (e) => {
+            this.state.showAbutments = e.target.checked;
             this.render();
         });
 
@@ -626,12 +641,13 @@ class VisualBeamV3 {
         if (!layer) return;
         
         this.state.defects.forEach(defect => {
+            const csClass = defect.conditionState === 'holes' ? 'defect-cs-holes' : `defect-cs-${defect.conditionState}`;
             const rect = this.createSVGElement('rect', {
                 x: x + defect.x * scale,
                 y: y + defect.y * scale,
                 width: defect.width * scale,
                 height: defect.height * scale,
-                class: `defect-cs-${defect.conditionState}`,
+                class: csClass,
                 opacity: 0.7
             });
             layer.appendChild(rect);

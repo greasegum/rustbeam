@@ -8,6 +8,7 @@
     --cs-2: #FFD700;
     --cs-3: #FFA500;
     --cs-4: #FF4444;
+    --cs-holes: #FFFFFF;
     --bg-dark: #1a1a1a;
     --bg-medium: #242424;
     --bg-light: #2d2d2d;
@@ -237,6 +238,12 @@ body {
 .cs-btn.cs-4 {
     background: var(--cs-4);
     color: #fff;
+}
+
+.cs-btn.cs-holes {
+    background: #666;
+    color: #fff;
+    border: 1px solid #888;
 }
 
 .cs-btn.active {
@@ -528,6 +535,11 @@ body {
 .defect-cs-2 { fill: var(--cs-2); }
 .defect-cs-3 { fill: var(--cs-3); }
 .defect-cs-4 { fill: var(--cs-4); }
+.defect-cs-holes { 
+    fill: var(--cs-holes);
+    stroke: #333;
+    stroke-width: 1;
+}
 
 .dimension-line {
     stroke: #333;
