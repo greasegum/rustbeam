@@ -135,6 +135,11 @@
             color: var(--bg-primary);
         }
 
+        .card-badge.professional {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
         .card-badge.mobile {
             background: var(--warning);
             color: var(--bg-primary);
@@ -217,8 +222,9 @@
         }
 
         .highlight-box {
-            background: linear-gradient(135deg, rgba(33, 150, 243, 0.1), rgba(144, 238, 144, 0.1));
-            border: 2px solid var(--accent);
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1));
+            border: 2px solid;
+            border-image: linear-gradient(135deg, #667eea, #764ba2) 1;
             border-radius: 8px;
             padding: 1.5rem;
             margin-bottom: 2rem;
@@ -226,7 +232,9 @@
         }
 
         .highlight-box h3 {
-            color: var(--accent);
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
             margin-bottom: 0.5rem;
         }
 
@@ -294,42 +302,42 @@
                 </svg>
                 <h1>VisualBeam</h1>
             </div>
-            <p class="tagline">Rust-Based Structural Beam Inspection System</p>
+            <p class="tagline">Professional Structural Beam Inspection System</p>
             <div class="status-indicator">
                 <span class="status-dot"></span>
-                <span>Active Development - Mobile Optimized</span>
+                <span>Active Development</span>
             </div>
         </header>
 
         <div class="highlight-box">
-            <h3>🎉 New Mobile-Optimized Interfaces Available!</h3>
-            <p>Experience our latest responsive designs with improved geometry accuracy and touch-friendly controls.</p>
+            <h3>🎉 VisualBeam V4 Professional Edition Released!</h3>
+            <p>Complete inspection toolkit with advanced annotation, intelligent editing, and CAD-ready export capabilities.</p>
         </div>
 
         <section class="section">
-            <h2 class="section-title">🚀 Live Applications - Professional Edition</h2>
+            <h2 class="section-title">🚀 Current Versions</h2>
             <div class="cards">
                 <a href="visualbeam-v4.html" class="card">
                     <div class="card-title">
                         VisualBeam Inspector V4
-                        <span class="card-badge new">Professional</span>
+                        <span class="card-badge professional">Professional</span>
                     </div>
                     <p class="card-description">
-                        Advanced professional beam inspection interface with comprehensive annotation tools
+                        Professional-grade beam inspection interface with comprehensive annotation and editing tools
                     </p>
                     <ul class="card-features">
-                        <li>Transparent grid overlay</li>
-                        <li>Advanced dimension tools</li>
-                        <li>Callouts and centerlines</li>
-                        <li>Paintbrush-style editing</li>
-                        <li>Beam transformation palette</li>
-                        <li>Annotation table view</li>
+                        <li>Advanced dimension and annotation tools</li>
+                        <li>Intelligent region selection</li>
+                        <li>Paintbrush-style defect marking</li>
                         <li>Engineer's scale ordinates</li>
-                        <li>Bottom control bar</li>
+                        <li>Beam transformation palette</li>
+                        <li>Bottom control bar interface</li>
+                        <li>Professional dark theme</li>
+                        <li>CAD-ready export formats</li>
                     </ul>
                     <div class="tech-stack">
                         <span class="tech-badge">Professional</span>
-                        <span class="tech-badge">Advanced</span>
+                        <span class="tech-badge">Advanced Tools</span>
                         <span class="tech-badge">CAD-Ready</span>
                     </div>
                 </a>
@@ -337,24 +345,22 @@
                 <a href="visualbeam-v3.html" class="card">
                     <div class="card-title">
                         VisualBeam Inspector V3
-                        <span class="card-badge new">Latest</span>
                         <span class="card-badge mobile">Mobile</span>
                     </div>
                     <p class="card-description">
-                        Mobile-optimized inspection interface with three distinct modes
+                        Mobile-optimized inspection interface with three distinct operational modes
                     </p>
                     <ul class="card-features">
-                        <li>Edit mode with grid marking tools</li>
-                        <li>Annotate mode for dimensions and notes</li>
-                        <li>View/Export mode with pan and zoom</li>
+                        <li>Edit mode with grid marking</li>
+                        <li>Annotate mode for dimensions</li>
+                        <li>View mode with pan and zoom</li>
                         <li>Touch-optimized controls</li>
-                        <li>Responsive from desktop to phone</li>
+                        <li>Responsive design</li>
                         <li>Mode-specific toolbars</li>
                     </ul>
                     <div class="tech-stack">
                         <span class="tech-badge">Mobile-First</span>
                         <span class="tech-badge">Touch</span>
-                        <span class="tech-badge">SVG</span>
                         <span class="tech-badge">Responsive</span>
                     </div>
                 </a>
@@ -362,22 +368,20 @@
                 <a href="setup-v2.html" class="card">
                     <div class="card-title">
                         Beam Setup V2
-                        <span class="card-badge new">Updated</span>
-                        <span class="card-badge mobile">Mobile</span>
+                        <span class="card-badge">Configuration</span>
                     </div>
                     <p class="card-description">
-                        Enhanced configuration with live previews and correct geometry
+                        Enhanced configuration interface with live geometry preview
                     </p>
                     <ul class="card-features">
-                        <li>Elevation preview with correct geometry</li>
-                        <li>Beam cross-section visualization</li>
-                        <li>Monolithic abutment structure</li>
-                        <li>Full-length beam web between flanges</li>
-                        <li>Mobile-friendly tabbed interface</li>
-                        <li>Touch-optimized forms</li>
+                        <li>Live elevation preview</li>
+                        <li>Cross-section visualization</li>
+                        <li>Accurate beam geometry</li>
+                        <li>Abutment configuration</li>
+                        <li>Mobile-friendly forms</li>
+                        <li>Validation feedback</li>
                     </ul>
                     <div class="tech-stack">
-                        <span class="tech-badge">Responsive</span>
                         <span class="tech-badge">Live Preview</span>
                         <span class="tech-badge">Validation</span>
                     </div>
@@ -408,185 +412,60 @@
         </section>
 
         <section class="section">
-            <h2 class="section-title">🏗️ Development Phases</h2>
-            <div class="cards">
-                <div class="card">
-                    <div class="card-title">
-                        Phase 1: Core Foundation
-                        <span class="card-badge new">In Progress</span>
-                    </div>
-                    <p class="card-description">
-                        Implementing beam profiles, geometry calculations, and defect classification in Rust
-                    </p>
-                    <ul class="card-features">
-                        <li>Beam catalog with 150+ profiles</li>
-                        <li>Grid-based coordinate system</li>
-                        <li>Defect severity classification</li>
-                        <li>Mobile-optimized UI mockups</li>
-                    </ul>
-                </div>
-
-                <div class="card">
-                    <div class="card-title">
-                        Phase 2: Rendering
-                        <span class="card-badge">Upcoming</span>
-                    </div>
-                    <p class="card-description">
-                        GPU-accelerated rendering with wgpu and Canvas 2D fallback
-                    </p>
-                    <ul class="card-features">
-                        <li>Native GPU rendering</li>
-                        <li>WASM bindings</li>
-                        <li>Touch gesture support</li>
-                        <li>Mobile performance optimization</li>
-                    </ul>
-                </div>
-
-                <div class="card">
-                    <div class="card-title">
-                        Phase 3: CAD Integration
-                        <span class="card-badge">Planned</span>
-                    </div>
-                    <p class="card-description">
-                        AutoCAD DXF/DWG export with proper layer structure
-                    </p>
-                    <ul class="card-features">
-                        <li>DXF parser/generator</li>
-                        <li>Layer mapping system</li>
-                        <li>XML exchange format</li>
-                        <li>Cloud sync capabilities</li>
-                    </ul>
-                </div>
-            </div>
-        </section>
-
-        <section class="section">
-            <h2 class="section-title">🗂️ Archived Versions</h2>
-            <div class="cards">
-                <a href="archive/visualbeam-v2.html" class="card">
-                    <div class="card-title">
-                        VisualBeam V2
-                        <span class="card-badge archived">Archived</span>
-                    </div>
-                    <p class="card-description">
-                        Previous version with bridge geometry awareness
-                    </p>
-                    <ul class="card-features">
-                        <li>Desktop-focused interface</li>
-                        <li>Single toolbar design</li>
-                        <li>Basic touch support</li>
-                    </ul>
-                </a>
-
-                <a href="archive/visualbeam.html" class="card">
-                    <div class="card-title">
-                        VisualBeam V1
-                        <span class="card-badge archived">Archived</span>
-                    </div>
-                    <p class="card-description">
-                        First iteration of the inspection interface
-                    </p>
-                    <ul class="card-features">
-                        <li>Initial grid system</li>
-                        <li>Basic marking tools</li>
-                        <li>Desktop-only design</li>
-                    </ul>
-                </a>
-
-                <a href="archive/setup.html" class="card">
-                    <div class="card-title">
-                        Setup V1
-                        <span class="card-badge archived">Archived</span>
-                    </div>
-                    <p class="card-description">
-                        Original setup configuration page
-                    </p>
-                    <ul class="card-features">
-                        <li>Basic form layout</li>
-                        <li>No preview functionality</li>
-                        <li>Desktop-oriented</li>
-                    </ul>
-                </a>
-
-                <a href="archive/index.html" class="card">
-                    <div class="card-title">
-                        Original Mockup
-                        <span class="card-badge archived">Archived</span>
-                    </div>
-                    <p class="card-description">
-                        Initial concept and prototype
-                    </p>
-                </a>
-            </div>
-        </section>
-
-        <section class="section">
-            <h2 class="section-title">✨ Latest Features</h2>
+            <h2 class="section-title">✨ Key Features</h2>
             <div class="links-grid">
                 <div class="link-item">
-                    <strong>Mobile Optimization</strong>
-                    <span>Touch controls and responsive layouts</span>
+                    <strong>Professional Tools</strong>
+                    <span>Advanced annotation and editing</span>
                 </div>
                 <div class="link-item">
-                    <strong>Three-Mode Interface</strong>
-                    <span>Edit, Annotate, and View/Export modes</span>
+                    <strong>Intelligent Selection</strong>
+                    <span>Flood-fill region detection</span>
                 </div>
                 <div class="link-item">
-                    <strong>Correct Geometry</strong>
-                    <span>Accurate abutment and beam rendering</span>
+                    <strong>CAD Integration</strong>
+                    <span>DXF/DWG export ready</span>
+                </div>
+                <div class="link-item">
+                    <strong>Mobile Optimized</strong>
+                    <span>Touch controls and responsive</span>
                 </div>
                 <div class="link-item">
                     <strong>Live Previews</strong>
-                    <span>Real-time elevation and section views</span>
+                    <span>Real-time geometry visualization</span>
                 </div>
                 <div class="link-item">
-                    <strong>Touch Gestures</strong>
-                    <span>Pinch-zoom and pan support</span>
-                </div>
-                <div class="link-item">
-                    <strong>Mode-Specific Tools</strong>
-                    <span>Contextual toolbars per mode</span>
+                    <strong>Dark Theme</strong>
+                    <span>Professional UI design</span>
                 </div>
             </div>
         </section>
 
         <section class="section">
-            <h2 class="section-title">🛠️ Technical Stack</h2>
-            <div class="links-grid">
-                <div class="link-item">
-                    <strong>Core Language</strong>
-                    <span>Rust with cargo workspace</span>
-                </div>
-                <div class="link-item">
-                    <strong>Web Assembly</strong>
-                    <span>wasm-bindgen for browser</span>
-                </div>
-                <div class="link-item">
-                    <strong>GPU Rendering</strong>
-                    <span>wgpu for native performance</span>
-                </div>
-                <div class="link-item">
-                    <strong>Mobile Support</strong>
-                    <span>Touch events and responsive design</span>
-                </div>
-                <div class="link-item">
-                    <strong>Testing</strong>
-                    <span>Built-in cargo test suite</span>
-                </div>
-                <div class="link-item">
-                    <strong>Documentation</strong>
-                    <span>Rustdoc with examples</span>
-                </div>
+            <h2 class="section-title">🗂️ Previous Versions</h2>
+            <div class="cards">
+                <a href="archive/" class="card">
+                    <div class="card-title">
+                        Archive
+                        <span class="card-badge archived">Archived</span>
+                    </div>
+                    <p class="card-description">
+                        Historical versions and initial prototypes
+                    </p>
+                    <ul class="card-features">
+                        <li>VisualBeam V1 & V2</li>
+                        <li>Original setup interface</li>
+                        <li>Initial prototypes</li>
+                        <li>Development iterations</li>
+                    </ul>
+                </a>
             </div>
         </section>
 
         <footer>
-            <p>VisualBeam &copy; 2024 | Built with Rust for Engineering Excellence</p>
+            <p>VisualBeam &copy; 2024 | Professional Structural Inspection System</p>
             <p style="margin-top: 0.5rem; font-size: 0.875rem;">
-                Mobile-optimized for field inspections | Desktop-powerful for office work
-            </p>
-            <p style="margin-top: 0.5rem; font-size: 0.875rem;">
-                🤖 Generated with <a href="https://claude.ai/code" style="color: var(--accent); text-decoration: none;">Claude Code</a>
+                Engineered for field inspections and office documentation
             </p>
         </footer>
     </div>
