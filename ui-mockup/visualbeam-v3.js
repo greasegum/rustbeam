@@ -48,6 +48,7 @@ class VisualBeamV3 {
             showBearings: true,
             showDimensions: true,
             showGrid: true,
+            ordinateOrigin: 'left',  // 'left' or 'right' - reversible
             defects: [],
             selectedCells: new Set(),
             annotations: [],
@@ -299,6 +300,7 @@ class VisualBeamV3 {
         
         if (this.state.showDimensions) {
             this.drawDimensions(beamX, beamY, beamLength, beamDepth, scale);
+            this.drawOrdinates(beamX, beamY, beamLength, beamDepth, scale);
         }
         
         this.drawAnnotations(beamX, beamY, scale);
@@ -479,8 +481,65 @@ class VisualBeamV3 {
         const gridSpacing = this.state.gridSize * scale;  // 1" grid
         const profile = this.config.profileData;
         
-        // Vertical lines at 1" intervals
-        for (let i = 0; i <= beamLength / this.state.gridSize; i++) {
+        // Create a clipping path for the beam area only
+        const clipPath = this.createSVGElement('clipPath', {
+            id: 'beam-clip'
+        });
+        
+        // Define beam outline for clipping
+        const beamPath = this.createSVGElement('rect', {
+            x: x,
+            y: y,
+            width: beamLength * scale,
+            height: beamDepth * scale
+        });
+        clipPath.appendChild(beamPath);
+        
+        // Add clipPath to defs
+        let defs = this.svg.querySelector('defs');
+        if (!defs) {
+            defs = this.createSVGElement('defs', {});
+            this.svg.insertBefore(defs, this.svg.firstChild);
+        }
+        const existingClip = defs.querySelector('#beam-clip');
+        if (existingClip) {
+            defs.removeChild(existingClip);
+        }
+        defs.appendChild(clipPath);
+        
+        // Create grid group with clipping
+        const gridGroup = this.createSVGElement('g', {
+            'clip-path': 'url(#beam-clip)'
+        });
+        
+        // Draw grid cells as interactive rectangles
+        for (let i = 0; i < beamLength / this.state.gridSize; i++) {
+            for (let j = 0; j < beamDepth / this.state.gridSize; j++) {
+                const cellX = x + i * gridSpacing;
+                const cellY = y + j * gridSpacing;
+                
+                // Create interactive grid cell
+                const cell = this.createSVGElement('rect', {
+                    x: cellX,
+                    y: cellY,
+                    width: gridSpacing,
+                    height: gridSpacing,
+                    class: 'grid-cell',
+                    'data-grid-x': i,
+                    'data-grid-y': j,
+                    fill: 'none',
+                    stroke: (i % 12 === 0 || j % 12 === 0) ? 'rgba(0,0,0,0.2)' : 'rgba(0,0,0,0.1)',
+                    'stroke-width': 0.5,
+                    'pointer-events': 'all'
+                });
+                
+                gridGroup.appendChild(cell);
+            }
+        }
+        
+        // Add major grid lines for visibility
+        // Vertical lines at 12" intervals
+        for (let i = 0; i <= beamLength / this.state.gridSize; i += 12) {
             const xPos = x + i * gridSpacing;
             if (xPos <= x + beamLength * scale) {
                 const line = this.createSVGElement('line', {
@@ -488,14 +547,15 @@ class VisualBeamV3 {
                     y1: y,
                     x2: xPos,
                     y2: y + beamDepth * scale,
-                    class: i % 12 === 0 ? 'grid-line-major' : 'grid-line'
+                    class: 'grid-line-major',
+                    'pointer-events': 'none'
                 });
-                layer.appendChild(line);
+                gridGroup.appendChild(line);
             }
         }
         
-        // Horizontal lines at 1" intervals
-        for (let i = 0; i <= beamDepth / this.state.gridSize; i++) {
+        // Horizontal lines at 12" intervals
+        for (let i = 0; i <= beamDepth / this.state.gridSize; i += 12) {
             const yPos = y + i * gridSpacing;
             if (yPos <= y + beamDepth * scale) {
                 const line = this.createSVGElement('line', {
@@ -503,11 +563,14 @@ class VisualBeamV3 {
                     y1: yPos,
                     x2: x + beamLength * scale,
                     y2: yPos,
-                    class: i % 12 === 0 ? 'grid-line-major' : 'grid-line'
+                    class: 'grid-line-major',
+                    'pointer-events': 'none'
                 });
-                layer.appendChild(line);
+                gridGroup.appendChild(line);
             }
         }
+        
+        layer.appendChild(gridGroup);
     }
 
     drawBeam(x, y, beamLength, beamDepth, scale) {
@@ -644,6 +707,110 @@ class VisualBeamV3 {
         layer.appendChild(textEl);
     }
 
+    drawOrdinates(x, y, beamLength, beamDepth, scale) {
+        const layer = document.getElementById('dimension-layer');
+        if (!layer) return;
+        
+        const ordinateY = y + beamDepth * scale + 60;
+        
+        // Create group for ordinates
+        const ordinateGroup = this.createSVGElement('g', {
+            class: 'ordinates',
+            style: 'cursor: pointer'
+        });
+        
+        // Add click handler to reverse origin
+        ordinateGroup.addEventListener('click', () => {
+            this.state.ordinateOrigin = this.state.ordinateOrigin === 'left' ? 'right' : 'left';
+            this.render();
+        });
+        
+        // Draw baseline
+        const baseline = this.createSVGElement('line', {
+            x1: x - 10,
+            y1: ordinateY,
+            x2: x + beamLength * scale + 10,
+            y2: ordinateY,
+            class: 'ordinate-line',
+            stroke: '#333',
+            'stroke-width': 1
+        });
+        ordinateGroup.appendChild(baseline);
+        
+        // Draw origin indicator arrow
+        const originX = this.state.ordinateOrigin === 'left' ? x : x + beamLength * scale;
+        const arrowDir = this.state.ordinateOrigin === 'left' ? 1 : -1;
+        
+        const arrow = this.createSVGElement('path', {
+            d: `M ${originX} ${ordinateY - 10} L ${originX + 15 * arrowDir} ${ordinateY} L ${originX} ${ordinateY + 10}`,
+            fill: '#333',
+            class: 'ordinate-arrow'
+        });
+        ordinateGroup.appendChild(arrow);
+        
+        // Draw ordinates every 12 inches (1 foot)
+        for (let i = 0; i <= beamLength; i += 12) {
+            const distance = this.state.ordinateOrigin === 'left' ? i : beamLength - i;
+            const xPos = x + i * scale;
+            
+            // Tick mark
+            const tick = this.createSVGElement('line', {
+                x1: xPos,
+                y1: ordinateY - 8,
+                x2: xPos,
+                y2: ordinateY + 8,
+                stroke: '#333',
+                'stroke-width': 1,
+                class: 'ordinate-tick'
+            });
+            ordinateGroup.appendChild(tick);
+            
+            // Label
+            const label = this.createSVGElement('text', {
+                x: xPos,
+                y: ordinateY + 20,
+                class: 'ordinate-text',
+                'text-anchor': 'middle',
+                'font-size': '10px',
+                fill: '#333'
+            });
+            
+            // Format as feet and inches
+            const feet = Math.floor(distance / 12);
+            const inches = distance % 12;
+            label.textContent = inches === 0 ? `${feet}'` : `${feet}'-${inches}"`;
+            ordinateGroup.appendChild(label);
+        }
+        
+        // Add label for origin
+        const originLabel = this.createSVGElement('text', {
+            x: originX + (this.state.ordinateOrigin === 'left' ? -20 : 20),
+            y: ordinateY,
+            class: 'ordinate-origin-label',
+            'text-anchor': this.state.ordinateOrigin === 'left' ? 'end' : 'start',
+            'font-size': '11px',
+            'font-weight': 'bold',
+            fill: '#333'
+        });
+        originLabel.textContent = '0';
+        ordinateGroup.appendChild(originLabel);
+        
+        // Add instruction text
+        const instruction = this.createSVGElement('text', {
+            x: x + beamLength * scale / 2,
+            y: ordinateY + 35,
+            class: 'ordinate-instruction',
+            'text-anchor': 'middle',
+            'font-size': '9px',
+            fill: '#666',
+            style: 'font-style: italic'
+        });
+        instruction.textContent = '(Click to reverse origin)';
+        ordinateGroup.appendChild(instruction);
+        
+        layer.appendChild(ordinateGroup);
+    }
+
     drawAnnotations(x, y, scale) {
         const layer = document.getElementById('annotation-layer');
         if (!layer) return;
@@ -732,10 +899,24 @@ class VisualBeamV3 {
     handleWheel(e) {
         e.preventDefault();
         
-        const zoomFactor = e.deltaY > 0 ? 0.9 : 1.1;
-        this.state.zoom *= zoomFactor;
-        this.state.zoom = Math.max(0.25, Math.min(4, this.state.zoom));
-        this.render();
+        if (this.state.tool === 'pan') {
+            // In pan mode, scrollwheel pans
+            const delta = 30;
+            if (e.shiftKey) {
+                // Shift+scroll for horizontal pan
+                this.state.pan.x += e.deltaY > 0 ? -delta : delta;
+            } else {
+                // Normal scroll for vertical pan
+                this.state.pan.y += e.deltaY > 0 ? -delta : delta;
+            }
+            this.render();
+        } else if (this.state.tool === 'zoom' || this.state.mode === 'view') {
+            // In zoom mode or view mode, scrollwheel zooms
+            const zoomFactor = e.deltaY > 0 ? 0.9 : 1.1;
+            this.state.zoom *= zoomFactor;
+            this.state.zoom = Math.max(0.25, Math.min(4, this.state.zoom));
+            this.render();
+        }
     }
 
     handleTouchStart(e) {
