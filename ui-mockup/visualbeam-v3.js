@@ -163,6 +163,12 @@ class VisualBeamV3 {
             this.render();
         });
 
+        // Ordinate origin selector
+        document.getElementById('ordinate-origin')?.addEventListener('change', (e) => {
+            this.state.ordinateOrigin = e.target.value;
+            this.render();
+        });
+
         // Canvas events
         this.svg.addEventListener('mousedown', (e) => this.handleMouseDown(e));
         this.svg.addEventListener('mousemove', (e) => this.handleMouseMove(e));
@@ -875,14 +881,7 @@ class VisualBeamV3 {
         
         // Create group for ordinates
         const ordinateGroup = this.createSVGElement('g', {
-            class: 'ordinates',
-            style: 'cursor: pointer'
-        });
-        
-        // Add click handler to reverse origin
-        ordinateGroup.addEventListener('click', () => {
-            this.state.ordinateOrigin = this.state.ordinateOrigin === 'left' ? 'right' : 'left';
-            this.render();
+            class: 'ordinates'
         });
         
         // Draw baseline
@@ -1102,15 +1101,10 @@ class VisualBeamV3 {
         e.preventDefault();
         
         if (this.state.tool === 'pan') {
-            // In pan mode, scrollwheel pans
+            // In pan mode, scrollwheel pans left-right
             const delta = 30;
-            if (e.shiftKey) {
-                // Shift+scroll for horizontal pan
-                this.state.pan.x += e.deltaY > 0 ? -delta : delta;
-            } else {
-                // Normal scroll for vertical pan
-                this.state.pan.y += e.deltaY > 0 ? -delta : delta;
-            }
+            // Scrollwheel always pans horizontally in pan mode
+            this.state.pan.x += e.deltaY > 0 ? -delta : delta;
             this.render();
         } else if (this.state.tool === 'zoom' || this.state.mode === 'view') {
             // In zoom mode or view mode, scrollwheel zooms
