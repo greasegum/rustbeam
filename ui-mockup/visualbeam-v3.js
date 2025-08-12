@@ -659,6 +659,7 @@ class VisualBeamV3 {
         if (!layer) return;
         
         const bearingCL = this.config.bearingClFt * 12 + this.config.bearingClIn;
+        const profile = this.config.profileData;
         
         // Beam length dimension
         this.drawHorizontalDimension(layer, x, x + beamLength * scale, y - 40, 
@@ -680,6 +681,118 @@ class VisualBeamV3 {
             x + (beamLength - breastwallOffset) * scale,
             y + beamDepth * scale + 40,
             `BREASTWALL DISTANCE: ${this.config.breastwallFt}'-${this.config.breastwallIn}"`);
+        
+        // Vertical dimensions at ordinate origin (0 end)
+        const dimX = this.state.ordinateOrigin === 'left' ? x - 30 : x + beamLength * scale + 30;
+        
+        // Top flange dimension
+        this.drawVerticalDimension(layer, dimX, y, y + profile.flangeThickness * scale, 
+            this.formatDimension(profile.flangeThickness));
+        
+        // Web height dimension
+        const webTop = y + profile.flangeThickness * scale;
+        const webBottom = y + (beamDepth - profile.flangeThickness) * scale;
+        this.drawVerticalDimension(layer, dimX - 20, webTop, webBottom,
+            this.formatDimension(beamDepth - 2 * profile.flangeThickness));
+        
+        // Bottom flange dimension
+        this.drawVerticalDimension(layer, dimX, webBottom, y + beamDepth * scale,
+            this.formatDimension(profile.flangeThickness));
+        
+        // Total depth dimension
+        this.drawVerticalDimension(layer, dimX - 40, y, y + beamDepth * scale,
+            this.formatDimension(beamDepth));
+    }
+
+    formatDimension(inches) {
+        // Convert decimal inches to feet-inches format
+        if (inches >= 12) {
+            const feet = Math.floor(inches / 12);
+            const remainingInches = inches % 12;
+            if (remainingInches === 0) {
+                return `${feet}'-0"`;
+            } else if (remainingInches % 1 === 0) {
+                return `${feet}'-${remainingInches}"`;
+            } else {
+                // Handle fractions
+                const whole = Math.floor(remainingInches);
+                const fraction = remainingInches - whole;
+                let fractionStr = '';
+                if (Math.abs(fraction - 0.5) < 0.01) fractionStr = '1/2';
+                else if (Math.abs(fraction - 0.25) < 0.01) fractionStr = '1/4';
+                else if (Math.abs(fraction - 0.75) < 0.01) fractionStr = '3/4';
+                
+                if (whole === 0 && fractionStr) {
+                    return `${feet}'-${fractionStr}"`;
+                } else if (fractionStr) {
+                    return `${feet}'-${whole}-${fractionStr}"`;
+                } else {
+                    return `${feet}'-${remainingInches.toFixed(1)}"`;
+                }
+            }
+        } else {
+            // Less than 12 inches
+            if (inches % 1 === 0) {
+                return `${inches}"`;
+            } else {
+                const whole = Math.floor(inches);
+                const fraction = inches - whole;
+                let fractionStr = '';
+                if (Math.abs(fraction - 0.5) < 0.01) fractionStr = '1/2';
+                else if (Math.abs(fraction - 0.25) < 0.01) fractionStr = '1/4';
+                else if (Math.abs(fraction - 0.75) < 0.01) fractionStr = '3/4';
+                
+                if (whole === 0 && fractionStr) {
+                    return `${fractionStr}"`;
+                } else if (fractionStr) {
+                    return `${whole}-${fractionStr}"`;
+                } else {
+                    return `${inches.toFixed(1)}"`;
+                }
+            }
+        }
+    }
+
+    drawVerticalDimension(layer, x, y1, y2, text) {
+        // Dimension line
+        const line = this.createSVGElement('line', {
+            x1: x,
+            y1: y1,
+            x2: x,
+            y2: y2,
+            class: 'dimension-line'
+        });
+        layer.appendChild(line);
+        
+        // End ticks
+        const tick1 = this.createSVGElement('line', {
+            x1: x - 5,
+            y1: y1,
+            x2: x + 5,
+            y2: y1,
+            class: 'dimension-line'
+        });
+        layer.appendChild(tick1);
+        
+        const tick2 = this.createSVGElement('line', {
+            x1: x - 5,
+            y1: y2,
+            x2: x + 5,
+            y2: y2,
+            class: 'dimension-line'
+        });
+        layer.appendChild(tick2);
+        
+        // Text - rotated 90 degrees
+        const textEl = this.createSVGElement('text', {
+            x: x - 10,
+            y: (y1 + y2) / 2,
+            class: 'dimension-text',
+            'text-anchor': 'middle',
+            transform: `rotate(-90, ${x - 10}, ${(y1 + y2) / 2})`
+        });
+        textEl.textContent = text;
+        layer.appendChild(textEl);
     }
 
     drawHorizontalDimension(layer, x1, x2, y, text) {
