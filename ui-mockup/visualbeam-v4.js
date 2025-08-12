@@ -888,40 +888,43 @@ class VisualBeamInspector {
     drawBeam(x, y, length, depth, scale) {
         const layer = document.getElementById('beam-layer');
         
-        // Draw beam as green rectangle matching reference
-        const beam = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
-        beam.setAttribute('x', x);
-        beam.setAttribute('y', y);
-        beam.setAttribute('width', length * scale);
-        beam.setAttribute('height', depth * scale);
-        beam.setAttribute('fill', '#00ff00');
-        beam.setAttribute('stroke', '#000');
-        beam.setAttribute('stroke-width', '2');
-        layer.appendChild(beam);
-        
-        // Draw horizontal lines to show flanges - MUST BE VISIBLE
+        // Calculate flange dimensions
         const flangeHeight = this.config.profileData.flangeHeight * scale;
         const webHeight = (this.config.profileData.depth - 2 * this.config.profileData.flangeHeight) * scale;
         
-        // Top flange line
-        const topLine = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-        topLine.setAttribute('x1', x);
-        topLine.setAttribute('y1', y + flangeHeight);
-        topLine.setAttribute('x2', x + length * scale);
-        topLine.setAttribute('y2', y + flangeHeight);
-        topLine.setAttribute('stroke', '#000');
-        topLine.setAttribute('stroke-width', '2');
-        layer.appendChild(topLine);
+        // Draw beam flanges and web as separate rectangles for clarity
+        // Top flange
+        const topFlange = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+        topFlange.setAttribute('x', x);
+        topFlange.setAttribute('y', y);
+        topFlange.setAttribute('width', length * scale);
+        topFlange.setAttribute('height', flangeHeight);
+        topFlange.setAttribute('fill', '#00ff00');
+        topFlange.setAttribute('stroke', '#000');
+        topFlange.setAttribute('stroke-width', '2');
+        layer.appendChild(topFlange);
         
-        // Bottom flange line
-        const bottomLine = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-        bottomLine.setAttribute('x1', x);
-        bottomLine.setAttribute('y1', y + flangeHeight + webHeight);
-        bottomLine.setAttribute('x2', x + length * scale);
-        bottomLine.setAttribute('y2', y + flangeHeight + webHeight);
-        bottomLine.setAttribute('stroke', '#000');
-        bottomLine.setAttribute('stroke-width', '2');
-        layer.appendChild(bottomLine);
+        // Web
+        const web = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+        web.setAttribute('x', x);
+        web.setAttribute('y', y + flangeHeight);
+        web.setAttribute('width', length * scale);
+        web.setAttribute('height', webHeight);
+        web.setAttribute('fill', '#00ff00');
+        web.setAttribute('stroke', '#000');
+        web.setAttribute('stroke-width', '2');
+        layer.appendChild(web);
+        
+        // Bottom flange
+        const bottomFlange = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+        bottomFlange.setAttribute('x', x);
+        bottomFlange.setAttribute('y', y + flangeHeight + webHeight);
+        bottomFlange.setAttribute('width', length * scale);
+        bottomFlange.setAttribute('height', flangeHeight);
+        bottomFlange.setAttribute('fill', '#00ff00');
+        bottomFlange.setAttribute('stroke', '#000');
+        bottomFlange.setAttribute('stroke-width', '2');
+        layer.appendChild(bottomFlange);
         
         // Draw beam end dimensions if visible
         if (this.state.showDimensions) {
@@ -936,97 +939,175 @@ class VisualBeamInspector {
     
     drawAbutments(x, y, length, depth, scale) {
         const layer = document.getElementById('abutment-layer');
-        const seatWidth = (this.config.seatLeft || 10) * scale; // Use configured seat width or default
-        const abutmentDepth = 40 * scale; // Depth of abutment behind beam
-        const abutmentHeight = (depth + 30) * scale; // Height extends below beam
         
-        // Simple left abutment - grey block with seat
-        const leftGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+        // Get parametric dimensions from config
+        const bearingDist = (this.config.bearingDistanceFt * 12 + this.config.bearingDistanceIn) * scale;
+        const breastwallWidth = (this.config.breastwallFt * 12 + this.config.breastwallIn) * scale;
+        const backwallClearance = (this.config.backwallClearanceFt * 12 + this.config.backwallClearanceIn) * scale;
         
-        // Left abutment block (extends behind and below beam)
-        const leftAbutment = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
-        leftAbutment.setAttribute('x', x - abutmentDepth);
-        leftAbutment.setAttribute('y', y - 10 * scale);
-        leftAbutment.setAttribute('width', abutmentDepth + seatWidth);
-        leftAbutment.setAttribute('height', abutmentHeight);
-        leftAbutment.setAttribute('fill', '#808080');
-        leftAbutment.setAttribute('stroke', '#000');
-        leftAbutment.setAttribute('stroke-width', '2');
-        leftGroup.appendChild(leftAbutment);
+        // Seat dimensions
+        const seatWidth = bearingDist; // Seat extends to bearing centerline
+        const seatHeight = 8 * scale; // 8" seat height
+        const abutmentTotalHeight = (depth + 40) * scale; // Total height extends below beam
+        const abutmentTopExtension = 10 * scale; // Extension above beam
         
-        layer.appendChild(leftGroup);
+        // LEFT ABUTMENT - 6-faceted shape
+        const leftPath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
         
-        // Simple right abutment - grey block with seat
-        const rightGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+        // Calculate left abutment points
+        const leftBackwallX = x - seatWidth - breastwallWidth;
+        const leftSeatX = x - seatWidth;
+        const leftBearingX = x; // Beam starts here
         
-        // Right abutment block (extends behind and below beam)
-        const rightAbutment = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
-        rightAbutment.setAttribute('x', x + length * scale - seatWidth);
-        rightAbutment.setAttribute('y', y - 10 * scale);
-        rightAbutment.setAttribute('width', abutmentDepth + seatWidth);
-        rightAbutment.setAttribute('height', abutmentHeight);
-        rightAbutment.setAttribute('fill', '#808080');
-        rightAbutment.setAttribute('stroke', '#000');
-        rightAbutment.setAttribute('stroke-width', '2');
-        rightGroup.appendChild(rightAbutment);
+        // Build the 6-faceted path for left abutment
+        let leftD = `M ${leftBackwallX} ${y - abutmentTopExtension} `; // Start at top of backwall
+        leftD += `L ${leftBackwallX} ${y + abutmentTotalHeight} `; // Down backwall
+        leftD += `L ${leftSeatX} ${y + abutmentTotalHeight} `; // Across bottom
+        leftD += `L ${leftSeatX} ${y + depth * scale} `; // Up to seat level
+        leftD += `L ${leftBearingX} ${y + depth * scale} `; // Across seat
+        leftD += `L ${leftBearingX} ${y + depth * scale - seatHeight} `; // Up seat face
+        leftD += `L ${leftSeatX} ${y + depth * scale - seatHeight} `; // Back to breastwall
+        leftD += `L ${leftSeatX} ${y - abutmentTopExtension} `; // Up breastwall
+        leftD += `Z`; // Close path
         
-        layer.appendChild(rightGroup);
+        leftPath.setAttribute('d', leftD);
+        leftPath.setAttribute('fill', '#808080');
+        leftPath.setAttribute('stroke', '#000');
+        leftPath.setAttribute('stroke-width', '2');
+        layer.appendChild(leftPath);
+        
+        // Add backwall emphasis line for left abutment
+        const leftBackwallLine = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+        leftBackwallLine.setAttribute('x1', leftBackwallX);
+        leftBackwallLine.setAttribute('y1', y - abutmentTopExtension);
+        leftBackwallLine.setAttribute('x2', leftBackwallX);
+        leftBackwallLine.setAttribute('y2', y + abutmentTotalHeight);
+        leftBackwallLine.setAttribute('stroke', '#000');
+        leftBackwallLine.setAttribute('stroke-width', '3');
+        layer.appendChild(leftBackwallLine);
+        
+        // RIGHT ABUTMENT - 6-faceted shape (mirrored)
+        const rightPath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+        
+        // Calculate right abutment points
+        const rightBearingX = x + length * scale; // Beam ends here
+        const rightSeatX = x + length * scale + seatWidth;
+        const rightBackwallX = x + length * scale + seatWidth + breastwallWidth;
+        
+        // Build the 6-faceted path for right abutment
+        let rightD = `M ${rightBackwallX} ${y - abutmentTopExtension} `; // Start at top of backwall
+        rightD += `L ${rightBackwallX} ${y + abutmentTotalHeight} `; // Down backwall
+        rightD += `L ${rightSeatX} ${y + abutmentTotalHeight} `; // Across bottom
+        rightD += `L ${rightSeatX} ${y + depth * scale} `; // Up to seat level
+        rightD += `L ${rightBearingX} ${y + depth * scale} `; // Across seat
+        rightD += `L ${rightBearingX} ${y + depth * scale - seatHeight} `; // Up seat face
+        rightD += `L ${rightSeatX} ${y + depth * scale - seatHeight} `; // Forward to breastwall
+        rightD += `L ${rightSeatX} ${y - abutmentTopExtension} `; // Up breastwall
+        rightD += `Z`; // Close path
+        
+        rightPath.setAttribute('d', rightD);
+        rightPath.setAttribute('fill', '#808080');
+        rightPath.setAttribute('stroke', '#000');
+        rightPath.setAttribute('stroke-width', '2');
+        layer.appendChild(rightPath);
+        
+        // Add backwall emphasis line for right abutment
+        const rightBackwallLine = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+        rightBackwallLine.setAttribute('x1', rightBackwallX);
+        rightBackwallLine.setAttribute('y1', y - abutmentTopExtension);
+        rightBackwallLine.setAttribute('x2', rightBackwallX);
+        rightBackwallLine.setAttribute('y2', y + abutmentTotalHeight);
+        rightBackwallLine.setAttribute('stroke', '#000');
+        rightBackwallLine.setAttribute('stroke-width', '3');
+        layer.appendChild(rightBackwallLine);
     }
     
     drawBearings(x, y, length, depth, scale) {
         const layer = document.getElementById('bearing-layer');
-        const bearingDist = this.config.bearingDistanceFt * 12 + this.config.bearingDistanceIn;
-        const seatHeight = 6 * scale;
         
-        // Left bearing pad on seat
-        const leftBearingGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+        // Calculate bearing positions from config
+        const bearingCL = this.config.bearingClFt * 12 + this.config.bearingClIn;
+        const bearingOffset = (length - bearingCL) / 2;
+        const bearingWidth = 18 * scale;
+        const bearingHeight = 3 * scale; // Each rectangle is 3" tall
         
-        const leftBearing = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
-        leftBearing.setAttribute('x', x - 8 * scale);
-        leftBearing.setAttribute('y', y + depth * scale - seatHeight - 2 * scale);
-        leftBearing.setAttribute('width', 16 * scale);
-        leftBearing.setAttribute('height', 2 * scale);
-        leftBearing.setAttribute('fill', '#333');
-        leftBearing.setAttribute('stroke', '#000');
-        leftBearing.setAttribute('stroke-width', '1');
-        leftBearingGroup.appendChild(leftBearing);
+        // Bearings sit just below the beam
+        const bearingY = y + depth * scale;
         
-        // Right bearing pad on seat
-        const rightBearingGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+        // LEFT BEARING - Two stacked rectangles
+        const leftBearingX = x + bearingOffset * scale - bearingWidth / 2;
         
-        const rightBearing = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
-        rightBearing.setAttribute('x', x + length * scale - 8 * scale);
-        rightBearing.setAttribute('y', y + depth * scale - seatHeight - 2 * scale);
-        rightBearing.setAttribute('width', 16 * scale);
-        rightBearing.setAttribute('height', 2 * scale);
-        rightBearing.setAttribute('fill', '#333');
-        rightBearing.setAttribute('stroke', '#000');
-        rightBearing.setAttribute('stroke-width', '1');
-        rightBearingGroup.appendChild(rightBearing);
+        // Top rectangle of left bearing
+        const leftTop = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+        leftTop.setAttribute('x', leftBearingX);
+        leftTop.setAttribute('y', bearingY);
+        leftTop.setAttribute('width', bearingWidth);
+        leftTop.setAttribute('height', bearingHeight);
+        leftTop.setAttribute('fill', '#00ff00'); // Same green as beam
+        leftTop.setAttribute('stroke', '#000');
+        leftTop.setAttribute('stroke-width', '1');
+        layer.appendChild(leftTop);
         
-        layer.appendChild(leftBearingGroup);
-        layer.appendChild(rightBearingGroup);
+        // Bottom rectangle of left bearing
+        const leftBottom = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+        leftBottom.setAttribute('x', leftBearingX);
+        leftBottom.setAttribute('y', bearingY + bearingHeight);
+        leftBottom.setAttribute('width', bearingWidth);
+        leftBottom.setAttribute('height', bearingHeight);
+        leftBottom.setAttribute('fill', '#00ff00'); // Same green as beam
+        leftBottom.setAttribute('stroke', '#000');
+        leftBottom.setAttribute('stroke-width', '1');
+        layer.appendChild(leftBottom);
         
-        // Draw centerlines if dimensions are shown
+        // RIGHT BEARING - Two stacked rectangles
+        const rightBearingX = x + (length - bearingOffset) * scale - bearingWidth / 2;
+        
+        // Top rectangle of right bearing
+        const rightTop = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+        rightTop.setAttribute('x', rightBearingX);
+        rightTop.setAttribute('y', bearingY);
+        rightTop.setAttribute('width', bearingWidth);
+        rightTop.setAttribute('height', bearingHeight);
+        rightTop.setAttribute('fill', '#00ff00'); // Same green as beam
+        rightTop.setAttribute('stroke', '#000');
+        rightTop.setAttribute('stroke-width', '1');
+        layer.appendChild(rightTop);
+        
+        // Bottom rectangle of right bearing
+        const rightBottom = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+        rightBottom.setAttribute('x', rightBearingX);
+        rightBottom.setAttribute('y', bearingY + bearingHeight);
+        rightBottom.setAttribute('width', bearingWidth);
+        rightBottom.setAttribute('height', bearingHeight);
+        rightBottom.setAttribute('fill', '#00ff00'); // Same green as beam
+        rightBottom.setAttribute('stroke', '#000');
+        rightBottom.setAttribute('stroke-width', '1');
+        layer.appendChild(rightBottom);
+        
+        // Draw bearing centerlines if dimensions are shown
         if (this.state.showDimensions) {
+            // Left bearing centerline
             const leftCL = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-            leftCL.setAttribute('x1', x + bearingDist * scale);
-            leftCL.setAttribute('y1', y - 20);
-            leftCL.setAttribute('x2', x + bearingDist * scale);
-            leftCL.setAttribute('y2', y + depth * scale + 30);
-            leftCL.setAttribute('stroke', '#666');
+            leftCL.setAttribute('x1', x + bearingOffset * scale);
+            leftCL.setAttribute('y1', y - 10 * scale);
+            leftCL.setAttribute('x2', x + bearingOffset * scale);
+            leftCL.setAttribute('y2', y + depth * scale + 10 * scale);
+            leftCL.setAttribute('stroke', '#FF5722');
             leftCL.setAttribute('stroke-width', '1');
-            leftCL.setAttribute('stroke-dasharray', '2,2');
+            leftCL.setAttribute('stroke-dasharray', '4 2');
+            leftCL.setAttribute('opacity', '0.7');
             layer.appendChild(leftCL);
             
+            // Right bearing centerline
             const rightCL = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-            rightCL.setAttribute('x1', x + (length - bearingDist) * scale);
-            rightCL.setAttribute('y1', y - 20);
-            rightCL.setAttribute('x2', x + (length - bearingDist) * scale);
-            rightCL.setAttribute('y2', y + depth * scale + 30);
-            rightCL.setAttribute('stroke', '#666');
+            rightCL.setAttribute('x1', x + (length - bearingOffset) * scale);
+            rightCL.setAttribute('y1', y - 10 * scale);
+            rightCL.setAttribute('x2', x + (length - bearingOffset) * scale);
+            rightCL.setAttribute('y2', y + depth * scale + 10 * scale);
+            rightCL.setAttribute('stroke', '#FF5722');
             rightCL.setAttribute('stroke-width', '1');
-            rightCL.setAttribute('stroke-dasharray', '2,2');
+            rightCL.setAttribute('stroke-dasharray', '4 2');
+            rightCL.setAttribute('opacity', '0.7');
             layer.appendChild(rightCL);
         }
     }
@@ -1034,23 +1115,46 @@ class VisualBeamInspector {
     drawDimensions(x, y, length, depth, scale) {
         const layer = document.getElementById('dimension-layer');
         
-        // Beam length dimension
+        // Beam length dimension - use black for visibility
         const dimLine = document.createElementNS('http://www.w3.org/2000/svg', 'line');
         dimLine.setAttribute('x1', x);
         dimLine.setAttribute('y1', y - 40);
         dimLine.setAttribute('x2', x + length * scale);
         dimLine.setAttribute('y2', y - 40);
-        dimLine.setAttribute('stroke', '#fff');
+        dimLine.setAttribute('stroke', '#000');
         dimLine.setAttribute('stroke-width', '1');
         layer.appendChild(dimLine);
         
-        // Add dimension text
+        // Add arrows at ends
+        const leftArrow = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+        leftArrow.setAttribute('d', `M ${x} ${y - 40} L ${x + 5} ${y - 43} L ${x + 5} ${y - 37} Z`);
+        leftArrow.setAttribute('fill', '#000');
+        layer.appendChild(leftArrow);
+        
+        const rightArrow = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+        rightArrow.setAttribute('d', `M ${x + length * scale} ${y - 40} L ${x + length * scale - 5} ${y - 43} L ${x + length * scale - 5} ${y - 37} Z`);
+        rightArrow.setAttribute('fill', '#000');
+        layer.appendChild(rightArrow);
+        
+        // Add dimension text with white background for contrast
+        const textBg = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+        const textX = x + (length * scale) / 2;
+        const textY = y - 45;
+        textBg.setAttribute('x', textX - 30);
+        textBg.setAttribute('y', textY - 10);
+        textBg.setAttribute('width', '60');
+        textBg.setAttribute('height', '15');
+        textBg.setAttribute('fill', 'white');
+        textBg.setAttribute('stroke', 'none');
+        layer.appendChild(textBg);
+        
         const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-        text.setAttribute('x', x + (length * scale) / 2);
-        text.setAttribute('y', y - 45);
+        text.setAttribute('x', textX);
+        text.setAttribute('y', textY);
         text.setAttribute('text-anchor', 'middle');
-        text.setAttribute('fill', '#fff');
+        text.setAttribute('fill', '#000');
         text.setAttribute('font-size', '12');
+        text.setAttribute('font-weight', 'bold');
         text.textContent = `${this.config.lengthFt}'-${this.config.lengthIn}"`;
         layer.appendChild(text);
     }
@@ -1072,7 +1176,7 @@ class VisualBeamInspector {
         topLine.setAttribute('y1', y);
         topLine.setAttribute('x2', dimX);
         topLine.setAttribute('y2', y + flangeHeight * scale);
-        topLine.setAttribute('stroke', '#fff');
+        topLine.setAttribute('stroke', '#000');
         topLine.setAttribute('stroke-width', '1');
         topFlangeGroup.appendChild(topLine);
         
@@ -1082,7 +1186,7 @@ class VisualBeamInspector {
         ext1.setAttribute('y1', y);
         ext1.setAttribute('x2', x);
         ext1.setAttribute('y2', y);
-        ext1.setAttribute('stroke', '#fff');
+        ext1.setAttribute('stroke', '#000');
         ext1.setAttribute('stroke-width', '0.5');
         topFlangeGroup.appendChild(ext1);
         
@@ -1091,7 +1195,7 @@ class VisualBeamInspector {
         ext2.setAttribute('y1', y + flangeHeight * scale);
         ext2.setAttribute('x2', x);
         ext2.setAttribute('y2', y + flangeHeight * scale);
-        ext2.setAttribute('stroke', '#fff');
+        ext2.setAttribute('stroke', '#000');
         ext2.setAttribute('stroke-width', '0.5');
         topFlangeGroup.appendChild(ext2);
         
@@ -1100,7 +1204,7 @@ class VisualBeamInspector {
         topText.setAttribute('x', dimX - 10);
         topText.setAttribute('y', y + flangeHeight * scale / 2);
         topText.setAttribute('text-anchor', 'end');
-        topText.setAttribute('fill', '#fff');
+        topText.setAttribute('fill', '#000');
         topText.setAttribute('font-size', '10');
         topText.textContent = this.formatInches(flangeHeight);
         topFlangeGroup.appendChild(topText);
@@ -1115,7 +1219,7 @@ class VisualBeamInspector {
         webLine.setAttribute('y1', y + flangeHeight * scale);
         webLine.setAttribute('x2', dimX);
         webLine.setAttribute('y2', y + (flangeHeight + webHeight) * scale);
-        webLine.setAttribute('stroke', '#fff');
+        webLine.setAttribute('stroke', '#000');
         webLine.setAttribute('stroke-width', '1');
         webGroup.appendChild(webLine);
         
@@ -1123,7 +1227,7 @@ class VisualBeamInspector {
         webText.setAttribute('x', dimX - 10);
         webText.setAttribute('y', y + (flangeHeight + webHeight/2) * scale);
         webText.setAttribute('text-anchor', 'end');
-        webText.setAttribute('fill', '#fff');
+        webText.setAttribute('fill', '#000');
         webText.setAttribute('font-size', '10');
         webText.textContent = this.formatInches(webHeight);
         webGroup.appendChild(webText);
@@ -1138,7 +1242,7 @@ class VisualBeamInspector {
         bottomDimLine.setAttribute('y1', y + (depth - flangeHeight) * scale);
         bottomDimLine.setAttribute('x2', dimX);
         bottomDimLine.setAttribute('y2', y + depth * scale);
-        bottomDimLine.setAttribute('stroke', '#fff');
+        bottomDimLine.setAttribute('stroke', '#000');
         bottomDimLine.setAttribute('stroke-width', '1');
         bottomFlangeGroup.appendChild(bottomDimLine);
         
@@ -1147,7 +1251,7 @@ class VisualBeamInspector {
         ext3.setAttribute('y1', y + depth * scale);
         ext3.setAttribute('x2', x);
         ext3.setAttribute('y2', y + depth * scale);
-        ext3.setAttribute('stroke', '#fff');
+        ext3.setAttribute('stroke', '#000');
         ext3.setAttribute('stroke-width', '0.5');
         bottomFlangeGroup.appendChild(ext3);
         
@@ -1155,7 +1259,7 @@ class VisualBeamInspector {
         bottomText.setAttribute('x', dimX - 10);
         bottomText.setAttribute('y', y + (depth - flangeHeight/2) * scale);
         bottomText.setAttribute('text-anchor', 'end');
-        bottomText.setAttribute('fill', '#fff');
+        bottomText.setAttribute('fill', '#000');
         bottomText.setAttribute('font-size', '10');
         bottomText.textContent = this.formatInches(flangeHeight);
         bottomFlangeGroup.appendChild(bottomText);
@@ -1171,7 +1275,7 @@ class VisualBeamInspector {
         overallLine.setAttribute('y1', y);
         overallLine.setAttribute('x2', overallDimX);
         overallLine.setAttribute('y2', y + depth * scale);
-        overallLine.setAttribute('stroke', '#fff');
+        overallLine.setAttribute('stroke', '#000');
         overallLine.setAttribute('stroke-width', '1');
         overallGroup.appendChild(overallLine);
         
@@ -1179,7 +1283,7 @@ class VisualBeamInspector {
         overallText.setAttribute('x', overallDimX - 10);
         overallText.setAttribute('y', y + depth * scale / 2);
         overallText.setAttribute('text-anchor', 'end');
-        overallText.setAttribute('fill', '#fff');
+        overallText.setAttribute('fill', '#000');
         overallText.setAttribute('font-size', '10');
         overallText.textContent = this.formatInches(depth);
         overallGroup.appendChild(overallText);
