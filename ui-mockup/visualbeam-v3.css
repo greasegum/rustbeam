@@ -531,13 +531,25 @@ body {
 }
 
 .abutment,
-.bridge-seat,
-.backwall,
+.bridge-seat {
+    fill: #BDBDBD;
+    stroke: #666;
+    stroke-width: 1.5;
+    opacity: 0.8;
+}
+
+.backwall {
+    fill: #9E9E9E;
+    stroke: #666;
+    stroke-width: 1.5;
+    opacity: 0.9;
+}
+
 .breastwall {
-    fill: #888;
-    stroke: #333;
-    stroke-width: 1;
-    opacity: 0.5;
+    fill: #9E9E9E;
+    stroke: #666;
+    stroke-width: 1.5;
+    opacity: 0.9;
 }
 
 .grid-line {

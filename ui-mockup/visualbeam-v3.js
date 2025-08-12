@@ -558,8 +558,8 @@ class VisualBeamV3 {
                         'data-grid-x': i,
                         'data-grid-y': j,
                         fill: 'none',
-                        stroke: 'rgba(0,0,0,0.15)',
-                        'stroke-width': 0.25,
+                        stroke: 'rgba(0,0,0,0.3)',
+                        'stroke-width': 0.5,
                         'pointer-events': 'all'
                     });
                     
@@ -573,8 +573,8 @@ class VisualBeamV3 {
                     });
                     
                     cell.addEventListener('mouseleave', (e) => {
-                        e.target.setAttribute('stroke', 'rgba(0,0,0,0.15)');
-                        e.target.setAttribute('stroke-width', '0.25');
+                        e.target.setAttribute('stroke', 'rgba(0,0,0,0.3)');
+                        e.target.setAttribute('stroke-width', '0.5');
                         e.target.setAttribute('fill', 'none');
                     });
                     
@@ -594,8 +594,8 @@ class VisualBeamV3 {
                         y1: y,
                         x2: xPos,
                         y2: y + beamDepth * scale,
-                        stroke: 'rgba(0,0,0,0.3)',
-                        'stroke-width': 0.5,
+                        stroke: 'rgba(0,0,0,0.5)',
+                        'stroke-width': 1,
                         'pointer-events': 'none'
                     });
                     gridGroup.appendChild(line);
@@ -613,8 +613,8 @@ class VisualBeamV3 {
                         y1: yPos,
                         x2: x + beamLength * scale,
                         y2: yPos,
-                        stroke: 'rgba(0,0,0,0.3)',
-                        'stroke-width': 0.5,
+                        stroke: 'rgba(0,0,0,0.5)',
+                        'stroke-width': 1,
                         'pointer-events': 'none'
                     });
                     gridGroup.appendChild(line);
@@ -710,14 +710,26 @@ class VisualBeamV3 {
             y - 20,
             `SPAN LENGTH (BEARING CL TO CL): ${Math.floor(bearingCL/12)}'-${bearingCL%12}"`);
         
-        // Breastwall distance
-        const breastwallDist = this.config.breastwallFt * 12 + this.config.breastwallIn;
-        const breastwallOffset = (beamLength - breastwallDist) / 2;
-        this.drawHorizontalDimension(layer,
-            x + breastwallOffset * scale,
-            x + (beamLength - breastwallOffset) * scale,
-            y + beamDepth * scale + 40,
-            `BREASTWALL DISTANCE: ${this.config.breastwallFt}'-${this.config.breastwallIn}"`);
+        // Abutment-related dimensions (only show when abutments are visible)
+        if (this.state.showAbutments) {
+            // Breastwall distance
+            const breastwallDist = this.config.breastwallFt * 12 + this.config.breastwallIn;
+            const breastwallOffset = (beamLength - breastwallDist) / 2;
+            this.drawHorizontalDimension(layer,
+                x + breastwallOffset * scale,
+                x + (beamLength - breastwallOffset) * scale,
+                y + beamDepth * scale + 40,
+                `BREASTWALL DISTANCE: ${this.config.breastwallFt}'-${this.config.breastwallIn}"`);
+            
+            // Backwall clearance (at beam ends)
+            const backwallClearance = 3; // 3 inches typical
+            // Left backwall clearance
+            this.drawHorizontalDimension(layer,
+                x + beamLength * scale,
+                x + beamLength * scale + backwallClearance * scale,
+                y - 60,
+                `BACKWALL CLEARANCE`);
+        }
         
         // Vertical dimensions at ordinate origin (0 end)
         const dimX = this.state.ordinateOrigin === 'left' ? x - 30 : x + beamLength * scale + 30;
