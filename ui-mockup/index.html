@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VisualBeam - Rust Implementation</title>
+    <style>
+        :root {
+            --bg-primary: #1a1a1a;
+            --bg-secondary: #242424;
+            --bg-card: #2d2d2d;
+            --text-primary: #e0e0e0;
+            --text-secondary: #999;
+            --accent: #2196F3;
+            --accent-hover: #1976D2;
+            --success: #90EE90;
+            --warning: #FFD700;
+            --danger: #FF4444;
+            --border: #333;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', system-ui, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        header {
+            text-align: center;
+            padding: 3rem 0;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 3rem;
+        }
+
+        .logo {
+            display: inline-flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .logo svg {
+            width: 48px;
+            height: 48px;
+            color: var(--accent);
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .tagline {
+            color: var(--text-secondary);
+            font-size: 1.125rem;
+        }
+
+        .section {
+            margin-bottom: 3rem;
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid var(--accent);
+            display: inline-block;
+        }
+
+        .cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1.5rem;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            color: inherit;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .card:hover {
+            border-color: var(--accent);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(33, 150, 243, 0.2);
+        }
+
+        .card-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--accent);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .card-badge {
+            display: inline-block;
+            padding: 0.25rem 0.5rem;
+            background: var(--accent);
+            color: var(--bg-primary);
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .card-badge.new {
+            background: var(--success);
+            color: var(--bg-primary);
+        }
+
+        .card-badge.beta {
+            background: var(--warning);
+            color: var(--bg-primary);
+        }
+
+        .card-badge.archived {
+            background: var(--text-secondary);
+            color: var(--bg-primary);
+        }
+
+        .card-description {
+            color: var(--text-secondary);
+            line-height: 1.5;
+        }
+
+        .card-features {
+            list-style: none;
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+        }
+
+        .card-features li {
+            padding: 0.25rem 0;
+            padding-left: 1.25rem;
+            position: relative;
+        }
+
+        .card-features li:before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: var(--success);
+        }
+
+        .tech-stack {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+        }
+
+        .tech-badge {
+            padding: 0.25rem 0.5rem;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+        }
+
+        .links-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+
+        .link-item {
+            padding: 1rem;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            text-decoration: none;
+            color: var(--text-primary);
+            transition: all 0.3s ease;
+        }
+
+        .link-item:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        .link-item strong {
+            display: block;
+            margin-bottom: 0.25rem;
+        }
+
+        .link-item span {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+        }
+
+        footer {
+            margin-top: 4rem;
+            padding-top: 2rem;
+            border-top: 1px solid var(--border);
+            text-align: center;
+            color: var(--text-secondary);
+        }
+
+        .status-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            margin-bottom: 1rem;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--success);
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo">
+                <svg viewBox="0 0 48 48" fill="none">
+                    <rect x="4" y="10" width="40" height="4" fill="currentColor"/>
+                    <rect x="20" y="14" width="8" height="20" fill="currentColor"/>
+                    <rect x="4" y="34" width="40" height="4" fill="currentColor"/>
+                    <circle cx="10" cy="36" r="3" fill="currentColor" opacity="0.6"/>
+                    <circle cx="38" cy="36" r="3" fill="currentColor" opacity="0.6"/>
+                </svg>
+                <h1>VisualBeam</h1>
+            </div>
+            <p class="tagline">Rust-Based Structural Beam Inspection System</p>
+            <div class="status-indicator">
+                <span class="status-dot"></span>
+                <span>Active Development</span>
+            </div>
+        </header>
+
+        <section class="section">
+            <h2 class="section-title">🚀 Live Applications</h2>
+            <div class="cards">
+                <a href="visualbeam-v2.html" class="card">
+                    <div class="card-title">
+                        VisualBeam Inspector
+                        <span class="card-badge new">Latest</span>
+                    </div>
+                    <p class="card-description">
+                        Production-ready beam inspection interface with bridge geometry awareness
+                    </p>
+                    <ul class="card-features">
+                        <li>Interactive 1" grid marking system</li>
+                        <li>CS1-CS4 condition state tracking</li>
+                        <li>Pan, zoom, and selection tools</li>
+                        <li>Ordinates and dimensions</li>
+                        <li>Real-time coordinate display</li>
+                    </ul>
+                    <div class="tech-stack">
+                        <span class="tech-badge">JavaScript</span>
+                        <span class="tech-badge">SVG</span>
+                        <span class="tech-badge">Canvas</span>
+                    </div>
+                </a>
+
+                <a href="setup.html" class="card">
+                    <div class="card-title">
+                        Beam Setup Configuration
+                        <span class="card-badge">Essential</span>
+                    </div>
+                    <p class="card-description">
+                        Configure beam parameters, bridge geometry, and inspection settings
+                    </p>
+                    <ul class="card-features">
+                        <li>Beam profile selection</li>
+                        <li>Length and bearing configuration</li>
+                        <li>Abutment geometry settings</li>
+                        <li>Top flange visibility control</li>
+                        <li>Elevation direction setup</li>
+                    </ul>
+                    <div class="tech-stack">
+                        <span class="tech-badge">Forms</span>
+                        <span class="tech-badge">LocalStorage</span>
+                        <span class="tech-badge">Validation</span>
+                    </div>
+                </a>
+            </div>
+        </section>
+
+        <section class="section">
+            <h2 class="section-title">📚 Documentation</h2>
+            <div class="links-grid">
+                <a href="../CLAUDE.md" class="link-item" target="_blank">
+                    <strong>CLAUDE.md</strong>
+                    <span>Project roadmap and architecture</span>
+                </a>
+                <a href="BRIDGE_GEOMETRY.md" class="link-item" target="_blank">
+                    <strong>Bridge Geometry</strong>
+                    <span>Structural relationships guide</span>
+                </a>
+                <a href="README.md" class="link-item" target="_blank">
+                    <strong>UI Documentation</strong>
+                    <span>Interface components guide</span>
+                </a>
+                <a href="https://github.com/greasegum/rustbeam" class="link-item" target="_blank">
+                    <strong>GitHub Repository</strong>
+                    <span>Source code and issues</span>
+                </a>
+            </div>
+        </section>
+
+        <section class="section">
+            <h2 class="section-title">🏗️ Development Phases</h2>
+            <div class="cards">
+                <div class="card">
+                    <div class="card-title">
+                        Phase 1: Core Foundation
+                        <span class="card-badge new">In Progress</span>
+                    </div>
+                    <p class="card-description">
+                        Implementing beam profiles, geometry calculations, and defect classification in Rust
+                    </p>
+                    <ul class="card-features">
+                        <li>Beam catalog with 150+ profiles</li>
+                        <li>Grid-based coordinate system</li>
+                        <li>Defect severity classification</li>
+                        <li>Comprehensive unit tests</li>
+                    </ul>
+                </div>
+
+                <div class="card">
+                    <div class="card-title">
+                        Phase 2: Rendering
+                        <span class="card-badge">Upcoming</span>
+                    </div>
+                    <p class="card-description">
+                        GPU-accelerated rendering with wgpu and Canvas 2D fallback
+                    </p>
+                    <ul class="card-features">
+                        <li>Native GPU rendering</li>
+                        <li>WASM bindings</li>
+                        <li>Platform abstraction</li>
+                        <li>UI primitives</li>
+                    </ul>
+                </div>
+
+                <div class="card">
+                    <div class="card-title">
+                        Phase 3: CAD Integration
+                        <span class="card-badge">Planned</span>
+                    </div>
+                    <p class="card-description">
+                        AutoCAD DXF/DWG export with proper layer structure
+                    </p>
+                    <ul class="card-features">
+                        <li>DXF parser/generator</li>
+                        <li>Layer mapping system</li>
+                        <li>XML exchange format</li>
+                        <li>Metadata preservation</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <section class="section">
+            <h2 class="section-title">🗂️ Archived Versions</h2>
+            <div class="cards">
+                <a href="archive/index.html" class="card">
+                    <div class="card-title">
+                        Original UI Mockup
+                        <span class="card-badge archived">Archived</span>
+                    </div>
+                    <p class="card-description">
+                        Initial beam inspection interface prototype
+                    </p>
+                </a>
+
+                <a href="archive/visualbeam.html" class="card">
+                    <div class="card-title">
+                        VisualBeam V1
+                        <span class="card-badge archived">Archived</span>
+                    </div>
+                    <p class="card-description">
+                        First iteration of the inspection interface
+                    </p>
+                </a>
+            </div>
+        </section>
+
+        <section class="section">
+            <h2 class="section-title">🛠️ Technical Stack</h2>
+            <div class="links-grid">
+                <div class="link-item">
+                    <strong>Core Language</strong>
+                    <span>Rust with cargo workspace</span>
+                </div>
+                <div class="link-item">
+                    <strong>Web Assembly</strong>
+                    <span>wasm-bindgen for browser</span>
+                </div>
+                <div class="link-item">
+                    <strong>GPU Rendering</strong>
+                    <span>wgpu for native performance</span>
+                </div>
+                <div class="link-item">
+                    <strong>Testing</strong>
+                    <span>Built-in cargo test suite</span>
+                </div>
+                <div class="link-item">
+                    <strong>Documentation</strong>
+                    <span>Rustdoc with examples</span>
+                </div>
+                <div class="link-item">
+                    <strong>Benchmarking</strong>
+                    <span>Criterion for performance</span>
+                </div>
+            </div>
+        </section>
+
+        <footer>
+            <p>VisualBeam &copy; 2024 | Built with Rust for Engineering Excellence</p>
+            <p style="margin-top: 0.5rem; font-size: 0.875rem;">
+                🤖 Generated with <a href="https://claude.ai/code" style="color: var(--accent); text-decoration: none;">Claude Code</a>
+            </p>
+        </footer>
+    </div>
+</body>
+</html>
