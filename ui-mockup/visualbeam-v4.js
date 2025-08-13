@@ -960,28 +960,27 @@ class VisualBeamInspector {
         const abutmentWidth = breastwallDist + seatWidth; // Total abutment width
         
         // Vertical proportions
-        const seatHeight = 6 * scale; // 6" seat height
+        const seatHeight = 6 * scale; // 6" seat height (not used in simple L-shape)
         const abutmentTotalHeight = depth * scale + 36 * scale; // Extends 36" below beam
-        const abutmentTopExtension = 0; // Flush with beam top
+        const abutmentTopExtension = 10 * scale; // Extends 10" above beam top
         
-        // LEFT ABUTMENT - Parametric shape
+        // LEFT ABUTMENT - Simple L-shape based on sketch
         const leftPath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
         
-        // Calculate left abutment points
-        const leftBackwallX = x - backwallClearance - abutmentWidth;
-        const leftBreastwallX = x - backwallClearance - seatWidth;
+        // Calculate left abutment points based on sketch pattern
+        // Sketch shows: backwall extends up, then horizontal seat, then breastwall down
+        const leftBackwallX = x - backwallClearance - breastwallDist - bearingDist;
+        const leftSeatStartX = x - backwallClearance - bearingDist; // Breastwall position
         const leftSeatEndX = x - backwallClearance; // Where seat meets beam
         
-        // Build complex abutment path
-        let leftD = `M ${leftBackwallX} ${y} `; // Start at top of backwall
-        leftD += `L ${leftBreastwallX} ${y} `; // Across to breastwall top
-        leftD += `L ${leftBreastwallX} ${y + depth * scale - seatHeight} `; // Down breastwall to seat level
-        leftD += `L ${leftSeatEndX} ${y + depth * scale - seatHeight} `; // Across seat top
-        leftD += `L ${leftSeatEndX} ${y + depth * scale} `; // Down seat face to beam bottom
-        leftD += `L ${leftBreastwallX} ${y + depth * scale} `; // Back to breastwall
-        leftD += `L ${leftBreastwallX} ${y + abutmentTotalHeight} `; // Down breastwall to base
-        leftD += `L ${leftBackwallX} ${y + abutmentTotalHeight} `; // Across base
-        leftD += `L ${leftBackwallX} ${y} `; // Up backwall
+        // Build simple L-shaped abutment path
+        let leftD = `M ${leftBackwallX} ${y - 10 * scale} `; // Start at top of backwall (extends above beam)
+        leftD += `L ${leftSeatStartX} ${y - 10 * scale} `; // Across top to breastwall position
+        leftD += `L ${leftSeatStartX} ${y + depth * scale} `; // Down breastwall to beam bottom level
+        leftD += `L ${leftSeatEndX} ${y + depth * scale} `; // Across seat to beam
+        leftD += `L ${leftSeatEndX} ${y + abutmentTotalHeight} `; // Down to base
+        leftD += `L ${leftBackwallX} ${y + abutmentTotalHeight} `; // Across base to backwall
+        leftD += `L ${leftBackwallX} ${y - 10 * scale} `; // Up backwall to top
         leftD += `Z`; // Close path
         
         leftPath.setAttribute('d', leftD);
@@ -993,31 +992,29 @@ class VisualBeamInspector {
         // Add backwall emphasis line for left abutment
         const leftBackwallLine = document.createElementNS('http://www.w3.org/2000/svg', 'line');
         leftBackwallLine.setAttribute('x1', leftBackwallX);
-        leftBackwallLine.setAttribute('y1', y);
+        leftBackwallLine.setAttribute('y1', y - 10 * scale);
         leftBackwallLine.setAttribute('x2', leftBackwallX);
         leftBackwallLine.setAttribute('y2', y + abutmentTotalHeight);
         leftBackwallLine.setAttribute('stroke', '#000');
         leftBackwallLine.setAttribute('stroke-width', '3');
         layer.appendChild(leftBackwallLine);
         
-        // RIGHT ABUTMENT - Mirrored parametric shape
+        // RIGHT ABUTMENT - Mirrored L-shape
         const rightPath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
         
-        // Calculate right abutment points
+        // Calculate right abutment points (mirrored from left)
         const rightSeatEndX = x + length * scale + backwallClearance; // Where seat meets beam
-        const rightBreastwallX = x + length * scale + backwallClearance + seatWidth;
-        const rightBackwallX = x + length * scale + backwallClearance + abutmentWidth;
+        const rightSeatStartX = x + length * scale + backwallClearance + bearingDist; // Breastwall position
+        const rightBackwallX = x + length * scale + backwallClearance + bearingDist + breastwallDist;
         
-        // Build complex abutment path (mirrored)
-        let rightD = `M ${rightBackwallX} ${y} `; // Start at top of backwall
-        rightD += `L ${rightBreastwallX} ${y} `; // Across to breastwall top
-        rightD += `L ${rightBreastwallX} ${y + depth * scale - seatHeight} `; // Down breastwall to seat level
-        rightD += `L ${rightSeatEndX} ${y + depth * scale - seatHeight} `; // Across seat top
-        rightD += `L ${rightSeatEndX} ${y + depth * scale} `; // Down seat face to beam bottom
-        rightD += `L ${rightBreastwallX} ${y + depth * scale} `; // Forward to breastwall
-        rightD += `L ${rightBreastwallX} ${y + abutmentTotalHeight} `; // Down breastwall to base
-        rightD += `L ${rightBackwallX} ${y + abutmentTotalHeight} `; // Across base
-        rightD += `L ${rightBackwallX} ${y} `; // Up backwall
+        // Build simple L-shaped abutment path (mirrored)
+        let rightD = `M ${rightSeatEndX} ${y + depth * scale} `; // Start at seat/beam junction
+        rightD += `L ${rightSeatEndX} ${y + abutmentTotalHeight} `; // Down to base
+        rightD += `L ${rightBackwallX} ${y + abutmentTotalHeight} `; // Across base to backwall
+        rightD += `L ${rightBackwallX} ${y - 10 * scale} `; // Up backwall to top
+        rightD += `L ${rightSeatStartX} ${y - 10 * scale} `; // Across top to breastwall
+        rightD += `L ${rightSeatStartX} ${y + depth * scale} `; // Down breastwall to seat level
+        rightD += `L ${rightSeatEndX} ${y + depth * scale} `; // Back to start
         rightD += `Z`; // Close path
         
         rightPath.setAttribute('d', rightD);
@@ -1029,7 +1026,7 @@ class VisualBeamInspector {
         // Add backwall emphasis line for right abutment
         const rightBackwallLine = document.createElementNS('http://www.w3.org/2000/svg', 'line');
         rightBackwallLine.setAttribute('x1', rightBackwallX);
-        rightBackwallLine.setAttribute('y1', y);
+        rightBackwallLine.setAttribute('y1', y - 10 * scale);
         rightBackwallLine.setAttribute('x2', rightBackwallX);
         rightBackwallLine.setAttribute('y2', y + abutmentTotalHeight);
         rightBackwallLine.setAttribute('stroke', '#000');
