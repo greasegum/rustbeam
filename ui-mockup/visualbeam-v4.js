@@ -951,36 +951,37 @@ class VisualBeamInspector {
         const layer = document.getElementById('abutment-layer');
         
         // Get parametric dimensions from config with defaults
-        const breastwallDist = ((this.config.breastwallFt || 2) * 12 + (this.config.breastwallIn || 6)) * scale;
-        const backwallClearance = ((this.config.backwallClearanceFt || 0) * 12 + (this.config.backwallClearanceIn || 2)) * scale;
-        const bearingDist = ((this.config.bearingDistanceFt || 1) * 12 + (this.config.bearingDistanceIn || 0)) * scale;
+        const bearingDist = ((this.config.bearingDistanceFt || 1) * 12 + (this.config.bearingDistanceIn || 0));
+        const backwallClearance = ((this.config.backwallClearanceFt || 0) * 12 + (this.config.backwallClearanceIn || 2));
+        const breastwallDist = ((this.config.breastwallFt || 2) * 12 + (this.config.breastwallIn || 6));
         
-        // Calculate abutment dimensions
-        const seatWidth = bearingDist; // Seat extends to bearing centerline  
-        const abutmentWidth = breastwallDist + seatWidth; // Total abutment width
+        // Calculate seat width to extend past bearing centerline by half bearing width
+        const bearingWidth = 18; // Standard 18" bearing width
+        const seatWidth = (bearingDist + bearingWidth/2 + 6) * scale; // Seat extends past bearing center + 6" extra
+        const abutmentWidth = (breastwallDist + bearingDist) * scale; // Total abutment width
         
         // Vertical proportions
         const seatHeight = 6 * scale; // 6" seat height (not used in simple L-shape)
         const abutmentTotalHeight = depth * scale + 36 * scale; // Extends 36" below beam
         const abutmentTopExtension = 10 * scale; // Extends 10" above beam top
         
-        // LEFT ABUTMENT - Simple L-shape based on sketch
+        // LEFT ABUTMENT - Simple L-shape with seat under bearing
         const leftPath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
         
-        // Calculate left abutment points based on sketch pattern
-        // Sketch shows: backwall extends up, then horizontal seat, then breastwall down
-        const leftBackwallX = x - backwallClearance - breastwallDist - bearingDist;
-        const leftSeatStartX = x - backwallClearance - bearingDist; // Breastwall position
-        const leftSeatEndX = x - backwallClearance; // Where seat meets beam
+        // Calculate left abutment points to align seat under bearing
+        const leftBearingCenterX = x + bearingDist * scale; // Bearing center position
+        const leftBackwallX = x - backwallClearance * scale - abutmentWidth;
+        const leftBreastwallX = leftBearingCenterX - breastwallDist * scale; // Breastwall is breastwallDist from bearing CL
+        const leftSeatEndX = x - backwallClearance * scale; // Where seat meets beam end
         
-        // Build simple L-shaped abutment path
-        let leftD = `M ${leftBackwallX} ${y - 10 * scale} `; // Start at top of backwall (extends above beam)
-        leftD += `L ${leftSeatStartX} ${y - 10 * scale} `; // Across top to breastwall position
-        leftD += `L ${leftSeatStartX} ${y + depth * scale} `; // Down breastwall to beam bottom level
-        leftD += `L ${leftSeatEndX} ${y + depth * scale} `; // Across seat to beam
+        // Build L-shaped abutment path with seat positioned under bearing
+        let leftD = `M ${leftBackwallX} ${y - abutmentTopExtension} `; // Start at top of backwall
+        leftD += `L ${leftBreastwallX} ${y - abutmentTopExtension} `; // Across top to breastwall
+        leftD += `L ${leftBreastwallX} ${y + depth * scale} `; // Down breastwall to seat level
+        leftD += `L ${leftSeatEndX} ${y + depth * scale} `; // Across seat to beam end
         leftD += `L ${leftSeatEndX} ${y + abutmentTotalHeight} `; // Down to base
         leftD += `L ${leftBackwallX} ${y + abutmentTotalHeight} `; // Across base to backwall
-        leftD += `L ${leftBackwallX} ${y - 10 * scale} `; // Up backwall to top
+        leftD += `L ${leftBackwallX} ${y - abutmentTopExtension} `; // Up backwall to top
         leftD += `Z`; // Close path
         
         leftPath.setAttribute('d', leftD);
@@ -992,7 +993,7 @@ class VisualBeamInspector {
         // Add backwall emphasis line for left abutment
         const leftBackwallLine = document.createElementNS('http://www.w3.org/2000/svg', 'line');
         leftBackwallLine.setAttribute('x1', leftBackwallX);
-        leftBackwallLine.setAttribute('y1', y - 10 * scale);
+        leftBackwallLine.setAttribute('y1', y - abutmentTopExtension);
         leftBackwallLine.setAttribute('x2', leftBackwallX);
         leftBackwallLine.setAttribute('y2', y + abutmentTotalHeight);
         leftBackwallLine.setAttribute('stroke', '#000');
@@ -1002,18 +1003,19 @@ class VisualBeamInspector {
         // RIGHT ABUTMENT - Mirrored L-shape
         const rightPath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
         
-        // Calculate right abutment points (mirrored from left)
-        const rightSeatEndX = x + length * scale + backwallClearance; // Where seat meets beam
-        const rightSeatStartX = x + length * scale + backwallClearance + bearingDist; // Breastwall position
-        const rightBackwallX = x + length * scale + backwallClearance + bearingDist + breastwallDist;
+        // Calculate right abutment points to align seat under bearing
+        const rightBearingCenterX = x + (length - bearingDist) * scale; // Bearing center position
+        const rightSeatEndX = x + length * scale + backwallClearance * scale; // Where seat meets beam end
+        const rightBreastwallX = rightBearingCenterX + breastwallDist * scale; // Breastwall is breastwallDist from bearing CL
+        const rightBackwallX = x + length * scale + backwallClearance * scale + abutmentWidth;
         
-        // Build simple L-shaped abutment path (mirrored)
+        // Build L-shaped abutment path with seat positioned under bearing
         let rightD = `M ${rightSeatEndX} ${y + depth * scale} `; // Start at seat/beam junction
         rightD += `L ${rightSeatEndX} ${y + abutmentTotalHeight} `; // Down to base
         rightD += `L ${rightBackwallX} ${y + abutmentTotalHeight} `; // Across base to backwall
-        rightD += `L ${rightBackwallX} ${y - 10 * scale} `; // Up backwall to top
-        rightD += `L ${rightSeatStartX} ${y - 10 * scale} `; // Across top to breastwall
-        rightD += `L ${rightSeatStartX} ${y + depth * scale} `; // Down breastwall to seat level
+        rightD += `L ${rightBackwallX} ${y - abutmentTopExtension} `; // Up backwall to top
+        rightD += `L ${rightBreastwallX} ${y - abutmentTopExtension} `; // Across top to breastwall
+        rightD += `L ${rightBreastwallX} ${y + depth * scale} `; // Down breastwall to seat level
         rightD += `L ${rightSeatEndX} ${y + depth * scale} `; // Back to start
         rightD += `Z`; // Close path
         
@@ -1026,7 +1028,7 @@ class VisualBeamInspector {
         // Add backwall emphasis line for right abutment
         const rightBackwallLine = document.createElementNS('http://www.w3.org/2000/svg', 'line');
         rightBackwallLine.setAttribute('x1', rightBackwallX);
-        rightBackwallLine.setAttribute('y1', y - 10 * scale);
+        rightBackwallLine.setAttribute('y1', y - abutmentTopExtension);
         rightBackwallLine.setAttribute('x2', rightBackwallX);
         rightBackwallLine.setAttribute('y2', y + abutmentTotalHeight);
         rightBackwallLine.setAttribute('stroke', '#000');
@@ -1131,48 +1133,111 @@ class VisualBeamInspector {
     drawDimensions(x, y, length, depth, scale) {
         const layer = document.getElementById('dimension-layer');
         
-        // Beam length dimension - use black for visibility
-        const dimLine = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-        dimLine.setAttribute('x1', x);
-        dimLine.setAttribute('y1', y - 40);
-        dimLine.setAttribute('x2', x + length * scale);
-        dimLine.setAttribute('y2', y - 40);
-        dimLine.setAttribute('stroke', '#000');
-        dimLine.setAttribute('stroke-width', '1');
-        layer.appendChild(dimLine);
+        // Get parametric dimensions
+        const bearingDist = ((this.config.bearingDistanceFt || 1) * 12 + (this.config.bearingDistanceIn || 0));
+        const backwallClearance = ((this.config.backwallClearanceFt || 0) * 12 + (this.config.backwallClearanceIn || 2));
+        const breastwallDist = ((this.config.breastwallFt || 2) * 12 + (this.config.breastwallIn || 6));
+        const bearingCL = this.config.bearingClFt * 12 + this.config.bearingClIn;
         
-        // Add arrows at ends
-        const leftArrow = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-        leftArrow.setAttribute('d', `M ${x} ${y - 40} L ${x + 5} ${y - 43} L ${x + 5} ${y - 37} Z`);
-        leftArrow.setAttribute('fill', '#000');
-        layer.appendChild(leftArrow);
+        // Helper function to draw dimension line with arrows and text
+        const drawDimLine = (x1, y1, x2, y2, label, offset = 0) => {
+            // Dimension line
+            const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+            line.setAttribute('x1', x1);
+            line.setAttribute('y1', y1);
+            line.setAttribute('x2', x2);
+            line.setAttribute('y2', y2);
+            line.setAttribute('stroke', '#000');
+            line.setAttribute('stroke-width', '1');
+            layer.appendChild(line);
+            
+            // Arrows
+            const isHorizontal = Math.abs(y2 - y1) < Math.abs(x2 - x1);
+            if (isHorizontal) {
+                // Left arrow
+                const leftArrow = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                leftArrow.setAttribute('d', `M ${x1} ${y1} L ${x1 + 5} ${y1 - 3} L ${x1 + 5} ${y1 + 3} Z`);
+                leftArrow.setAttribute('fill', '#000');
+                layer.appendChild(leftArrow);
+                
+                // Right arrow
+                const rightArrow = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                rightArrow.setAttribute('d', `M ${x2} ${y2} L ${x2 - 5} ${y2 - 3} L ${x2 - 5} ${y2 + 3} Z`);
+                rightArrow.setAttribute('fill', '#000');
+                layer.appendChild(rightArrow);
+            }
+            
+            // Text with background
+            const textX = (x1 + x2) / 2;
+            const textY = (y1 + y2) / 2 + offset;
+            
+            const textBg = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+            textBg.setAttribute('x', textX - 30);
+            textBg.setAttribute('y', textY - 10);
+            textBg.setAttribute('width', '60');
+            textBg.setAttribute('height', '15');
+            textBg.setAttribute('fill', 'white');
+            textBg.setAttribute('stroke', 'none');
+            layer.appendChild(textBg);
+            
+            const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+            text.setAttribute('x', textX);
+            text.setAttribute('y', textY);
+            text.setAttribute('text-anchor', 'middle');
+            text.setAttribute('fill', '#000');
+            text.setAttribute('font-size', '11');
+            text.setAttribute('font-weight', 'bold');
+            text.textContent = label;
+            layer.appendChild(text);
+        };
         
-        const rightArrow = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-        rightArrow.setAttribute('d', `M ${x + length * scale} ${y - 40} L ${x + length * scale - 5} ${y - 43} L ${x + length * scale - 5} ${y - 37} Z`);
-        rightArrow.setAttribute('fill', '#000');
-        layer.appendChild(rightArrow);
+        // 1. Overall beam length dimension (top)
+        drawDimLine(x, y - 40, x + length * scale, y - 40, `${this.config.lengthFt}'-${this.config.lengthIn}"`, -5);
         
-        // Add dimension text with white background for contrast
-        const textBg = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
-        const textX = x + (length * scale) / 2;
-        const textY = y - 45;
-        textBg.setAttribute('x', textX - 30);
-        textBg.setAttribute('y', textY - 10);
-        textBg.setAttribute('width', '60');
-        textBg.setAttribute('height', '15');
-        textBg.setAttribute('fill', 'white');
-        textBg.setAttribute('stroke', 'none');
-        layer.appendChild(textBg);
+        // 2. Bearing C/L dimension (below beam)
+        const leftBearingX = x + bearingDist * scale;
+        const rightBearingX = x + (length - bearingDist) * scale;
+        drawDimLine(leftBearingX, y + depth * scale + 40, rightBearingX, y + depth * scale + 40, `${Math.floor(bearingCL/12)}'-${bearingCL%12}" C/L`, -5);
         
-        const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-        text.setAttribute('x', textX);
-        text.setAttribute('y', textY);
-        text.setAttribute('text-anchor', 'middle');
-        text.setAttribute('fill', '#000');
-        text.setAttribute('font-size', '12');
-        text.setAttribute('font-weight', 'bold');
-        text.textContent = `${this.config.lengthFt}'-${this.config.lengthIn}"`;
-        layer.appendChild(text);
+        // 3. Backwall clearance dimensions (small dims at ends)
+        if (backwallClearance > 0) {
+            // Left backwall clearance
+            drawDimLine(x - backwallClearance * scale, y + depth * scale + 20, x, y + depth * scale + 20, 
+                       `${Math.floor(backwallClearance/12)}'-${backwallClearance%12}"`, -5);
+            
+            // Right backwall clearance
+            drawDimLine(x + length * scale, y + depth * scale + 20, x + length * scale + backwallClearance * scale, y + depth * scale + 20,
+                       `${Math.floor(backwallClearance/12)}'-${backwallClearance%12}"`, -5);
+        }
+        
+        // 4. Bearing distance from ends
+        drawDimLine(x, y - 20, leftBearingX, y - 20, `${Math.floor(bearingDist/12)}'-${bearingDist%12}"`, -5);
+        drawDimLine(rightBearingX, y - 20, x + length * scale, y - 20, `${Math.floor(bearingDist/12)}'-${bearingDist%12}"`, -5);
+        
+        // 5. Breastwall distance from bearing C/L
+        const leftBreastwallX = leftBearingX - breastwallDist * scale;
+        const rightBreastwallX = rightBearingX + breastwallDist * scale;
+        
+        // Draw extension lines for breastwall positions
+        const extLine1 = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+        extLine1.setAttribute('x1', leftBreastwallX);
+        extLine1.setAttribute('y1', y - 60);
+        extLine1.setAttribute('x2', leftBreastwallX);
+        extLine1.setAttribute('y2', y + depth * scale + 60);
+        extLine1.setAttribute('stroke', '#000');
+        extLine1.setAttribute('stroke-width', '0.5');
+        extLine1.setAttribute('stroke-dasharray', '2 2');
+        layer.appendChild(extLine1);
+        
+        const extLine2 = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+        extLine2.setAttribute('x1', rightBreastwallX);
+        extLine2.setAttribute('y1', y - 60);
+        extLine2.setAttribute('x2', rightBreastwallX);
+        extLine2.setAttribute('y2', y + depth * scale + 60);
+        extLine2.setAttribute('stroke', '#000');
+        extLine2.setAttribute('stroke-width', '0.5');
+        extLine2.setAttribute('stroke-dasharray', '2 2');
+        layer.appendChild(extLine2);
     }
     
     drawBeamEndDimensions(x, y, depth, scale) {
