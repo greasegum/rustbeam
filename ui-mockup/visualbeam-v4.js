@@ -649,11 +649,12 @@ class VisualBeamInspector {
         const beamDepth = this.config.profileData.depth;
         const scale = this.scale * this.state.zoom;
         
-        // Center the beam
+        // Always center on beam's axial centerline
         const svgRect = this.svg.getBoundingClientRect();
         const centerX = svgRect.width / 2;
         const centerY = svgRect.height / 2;
         
+        // Position beam so its center (both horizontal and vertical) is at canvas center
         const beamX = centerX - (beamLength * scale) / 2 + this.state.pan.x;
         const beamY = centerY - (beamDepth * scale) / 2 + this.state.pan.y;
         
@@ -819,7 +820,7 @@ class VisualBeamInspector {
      * Calculate scale based on viewport
      */
     calculateScale() {
-        const padding = 100;
+        const padding = 120; // Increased padding for dimensions
         const svgRect = this.svg.getBoundingClientRect();
         const svgWidth = svgRect.width - 2 * padding;
         const svgHeight = svgRect.height - 2 * padding;
@@ -833,14 +834,14 @@ class VisualBeamInspector {
         const backwallClearance = (this.config.backwallClearanceFt || 0) * 12 + (this.config.backwallClearanceIn || 2);
         const abutmentWidth = breastwallDist + bearingDist;
         
-        // Total width = beam + 2*(backwall clearance + abutment width)
-        const totalWidth = beamLength + 2 * (backwallClearance + abutmentWidth);
-        const totalHeight = beamDepth + 48; // Allow 48" total vertical space
+        // Total width = beam + 2*(backwall clearance + abutment width) + dimension space
+        const totalWidth = beamLength + 2 * (backwallClearance + abutmentWidth) + 24; // Extra 24" for dims
+        const totalHeight = beamDepth + 80; // Allow 80" total vertical space for dims
         
         const scaleX = svgWidth / totalWidth;
         const scaleY = svgHeight / totalHeight;
         
-        this.scale = Math.min(scaleX, scaleY, 4);
+        this.scale = Math.min(scaleX, scaleY, 3); // Max scale of 3 for clarity
     }
 
     /**
@@ -1140,7 +1141,7 @@ class VisualBeamInspector {
         const bearingCL = this.config.bearingClFt * 12 + this.config.bearingClIn;
         
         // Helper function to draw dimension line with arrows and text
-        const drawDimLine = (x1, y1, x2, y2, label, offset = 0) => {
+        const drawDimLine = (x1, y1, x2, y2, label, offset = 0, textWidth = 60) => {
             // Dimension line
             const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
             line.setAttribute('x1', x1);
@@ -1172,12 +1173,13 @@ class VisualBeamInspector {
             const textY = (y1 + y2) / 2 + offset;
             
             const textBg = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
-            textBg.setAttribute('x', textX - 30);
+            textBg.setAttribute('x', textX - textWidth/2);
             textBg.setAttribute('y', textY - 10);
-            textBg.setAttribute('width', '60');
+            textBg.setAttribute('width', textWidth);
             textBg.setAttribute('height', '15');
             textBg.setAttribute('fill', 'white');
-            textBg.setAttribute('stroke', 'none');
+            textBg.setAttribute('stroke', '#ccc');
+            textBg.setAttribute('stroke-width', '0.5');
             layer.appendChild(textBg);
             
             const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
@@ -1191,53 +1193,78 @@ class VisualBeamInspector {
             layer.appendChild(text);
         };
         
-        // 1. Overall beam length dimension (top)
-        drawDimLine(x, y - 40, x + length * scale, y - 40, `${this.config.lengthFt}'-${this.config.lengthIn}"`, -5);
+        // Dimension line vertical positions (harmonized spacing)
+        const dimLevel1 = y - 60;  // Top level - overall length
+        const dimLevel2 = y - 35;  // Second level - bearing distances
+        const dimLevel3 = y + depth * scale + 25; // Bottom level - bearing C/L
+        const dimLevel4 = y + depth * scale + 50; // Bottom level 2 - clearances
         
-        // 2. Bearing C/L dimension (below beam)
+        // Calculate bearing positions
         const leftBearingX = x + bearingDist * scale;
         const rightBearingX = x + (length - bearingDist) * scale;
-        drawDimLine(leftBearingX, y + depth * scale + 40, rightBearingX, y + depth * scale + 40, `${Math.floor(bearingCL/12)}'-${bearingCL%12}" C/L`, -5);
-        
-        // 3. Backwall clearance dimensions (small dims at ends)
-        if (backwallClearance > 0) {
-            // Left backwall clearance
-            drawDimLine(x - backwallClearance * scale, y + depth * scale + 20, x, y + depth * scale + 20, 
-                       `${Math.floor(backwallClearance/12)}'-${backwallClearance%12}"`, -5);
-            
-            // Right backwall clearance
-            drawDimLine(x + length * scale, y + depth * scale + 20, x + length * scale + backwallClearance * scale, y + depth * scale + 20,
-                       `${Math.floor(backwallClearance/12)}'-${backwallClearance%12}"`, -5);
-        }
-        
-        // 4. Bearing distance from ends
-        drawDimLine(x, y - 20, leftBearingX, y - 20, `${Math.floor(bearingDist/12)}'-${bearingDist%12}"`, -5);
-        drawDimLine(rightBearingX, y - 20, x + length * scale, y - 20, `${Math.floor(bearingDist/12)}'-${bearingDist%12}"`, -5);
-        
-        // 5. Breastwall distance from bearing C/L
         const leftBreastwallX = leftBearingX - breastwallDist * scale;
         const rightBreastwallX = rightBearingX + breastwallDist * scale;
         
-        // Draw extension lines for breastwall positions
-        const extLine1 = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-        extLine1.setAttribute('x1', leftBreastwallX);
-        extLine1.setAttribute('y1', y - 60);
-        extLine1.setAttribute('x2', leftBreastwallX);
-        extLine1.setAttribute('y2', y + depth * scale + 60);
-        extLine1.setAttribute('stroke', '#000');
-        extLine1.setAttribute('stroke-width', '0.5');
-        extLine1.setAttribute('stroke-dasharray', '2 2');
-        layer.appendChild(extLine1);
+        // Draw vertical extension lines for key positions
+        const drawExtensionLine = (xPos, label = '', yStart = y - 70, yEnd = y + depth * scale + 70) => {
+            const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+            line.setAttribute('x1', xPos);
+            line.setAttribute('y1', yStart);
+            line.setAttribute('x2', xPos);
+            line.setAttribute('y2', yEnd);
+            line.setAttribute('stroke', '#666');
+            line.setAttribute('stroke-width', '0.5');
+            line.setAttribute('stroke-dasharray', '3 3');
+            layer.appendChild(line);
+            
+            if (label) {
+                const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                text.setAttribute('x', xPos);
+                text.setAttribute('y', yStart - 5);
+                text.setAttribute('text-anchor', 'middle');
+                text.setAttribute('fill', '#666');
+                text.setAttribute('font-size', '9');
+                text.textContent = label;
+                layer.appendChild(text);
+            }
+        };
         
-        const extLine2 = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-        extLine2.setAttribute('x1', rightBreastwallX);
-        extLine2.setAttribute('y1', y - 60);
-        extLine2.setAttribute('x2', rightBreastwallX);
-        extLine2.setAttribute('y2', y + depth * scale + 60);
-        extLine2.setAttribute('stroke', '#000');
-        extLine2.setAttribute('stroke-width', '0.5');
-        extLine2.setAttribute('stroke-dasharray', '2 2');
-        layer.appendChild(extLine2);
+        // Draw extension lines for critical alignments
+        drawExtensionLine(leftBearingX, 'BRG');
+        drawExtensionLine(rightBearingX, 'BRG');
+        drawExtensionLine(leftBreastwallX, 'BW');
+        drawExtensionLine(rightBreastwallX, 'BW');
+        
+        // 1. Overall beam length dimension (top level)
+        drawDimLine(x, dimLevel1, x + length * scale, dimLevel1, 
+                   `${this.config.lengthFt}'-${this.config.lengthIn}"`, -5, 70);
+        
+        // 2. Bearing distance from ends (second level)
+        drawDimLine(x, dimLevel2, leftBearingX, dimLevel2, 
+                   `${Math.floor(bearingDist/12)}'-${bearingDist%12}"`, -5, 50);
+        drawDimLine(rightBearingX, dimLevel2, x + length * scale, dimLevel2, 
+                   `${Math.floor(bearingDist/12)}'-${bearingDist%12}"`, -5, 50);
+        
+        // 3. Bearing C/L dimension (bottom)
+        drawDimLine(leftBearingX, dimLevel3, rightBearingX, dimLevel3, 
+                   `${Math.floor(bearingCL/12)}'-${bearingCL%12}" BRG C/L`, -5, 80);
+        
+        // 4. Breastwall dimensions
+        drawDimLine(leftBreastwallX, dimLevel3 - 20, leftBearingX, dimLevel3 - 20,
+                   `${Math.floor(breastwallDist/12)}'-${breastwallDist%12}" BW`, -5, 50);
+        drawDimLine(rightBearingX, dimLevel3 - 20, rightBreastwallX, dimLevel3 - 20,
+                   `${Math.floor(breastwallDist/12)}'-${breastwallDist%12}" BW`, -5, 50);
+        
+        // 5. Backwall clearance dimensions if present
+        if (backwallClearance > 0) {
+            // Left backwall clearance
+            drawDimLine(x - backwallClearance * scale, dimLevel4, x, dimLevel4, 
+                       `${Math.floor(backwallClearance/12)}'-${backwallClearance%12}" CLR`, -5, 60);
+            
+            // Right backwall clearance
+            drawDimLine(x + length * scale, dimLevel4, x + length * scale + backwallClearance * scale, dimLevel4,
+                       `${Math.floor(backwallClearance/12)}'-${backwallClearance%12}" CLR`, -5, 60);
+        }
     }
     
     drawBeamEndDimensions(x, y, depth, scale) {
