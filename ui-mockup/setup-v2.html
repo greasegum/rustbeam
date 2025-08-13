@@ -117,7 +117,7 @@
                     <div class="tab-content" id="geometry-tab">
                         <div class="form-row">
                             <div class="form-group">
-                                <label for="bearing-cl-ft">Bearing C/L</label>
+                                <label for="bearing-cl-ft">Bearing C/L Spacing</label>
                                 <div class="input-group">
                                     <input type="number" id="bearing-cl-ft" value="42" min="0" max="100">
                                     <span class="unit">ft</span>
@@ -127,33 +127,37 @@
                             </div>
                         </div>
 
-                        <div class="form-group">
-                            <label>Bridge Seat Width (from beam end)</label>
-                            <div class="form-row">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="bearing-distance-ft">Bearing Distance from End</label>
                                 <div class="input-group">
-                                    <label class="small">Left</label>
-                                    <input type="number" id="seat-left" value="18" min="0" max="48">
-                                    <span class="unit">in</span>
-                                </div>
-                                <div class="input-group">
-                                    <label class="small">Right</label>
-                                    <input type="number" id="seat-right" value="18" min="0" max="48">
+                                    <input type="number" id="bearing-distance-ft" value="1" min="0" max="10">
+                                    <span class="unit">ft</span>
+                                    <input type="number" id="bearing-distance-in" value="0" min="0" max="11">
                                     <span class="unit">in</span>
                                 </div>
                             </div>
                         </div>
 
-                        <div class="form-group">
-                            <label>Backwall Distance (from beam end)</label>
-                            <div class="form-row">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="backwall-clearance-ft">Backwall Clearance</label>
                                 <div class="input-group">
-                                    <label class="small">Left</label>
-                                    <input type="number" id="backwall-left" value="2" min="0" max="24">
+                                    <input type="number" id="backwall-clearance-ft" value="0" min="0" max="2">
+                                    <span class="unit">ft</span>
+                                    <input type="number" id="backwall-clearance-in" value="2" min="0" max="11">
                                     <span class="unit">in</span>
                                 </div>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="breastwall-ft">Breastwall Distance from Bearing</label>
                                 <div class="input-group">
-                                    <label class="small">Right</label>
-                                    <input type="number" id="backwall-right" value="2" min="0" max="24">
+                                    <input type="number" id="breastwall-ft" value="2" min="0" max="10">
+                                    <span class="unit">ft</span>
+                                    <input type="number" id="breastwall-in" value="6" min="0" max="11">
                                     <span class="unit">in</span>
                                 </div>
                             </div>

@@ -68,10 +68,12 @@ class BeamSetup {
             topFlangeVisible: true,
             bearingClFt: 42,
             bearingClIn: 0,
-            seatLeft: 18,
-            seatRight: 18,
-            backwallLeft: 2,
-            backwallRight: 2
+            bearingDistanceFt: 1,
+            bearingDistanceIn: 0,
+            backwallClearanceFt: 0,
+            backwallClearanceIn: 2,
+            breastwallFt: 2,
+            breastwallIn: 6
         };
     }
 
@@ -88,10 +90,12 @@ class BeamSetup {
             topFlangeVisible: document.getElementById('top-flange-visible').checked,
             bearingClFt: parseInt(document.getElementById('bearing-cl-ft').value),
             bearingClIn: parseInt(document.getElementById('bearing-cl-in').value),
-            seatLeft: parseInt(document.getElementById('seat-left').value),
-            seatRight: parseInt(document.getElementById('seat-right').value),
-            backwallLeft: parseInt(document.getElementById('backwall-left').value),
-            backwallRight: parseInt(document.getElementById('backwall-right').value)
+            bearingDistanceFt: parseInt(document.getElementById('bearing-distance-ft').value || 1),
+            bearingDistanceIn: parseInt(document.getElementById('bearing-distance-in').value || 0),
+            backwallClearanceFt: parseInt(document.getElementById('backwall-clearance-ft').value || 0),
+            backwallClearanceIn: parseInt(document.getElementById('backwall-clearance-in').value || 2),
+            breastwallFt: parseInt(document.getElementById('breastwall-ft').value || 2),
+            breastwallIn: parseInt(document.getElementById('breastwall-in').value || 6)
         };
 
         // Add profile data
@@ -159,10 +163,12 @@ class BeamSetup {
         document.getElementById('top-flange-visible').checked = this.config.topFlangeVisible;
         document.getElementById('bearing-cl-ft').value = this.config.bearingClFt;
         document.getElementById('bearing-cl-in').value = this.config.bearingClIn;
-        document.getElementById('seat-left').value = this.config.seatLeft;
-        document.getElementById('seat-right').value = this.config.seatRight;
-        document.getElementById('backwall-left').value = this.config.backwallLeft;
-        document.getElementById('backwall-right').value = this.config.backwallRight;
+        document.getElementById('bearing-distance-ft').value = this.config.bearingDistanceFt || 1;
+        document.getElementById('bearing-distance-in').value = this.config.bearingDistanceIn || 0;
+        document.getElementById('backwall-clearance-ft').value = this.config.backwallClearanceFt || 0;
+        document.getElementById('backwall-clearance-in').value = this.config.backwallClearanceIn || 2;
+        document.getElementById('breastwall-ft').value = this.config.breastwallFt || 2;
+        document.getElementById('breastwall-in').value = this.config.breastwallIn || 6;
     }
 
     switchTab(tab) {
@@ -207,13 +213,21 @@ class BeamSetup {
                           parseInt(document.getElementById('length-in').value);
         const bearingCL = parseInt(document.getElementById('bearing-cl-ft').value) * 12 + 
                          parseInt(document.getElementById('bearing-cl-in').value);
+        const bearingDist = parseInt(document.getElementById('bearing-distance-ft').value || 1) * 12 +
+                           parseInt(document.getElementById('bearing-distance-in').value || 0);
+        const backwallClearance = parseInt(document.getElementById('backwall-clearance-ft').value || 0) * 12 +
+                                 parseInt(document.getElementById('backwall-clearance-in').value || 2);
+        const breastwallDist = parseInt(document.getElementById('breastwall-ft').value || 2) * 12 +
+                              parseInt(document.getElementById('breastwall-in').value || 6);
         const profile = this.profiles[document.getElementById('beam-profile').value];
         const topFlangeVisible = document.getElementById('top-flange-visible').checked;
         
-        // Calculate scale
-        const padding = 100;
+        // Calculate scale to include abutments
+        const padding = 80;
+        const abutmentWidth = breastwallDist + bearingDist;
+        const totalWidth = beamLength + 2 * (backwallClearance + abutmentWidth);
         const availableWidth = 800 - 2 * padding;
-        const scale = Math.min(availableWidth / beamLength, 10);
+        const scale = Math.min(availableWidth / totalWidth, 6);
         
         const centerX = 400;
         const centerY = 200;
@@ -241,123 +255,67 @@ class BeamSetup {
 
     drawAbutments(x, y, beamLength, beamDepth, scale) {
         const group = document.getElementById('elevation-abutments');
-        const seatLeft = parseInt(document.getElementById('seat-left').value);
-        const seatRight = parseInt(document.getElementById('seat-right').value);
-        const backwallLeft = parseInt(document.getElementById('backwall-left').value);
-        const backwallRight = parseInt(document.getElementById('backwall-right').value);
         
-        const seatHeight = 6;  // Height of bridge seat in inches
-        const backwallHeight = beamDepth + 12;  // Backwall extends above beam
+        // Get parametric dimensions
+        const bearingDist = (parseInt(document.getElementById('bearing-distance-ft').value || 1) * 12 +
+                            parseInt(document.getElementById('bearing-distance-in').value || 0)) * scale;
+        const backwallClearance = (parseInt(document.getElementById('backwall-clearance-ft').value || 0) * 12 +
+                                  parseInt(document.getElementById('backwall-clearance-in').value || 2)) * scale;
+        const breastwallDist = (parseInt(document.getElementById('breastwall-ft').value || 2) * 12 +
+                               parseInt(document.getElementById('breastwall-in').value || 6)) * scale;
         
-        // Left abutment (monolithic)
-        if (seatLeft > 0) {
-            // Main abutment body (large grey block)
-            const abutmentBody = this.createSVGElement('rect', {
-                x: x - backwallLeft * scale - 20 * scale,
-                y: y - 15 * scale,
-                width: (backwallLeft + 20) * scale,
-                height: (backwallHeight + 40) * scale,
-                fill: '#BDBDBD',
-                stroke: '#666',
-                'stroke-width': 1.5,
-                opacity: 0.8
-            });
-            group.appendChild(abutmentBody);
-            
-            // Bridge seat (horizontal surface)
-            const seatRect = this.createSVGElement('rect', {
-                x: x - seatLeft * scale,
-                y: y + beamDepth * scale - seatHeight * scale,
-                width: seatLeft * scale,
-                height: seatHeight * scale + 20 * scale,
-                fill: '#9E9E9E',
-                stroke: '#666',
-                'stroke-width': 1.5,
-                opacity: 0.9
-            });
-            group.appendChild(seatRect);
-            
-            // Backwall (vertical at beam end)
-            const backwallRect = this.createSVGElement('rect', {
-                x: x - backwallLeft * scale,
-                y: y - 6 * scale,
-                width: backwallLeft * scale,
-                height: backwallHeight * scale,
-                fill: '#9E9E9E',
-                stroke: '#666',
-                'stroke-width': 1.5,
-                opacity: 0.9
-            });
-            group.appendChild(backwallRect);
-            
-            // Breastwall (drops from inner edge of seat)
-            const breastwallRect = this.createSVGElement('rect', {
-                x: x - seatLeft * scale,
-                y: y + beamDepth * scale + seatHeight * scale,
-                width: 6 * scale,
-                height: 24 * scale,
-                fill: '#9E9E9E',
-                stroke: '#666',
-                'stroke-width': 1.5,
-                opacity: 0.9
-            });
-            group.appendChild(breastwallRect);
-        }
+        const seatWidth = bearingDist + 12 * scale; // Seat extends past bearing center
+        const abutmentWidth = breastwallDist + bearingDist;
+        const abutmentTopExtension = 10 * scale;
+        const abutmentTotalHeight = beamDepth * scale + 36 * scale;
         
-        // Right abutment (mirror)
-        if (seatRight > 0) {
-            // Main abutment body
-            const abutmentBody = this.createSVGElement('rect', {
-                x: x + beamLength * scale,
-                y: y - 15 * scale,
-                width: (backwallRight + 20) * scale,
-                height: (backwallHeight + 40) * scale,
-                fill: '#BDBDBD',
-                stroke: '#666',
-                'stroke-width': 1.5,
-                opacity: 0.8
-            });
-            group.appendChild(abutmentBody);
-            
-            // Bridge seat
-            const seatRect = this.createSVGElement('rect', {
-                x: x + beamLength * scale,
-                y: y + beamDepth * scale - seatHeight * scale,
-                width: seatRight * scale,
-                height: seatHeight * scale + 20 * scale,
-                fill: '#9E9E9E',
-                stroke: '#666',
-                'stroke-width': 1.5,
-                opacity: 0.9
-            });
-            group.appendChild(seatRect);
-            
-            // Backwall
-            const backwallRect = this.createSVGElement('rect', {
-                x: x + beamLength * scale,
-                y: y - 6 * scale,
-                width: backwallRight * scale,
-                height: backwallHeight * scale,
-                fill: '#9E9E9E',
-                stroke: '#666',
-                'stroke-width': 1.5,
-                opacity: 0.9
-            });
-            group.appendChild(backwallRect);
-            
-            // Breastwall
-            const breastwallRect = this.createSVGElement('rect', {
-                x: x + beamLength * scale + seatRight * scale - 6 * scale,
-                y: y + beamDepth * scale + seatHeight * scale,
-                width: 6 * scale,
-                height: 24 * scale,
-                fill: '#9E9E9E',
-                stroke: '#666',
-                'stroke-width': 1.5,
-                opacity: 0.9
-            });
-            group.appendChild(breastwallRect);
-        }
+        // LEFT ABUTMENT - L-shaped parametric design
+        const leftBearingCenterX = x + bearingDist;
+        const leftBackwallX = x - backwallClearance - abutmentWidth;
+        const leftBreastwallX = leftBearingCenterX - breastwallDist;
+        const leftSeatEndX = x - backwallClearance;
+        
+        // Create path for left abutment
+        let leftPath = `M ${leftBackwallX} ${y - abutmentTopExtension} `; // Top of backwall
+        leftPath += `L ${leftBreastwallX} ${y - abutmentTopExtension} `; // Across top
+        leftPath += `L ${leftBreastwallX} ${y + beamDepth * scale} `; // Down breastwall
+        leftPath += `L ${leftSeatEndX} ${y + beamDepth * scale} `; // Across seat
+        leftPath += `L ${leftSeatEndX} ${y + abutmentTotalHeight} `; // Down to base
+        leftPath += `L ${leftBackwallX} ${y + abutmentTotalHeight} `; // Across base
+        leftPath += `L ${leftBackwallX} ${y - abutmentTopExtension} `; // Up backwall
+        leftPath += `Z`; // Close path
+        
+        const leftAbutment = this.createSVGElement('path', {
+            d: leftPath,
+            fill: '#808080',
+            stroke: '#000',
+            'stroke-width': 2
+        });
+        group.appendChild(leftAbutment);
+        
+        // RIGHT ABUTMENT - Mirrored L-shape
+        const rightBearingCenterX = x + beamLength * scale - bearingDist;
+        const rightSeatEndX = x + beamLength * scale + backwallClearance;
+        const rightBreastwallX = rightBearingCenterX + breastwallDist;
+        const rightBackwallX = x + beamLength * scale + backwallClearance + abutmentWidth;
+        
+        // Create path for right abutment
+        let rightPath = `M ${rightSeatEndX} ${y + beamDepth * scale} `; // Start at seat
+        rightPath += `L ${rightSeatEndX} ${y + abutmentTotalHeight} `; // Down to base
+        rightPath += `L ${rightBackwallX} ${y + abutmentTotalHeight} `; // Across base
+        rightPath += `L ${rightBackwallX} ${y - abutmentTopExtension} `; // Up backwall
+        rightPath += `L ${rightBreastwallX} ${y - abutmentTopExtension} `; // Across top
+        rightPath += `L ${rightBreastwallX} ${y + beamDepth * scale} `; // Down breastwall
+        rightPath += `L ${rightSeatEndX} ${y + beamDepth * scale} `; // Back to start
+        rightPath += `Z`; // Close path
+        
+        const rightAbutment = this.createSVGElement('path', {
+            d: rightPath,
+            fill: '#808080',
+            stroke: '#000',
+            'stroke-width': 2
+        });
+        group.appendChild(rightAbutment);
     }
 
     drawBeam(x, y, beamLength, profile, scale, topFlangeVisible) {
@@ -407,31 +365,68 @@ class BeamSetup {
 
     drawBearings(x, y, beamLength, bearingCL, beamDepth, scale) {
         const group = document.getElementById('elevation-bearings');
-        const bearingOffset = (beamLength - bearingCL) / 2;
+        
+        // Get bearing distance from end
+        const bearingDist = parseInt(document.getElementById('bearing-distance-ft').value || 1) * 12 +
+                           parseInt(document.getElementById('bearing-distance-in').value || 0);
+        
         const bearingWidth = 18;
-        const bearingHeight = 8;
+        const bearingHeight = 3; // Each bearing pad is 3" thick
+        const bearingY = y + beamDepth * scale;
         
-        // Left bearing
-        const leftBearing = this.createSVGElement('rect', {
-            x: x + bearingOffset * scale - (bearingWidth * scale / 2),
-            y: y + beamDepth * scale - bearingHeight * scale,
+        // LEFT BEARING - Two stacked rectangles positioned at bearingDist from left end
+        const leftBearingX = x + bearingDist * scale - (bearingWidth * scale / 2);
+        
+        // Top pad
+        const leftTop = this.createSVGElement('rect', {
+            x: leftBearingX,
+            y: bearingY,
             width: bearingWidth * scale,
             height: bearingHeight * scale,
-            rx: 2,
-            class: 'bearing'
+            fill: '#00ff00',
+            stroke: '#000',
+            'stroke-width': 1
         });
-        group.appendChild(leftBearing);
+        group.appendChild(leftTop);
         
-        // Right bearing
-        const rightBearing = this.createSVGElement('rect', {
-            x: x + (beamLength - bearingOffset) * scale - (bearingWidth * scale / 2),
-            y: y + beamDepth * scale - bearingHeight * scale,
+        // Bottom pad
+        const leftBottom = this.createSVGElement('rect', {
+            x: leftBearingX,
+            y: bearingY + bearingHeight * scale,
             width: bearingWidth * scale,
             height: bearingHeight * scale,
-            rx: 2,
-            class: 'bearing'
+            fill: '#00ff00',
+            stroke: '#000',
+            'stroke-width': 1
         });
-        group.appendChild(rightBearing);
+        group.appendChild(leftBottom);
+        
+        // RIGHT BEARING - Two stacked rectangles positioned at bearingDist from right end
+        const rightBearingX = x + (beamLength - bearingDist) * scale - (bearingWidth * scale / 2);
+        
+        // Top pad
+        const rightTop = this.createSVGElement('rect', {
+            x: rightBearingX,
+            y: bearingY,
+            width: bearingWidth * scale,
+            height: bearingHeight * scale,
+            fill: '#00ff00',
+            stroke: '#000',
+            'stroke-width': 1
+        });
+        group.appendChild(rightTop);
+        
+        // Bottom pad
+        const rightBottom = this.createSVGElement('rect', {
+            x: rightBearingX,
+            y: bearingY + bearingHeight * scale,
+            width: bearingWidth * scale,
+            height: bearingHeight * scale,
+            fill: '#00ff00',
+            stroke: '#000',
+            'stroke-width': 1
+        });
+        group.appendChild(rightBottom);
     }
 
     drawDimensions(x, y, beamLength, bearingCL, beamDepth, scale) {
