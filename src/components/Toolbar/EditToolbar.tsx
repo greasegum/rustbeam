@@ -2,7 +2,11 @@ import React, { useState } from 'react';
 import { useStore } from '../../store';
 import './Toolbar.css';
 
-export const EditToolbar: React.FC = () => {
+interface EditToolbarProps {
+  onConfigure: () => void;
+}
+
+export const EditToolbar: React.FC<EditToolbarProps> = ({ onConfigure }) => {
   const [activeTool, setActiveTool] = useState<string>('brush');
   const [activeCS, setActiveCS] = useState<number>(1);
   const [brushRadius, setBrushRadius] = useState<number>(1);
@@ -157,7 +161,12 @@ export const EditToolbar: React.FC = () => {
       
       <div className="tool-group ml-auto">
         {/* Configure button for advanced settings */}
-        <button className="action-btn" id="configure-btn" title="Advanced Settings">
+        <button
+          className="action-btn"
+          id="configure-btn"
+          title="Advanced Settings"
+          onClick={onConfigure}
+        >
           <svg width="16" height="16" viewBox="0 0 16 16">
             <circle cx="8" cy="8" r="3" stroke="currentColor" fill="none"/>
             <path d="M8 1 L8 3 M8 13 L8 15 M1 8 L3 8 M13 8 L15 8" stroke="currentColor"/>
