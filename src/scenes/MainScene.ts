@@ -107,53 +107,62 @@ export class MainScene extends Phaser.Scene {
     // Pastel green color (soft mint green)
     const beamColor = 0x98D8A8;
     const strokeColor = 0x4A8060;
+    const flangeLineColor = 0x6B9070;
     
-    // For side view, we show the beam as an I-shape
-    // The web is the vertical part, flanges are horizontal parts at top and bottom
+    // SIDE ELEVATION VIEW - Looking at the beam from the side
+    // Shows full length horizontally and depth vertically
     
-    // Draw web (vertical part in the middle - thin vertical rectangle)
-    const web = this.add.rectangle(
-      0, 0,
-      profile.webThickness * scale,  // Web thickness (thin)
-      profile.depth * scale,          // Full height
-      beamColor
-    );
-    web.setStrokeStyle(1, strokeColor);
-    this.beamContainer.add(web);
-    
-    // Draw top flange (horizontal part at top - wider than web)
-    const topFlange = this.add.rectangle(
-      0,
-      -(profile.depth / 2 - profile.flangeThickness / 2) * scale,
-      profile.flangeWidth * scale,    // Flange width (wider than web)
-      profile.flangeThickness * scale,
-      beamColor
-    );
-    topFlange.setStrokeStyle(1, strokeColor);
-    this.beamContainer.add(topFlange);
-    
-    // Draw bottom flange (horizontal part at bottom - wider than web)
-    const bottomFlange = this.add.rectangle(
-      0,
-      (profile.depth / 2 - profile.flangeThickness / 2) * scale,
-      profile.flangeWidth * scale,    // Flange width (wider than web)
-      profile.flangeThickness * scale,
-      beamColor
-    );
-    bottomFlange.setStrokeStyle(1, strokeColor);
-    this.beamContainer.add(bottomFlange);
-    
-    // Draw the length representation (side view showing the beam extending)
-    // This shows the beam from the side, so we see it as a long rectangle
-    const beamLength = this.add.rectangle(
+    // Draw main beam body (side elevation)
+    const beamBody = this.add.rectangle(
       0, 0,
       length * scale,
       profile.depth * scale,
-      beamColor,
-      0.3  // Semi-transparent to show it's the side view
+      beamColor
     );
-    beamLength.setStrokeStyle(2, strokeColor);
-    this.beamContainer.add(beamLength);
+    beamBody.setStrokeStyle(2, strokeColor);
+    this.beamContainer.add(beamBody);
+    
+    // Draw horizontal lines to show the three zones
+    // Top flange zone line
+    const topFlangeZoneLine = this.add.line(
+      0, 0,
+      -length * scale / 2, -(profile.depth / 2 - profile.flangeThickness) * scale,
+      length * scale / 2, -(profile.depth / 2 - profile.flangeThickness) * scale,
+      flangeLineColor, 0.8
+    );
+    topFlangeZoneLine.setLineWidth(1);
+    this.beamContainer.add(topFlangeZoneLine);
+    
+    // Bottom flange zone line  
+    const bottomFlangeZoneLine = this.add.line(
+      0, 0,
+      -length * scale / 2, (profile.depth / 2 - profile.flangeThickness) * scale,
+      length * scale / 2, (profile.depth / 2 - profile.flangeThickness) * scale,
+      flangeLineColor, 0.8
+    );
+    bottomFlangeZoneLine.setLineWidth(1);
+    this.beamContainer.add(bottomFlangeZoneLine);
+    
+    // Add subtle shading for flanges to show zones
+    // Top flange zone
+    const topFlangeZone = this.add.rectangle(
+      0,
+      -(profile.depth / 2 - profile.flangeThickness / 2) * scale,
+      length * scale,
+      profile.flangeThickness * scale,
+      beamColor, 0.3
+    );
+    this.beamContainer.add(topFlangeZone);
+    
+    // Bottom flange zone
+    const bottomFlangeZone = this.add.rectangle(
+      0,
+      (profile.depth / 2 - profile.flangeThickness / 2) * scale,
+      length * scale,
+      profile.flangeThickness * scale,
+      beamColor, 0.3
+    );
+    this.beamContainer.add(bottomFlangeZone);
     
     // Draw bearings
     // Complementary color for bearings (coral/salmon)
