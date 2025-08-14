@@ -83,11 +83,26 @@ export const useStore = create<AppStore>()(
         partialize: (state) => ({
           project: state.project,
           beam: state.beam,
-          grid: state.grid,
+          grid: { ...state.grid, cells: Array.from(state.grid.cells.entries()) },
           tool: state.tool,
-          annotations: state.annotations,
+          annotations: {
+            ...state.annotations,
+            annotations: Array.from(state.annotations.annotations.entries())
+          },
           view: state.view
-        })
+        }),
+        deserialize: (str) => {
+          const data = JSON.parse(str);
+          if (data.state?.grid?.cells) {
+            data.state.grid.cells = new Map(data.state.grid.cells);
+          }
+          if (data.state?.annotations?.annotations) {
+            data.state.annotations.annotations = new Map(
+              data.state.annotations.annotations
+            );
+          }
+          return data;
+        }
       }
     )
   )
