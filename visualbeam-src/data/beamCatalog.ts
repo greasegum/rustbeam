@@ -1,0 +1,205 @@
+import { BeamProfile } from '../types';
+
+export const BEAM_CATALOG: BeamProfile[] = [
+  // 8" Deep Beams
+  { id: 'W8X10', depth: 7.89, weight: 10, webThickness: 0.170, flangeWidth: 3.940, flangeThickness: 0.205, area: 2.96, momentOfInertia: 30.8 },
+  { id: 'W8X13', depth: 7.99, weight: 13, webThickness: 0.230, flangeWidth: 4.000, flangeThickness: 0.255, area: 3.84, momentOfInertia: 39.6 },
+  { id: 'W8X15', depth: 8.11, weight: 15, webThickness: 0.245, flangeWidth: 4.015, flangeThickness: 0.315, area: 4.44, momentOfInertia: 48.0 },
+  { id: 'W8X18', depth: 8.14, weight: 18, webThickness: 0.230, flangeWidth: 5.250, flangeThickness: 0.330, area: 5.26, momentOfInertia: 61.9 },
+  { id: 'W8X21', depth: 8.28, weight: 21, webThickness: 0.250, flangeWidth: 5.270, flangeThickness: 0.400, area: 6.16, momentOfInertia: 75.3 },
+  { id: 'W8X24', depth: 7.93, weight: 24, webThickness: 0.245, flangeWidth: 6.495, flangeThickness: 0.400, area: 7.08, momentOfInertia: 82.8 },
+  { id: 'W8X28', depth: 8.06, weight: 28, webThickness: 0.285, flangeWidth: 6.535, flangeThickness: 0.465, area: 8.25, momentOfInertia: 98.0 },
+  { id: 'W8X31', depth: 8.00, weight: 31, webThickness: 0.285, flangeWidth: 7.995, flangeThickness: 0.435, area: 9.13, momentOfInertia: 110 },
+  { id: 'W8X35', depth: 8.12, weight: 35, webThickness: 0.310, flangeWidth: 8.020, flangeThickness: 0.495, area: 10.3, momentOfInertia: 127 },
+  { id: 'W8X40', depth: 8.25, weight: 40, webThickness: 0.360, flangeWidth: 8.070, flangeThickness: 0.560, area: 11.7, momentOfInertia: 146 },
+  { id: 'W8X48', depth: 8.50, weight: 48, webThickness: 0.400, flangeWidth: 8.110, flangeThickness: 0.685, area: 14.1, momentOfInertia: 184 },
+  { id: 'W8X58', depth: 8.75, weight: 58, webThickness: 0.510, flangeWidth: 8.220, flangeThickness: 0.810, area: 17.1, momentOfInertia: 228 },
+  { id: 'W8X67', depth: 9.00, weight: 67, webThickness: 0.570, flangeWidth: 8.280, flangeThickness: 0.935, area: 19.7, momentOfInertia: 272 },
+
+  // 10" Deep Beams
+  { id: 'W10X12', depth: 9.87, weight: 12, webThickness: 0.190, flangeWidth: 3.960, flangeThickness: 0.210, area: 3.54, momentOfInertia: 53.8 },
+  { id: 'W10X15', depth: 9.99, weight: 15, webThickness: 0.230, flangeWidth: 4.000, flangeThickness: 0.270, area: 4.41, momentOfInertia: 68.9 },
+  { id: 'W10X17', depth: 10.11, weight: 17, webThickness: 0.240, flangeWidth: 4.010, flangeThickness: 0.330, area: 4.99, momentOfInertia: 81.9 },
+  { id: 'W10X19', depth: 10.24, weight: 19, webThickness: 0.250, flangeWidth: 4.020, flangeThickness: 0.395, area: 5.62, momentOfInertia: 96.3 },
+  { id: 'W10X22', depth: 10.17, weight: 22, webThickness: 0.240, flangeWidth: 5.750, flangeThickness: 0.360, area: 6.49, momentOfInertia: 118 },
+  { id: 'W10X26', depth: 10.33, weight: 26, webThickness: 0.260, flangeWidth: 5.770, flangeThickness: 0.440, area: 7.61, momentOfInertia: 144 },
+  { id: 'W10X30', depth: 10.47, weight: 30, webThickness: 0.300, flangeWidth: 5.810, flangeThickness: 0.510, area: 8.84, momentOfInertia: 170 },
+  { id: 'W10X33', depth: 9.73, weight: 33, webThickness: 0.290, flangeWidth: 7.960, flangeThickness: 0.435, area: 9.71, momentOfInertia: 171 },
+  { id: 'W10X39', depth: 9.92, weight: 39, webThickness: 0.315, flangeWidth: 7.985, flangeThickness: 0.530, area: 11.5, momentOfInertia: 209 },
+  { id: 'W10X45', depth: 10.10, weight: 45, webThickness: 0.350, flangeWidth: 8.020, flangeThickness: 0.620, area: 13.3, momentOfInertia: 248 },
+  { id: 'W10X49', depth: 9.98, weight: 49, webThickness: 0.340, flangeWidth: 10.000, flangeThickness: 0.560, area: 14.4, momentOfInertia: 272 },
+  { id: 'W10X54', depth: 10.09, weight: 54, webThickness: 0.370, flangeWidth: 10.030, flangeThickness: 0.615, area: 15.8, momentOfInertia: 303 },
+  { id: 'W10X60', depth: 10.22, weight: 60, webThickness: 0.420, flangeWidth: 10.080, flangeThickness: 0.680, area: 17.6, momentOfInertia: 341 },
+  { id: 'W10X68', depth: 10.40, weight: 68, webThickness: 0.470, flangeWidth: 10.130, flangeThickness: 0.770, area: 20.0, momentOfInertia: 394 },
+  { id: 'W10X77', depth: 10.60, weight: 77, webThickness: 0.530, flangeWidth: 10.190, flangeThickness: 0.870, area: 22.6, momentOfInertia: 455 },
+  { id: 'W10X88', depth: 10.84, weight: 88, webThickness: 0.605, flangeWidth: 10.265, flangeThickness: 0.990, area: 25.9, momentOfInertia: 534 },
+  { id: 'W10X100', depth: 11.10, weight: 100, webThickness: 0.680, flangeWidth: 10.340, flangeThickness: 1.120, area: 29.4, momentOfInertia: 623 },
+  { id: 'W10X112', depth: 11.36, weight: 112, webThickness: 0.755, flangeWidth: 10.415, flangeThickness: 1.250, area: 32.9, momentOfInertia: 716 },
+
+  // 12" Deep Beams
+  { id: 'W12X14', depth: 11.91, weight: 14, webThickness: 0.200, flangeWidth: 3.970, flangeThickness: 0.225, area: 4.16, momentOfInertia: 88.6 },
+  { id: 'W12X16', depth: 11.99, weight: 16, webThickness: 0.220, flangeWidth: 3.990, flangeThickness: 0.265, area: 4.71, momentOfInertia: 103 },
+  { id: 'W12X19', depth: 12.16, weight: 19, webThickness: 0.235, flangeWidth: 4.005, flangeThickness: 0.350, area: 5.57, momentOfInertia: 130 },
+  { id: 'W12X22', depth: 12.31, weight: 22, webThickness: 0.260, flangeWidth: 4.030, flangeThickness: 0.425, area: 6.48, momentOfInertia: 156 },
+  { id: 'W12X26', depth: 12.22, weight: 26, webThickness: 0.230, flangeWidth: 6.490, flangeThickness: 0.380, area: 7.65, momentOfInertia: 204 },
+  { id: 'W12X30', depth: 12.34, weight: 30, webThickness: 0.260, flangeWidth: 6.520, flangeThickness: 0.440, area: 8.79, momentOfInertia: 238 },
+  { id: 'W12X35', depth: 12.50, weight: 35, webThickness: 0.300, flangeWidth: 6.560, flangeThickness: 0.520, area: 10.3, momentOfInertia: 285 },
+  { id: 'W12X40', depth: 11.94, weight: 40, webThickness: 0.295, flangeWidth: 8.005, flangeThickness: 0.515, area: 11.8, momentOfInertia: 310 },
+  { id: 'W12X45', depth: 12.06, weight: 45, webThickness: 0.335, flangeWidth: 8.045, flangeThickness: 0.575, area: 13.2, momentOfInertia: 350 },
+  { id: 'W12X50', depth: 12.19, weight: 50, webThickness: 0.370, flangeWidth: 8.080, flangeThickness: 0.640, area: 14.7, momentOfInertia: 394 },
+  { id: 'W12X53', depth: 12.06, weight: 53, webThickness: 0.345, flangeWidth: 9.995, flangeThickness: 0.575, area: 15.6, momentOfInertia: 425 },
+  { id: 'W12X58', depth: 12.19, weight: 58, webThickness: 0.360, flangeWidth: 10.010, flangeThickness: 0.640, area: 17.0, momentOfInertia: 475 },
+  { id: 'W12X65', depth: 12.12, weight: 65, webThickness: 0.390, flangeWidth: 12.000, flangeThickness: 0.605, area: 19.1, momentOfInertia: 533 },
+  { id: 'W12X72', depth: 12.25, weight: 72, webThickness: 0.430, flangeWidth: 12.040, flangeThickness: 0.670, area: 21.1, momentOfInertia: 597 },
+  { id: 'W12X79', depth: 12.38, weight: 79, webThickness: 0.470, flangeWidth: 12.080, flangeThickness: 0.735, area: 23.2, momentOfInertia: 662 },
+  { id: 'W12X87', depth: 12.53, weight: 87, webThickness: 0.515, flangeWidth: 12.125, flangeThickness: 0.810, area: 25.6, momentOfInertia: 740 },
+  { id: 'W12X96', depth: 12.71, weight: 96, webThickness: 0.550, flangeWidth: 12.160, flangeThickness: 0.900, area: 28.2, momentOfInertia: 833 },
+  { id: 'W12X106', depth: 12.89, weight: 106, webThickness: 0.610, flangeWidth: 12.220, flangeThickness: 0.990, area: 31.2, momentOfInertia: 933 },
+  { id: 'W12X120', depth: 13.12, weight: 120, webThickness: 0.710, flangeWidth: 12.320, flangeThickness: 1.105, area: 35.3, momentOfInertia: 1070 },
+  { id: 'W12X136', depth: 13.41, weight: 136, webThickness: 0.790, flangeWidth: 12.400, flangeThickness: 1.250, area: 39.9, momentOfInertia: 1240 },
+  { id: 'W12X152', depth: 13.71, weight: 152, webThickness: 0.870, flangeWidth: 12.480, flangeThickness: 1.400, area: 44.7, momentOfInertia: 1430 },
+  { id: 'W12X170', depth: 14.03, weight: 170, webThickness: 0.960, flangeWidth: 12.570, flangeThickness: 1.560, area: 50.0, momentOfInertia: 1650 },
+  { id: 'W12X190', depth: 14.38, weight: 190, webThickness: 1.060, flangeWidth: 12.670, flangeThickness: 1.735, area: 55.8, momentOfInertia: 1890 },
+  { id: 'W12X210', depth: 14.71, weight: 210, webThickness: 1.180, flangeWidth: 12.790, flangeThickness: 1.900, area: 61.8, momentOfInertia: 2140 },
+  { id: 'W12X230', depth: 15.05, weight: 230, webThickness: 1.285, flangeWidth: 12.895, flangeThickness: 2.070, area: 67.7, momentOfInertia: 2420 },
+  { id: 'W12X252', depth: 15.41, weight: 252, webThickness: 1.395, flangeWidth: 13.005, flangeThickness: 2.250, area: 74.1, momentOfInertia: 2720 },
+  { id: 'W12X279', depth: 15.85, weight: 279, webThickness: 1.530, flangeWidth: 13.140, flangeThickness: 2.470, area: 81.9, momentOfInertia: 3110 },
+  { id: 'W12X305', depth: 16.32, weight: 305, webThickness: 1.625, flangeWidth: 13.235, flangeThickness: 2.705, area: 89.6, momentOfInertia: 3550 },
+  { id: 'W12X336', depth: 16.82, weight: 336, webThickness: 1.775, flangeWidth: 13.385, flangeThickness: 2.955, area: 98.8, momentOfInertia: 4060 },
+
+  // 14" Deep Beams
+  { id: 'W14X22', depth: 13.74, weight: 22, webThickness: 0.230, flangeWidth: 5.000, flangeThickness: 0.335, area: 6.49, momentOfInertia: 199 },
+  { id: 'W14X26', depth: 13.91, weight: 26, webThickness: 0.255, flangeWidth: 5.025, flangeThickness: 0.420, area: 7.69, momentOfInertia: 245 },
+  { id: 'W14X30', depth: 13.84, weight: 30, webThickness: 0.270, flangeWidth: 6.730, flangeThickness: 0.385, area: 8.85, momentOfInertia: 291 },
+  { id: 'W14X34', depth: 13.98, weight: 34, webThickness: 0.285, flangeWidth: 6.745, flangeThickness: 0.455, area: 10.0, momentOfInertia: 340 },
+  { id: 'W14X38', depth: 14.10, weight: 38, webThickness: 0.310, flangeWidth: 6.770, flangeThickness: 0.515, area: 11.2, momentOfInertia: 385 },
+  { id: 'W14X43', depth: 13.66, weight: 43, webThickness: 0.305, flangeWidth: 7.995, flangeThickness: 0.530, area: 12.6, momentOfInertia: 428 },
+  { id: 'W14X48', depth: 13.79, weight: 48, webThickness: 0.340, flangeWidth: 8.030, flangeThickness: 0.595, area: 14.1, momentOfInertia: 485 },
+  { id: 'W14X53', depth: 13.92, weight: 53, webThickness: 0.370, flangeWidth: 8.060, flangeThickness: 0.660, area: 15.6, momentOfInertia: 541 },
+  { id: 'W14X61', depth: 13.89, weight: 61, webThickness: 0.375, flangeWidth: 9.995, flangeThickness: 0.645, area: 17.9, momentOfInertia: 640 },
+  { id: 'W14X68', depth: 14.04, weight: 68, webThickness: 0.415, flangeWidth: 10.035, flangeThickness: 0.720, area: 20.0, momentOfInertia: 723 },
+  { id: 'W14X74', depth: 14.17, weight: 74, webThickness: 0.450, flangeWidth: 10.070, flangeThickness: 0.785, area: 21.8, momentOfInertia: 796 },
+  { id: 'W14X82', depth: 14.31, weight: 82, webThickness: 0.510, flangeWidth: 10.130, flangeThickness: 0.855, area: 24.0, momentOfInertia: 881 },
+  { id: 'W14X90', depth: 14.02, weight: 90, webThickness: 0.440, flangeWidth: 14.520, flangeThickness: 0.710, area: 26.5, momentOfInertia: 999 },
+  { id: 'W14X99', depth: 14.16, weight: 99, webThickness: 0.485, flangeWidth: 14.565, flangeThickness: 0.780, area: 29.1, momentOfInertia: 1110 },
+  { id: 'W14X109', depth: 14.32, weight: 109, webThickness: 0.525, flangeWidth: 14.605, flangeThickness: 0.860, area: 32.0, momentOfInertia: 1240 },
+  { id: 'W14X120', depth: 14.48, weight: 120, webThickness: 0.590, flangeWidth: 14.670, flangeThickness: 0.940, area: 35.3, momentOfInertia: 1380 },
+  { id: 'W14X132', depth: 14.66, weight: 132, webThickness: 0.645, flangeWidth: 14.725, flangeThickness: 1.030, area: 38.8, momentOfInertia: 1530 },
+  { id: 'W14X145', depth: 14.78, weight: 145, webThickness: 0.680, flangeWidth: 15.500, flangeThickness: 1.090, area: 42.7, momentOfInertia: 1710 },
+  { id: 'W14X159', depth: 14.98, weight: 159, webThickness: 0.745, flangeWidth: 15.565, flangeThickness: 1.190, area: 46.7, momentOfInertia: 1900 },
+  { id: 'W14X176', depth: 15.22, weight: 176, webThickness: 0.830, flangeWidth: 15.650, flangeThickness: 1.310, area: 51.8, momentOfInertia: 2140 },
+  { id: 'W14X193', depth: 15.48, weight: 193, webThickness: 0.890, flangeWidth: 15.710, flangeThickness: 1.440, area: 56.8, momentOfInertia: 2400 },
+  { id: 'W14X211', depth: 15.72, weight: 211, webThickness: 0.980, flangeWidth: 15.800, flangeThickness: 1.560, area: 62.0, momentOfInertia: 2660 },
+  { id: 'W14X233', depth: 16.04, weight: 233, webThickness: 1.070, flangeWidth: 15.890, flangeThickness: 1.720, area: 68.5, momentOfInertia: 3010 },
+  { id: 'W14X257', depth: 16.38, weight: 257, webThickness: 1.175, flangeWidth: 15.995, flangeThickness: 1.890, area: 75.6, momentOfInertia: 3400 },
+  { id: 'W14X283', depth: 16.74, weight: 283, webThickness: 1.290, flangeWidth: 16.110, flangeThickness: 2.070, area: 83.3, momentOfInertia: 3840 },
+  { id: 'W14X311', depth: 17.12, weight: 311, webThickness: 1.410, flangeWidth: 16.230, flangeThickness: 2.260, area: 91.4, momentOfInertia: 4330 },
+  { id: 'W14X342', depth: 17.54, weight: 342, webThickness: 1.540, flangeWidth: 16.360, flangeThickness: 2.470, area: 101, momentOfInertia: 4900 },
+  { id: 'W14X370', depth: 17.92, weight: 370, webThickness: 1.655, flangeWidth: 16.475, flangeThickness: 2.660, area: 109, momentOfInertia: 5440 },
+  { id: 'W14X398', depth: 18.29, weight: 398, webThickness: 1.770, flangeWidth: 16.590, flangeThickness: 2.845, area: 117, momentOfInertia: 6000 },
+  { id: 'W14X426', depth: 18.67, weight: 426, webThickness: 1.875, flangeWidth: 16.695, flangeThickness: 3.035, area: 125, momentOfInertia: 6600 },
+  { id: 'W14X455', depth: 19.02, weight: 455, webThickness: 2.015, flangeWidth: 16.835, flangeThickness: 3.210, area: 134, momentOfInertia: 7190 },
+  { id: 'W14X500', depth: 19.60, weight: 500, webThickness: 2.190, flangeWidth: 17.010, flangeThickness: 3.500, area: 147, momentOfInertia: 8210 },
+  { id: 'W14X550', depth: 20.24, weight: 550, webThickness: 2.380, flangeWidth: 17.200, flangeThickness: 3.820, area: 162, momentOfInertia: 9430 },
+  { id: 'W14X605', depth: 20.92, weight: 605, webThickness: 2.595, flangeWidth: 17.415, flangeThickness: 4.160, area: 178, momentOfInertia: 10800 },
+  { id: 'W14X665', depth: 21.64, weight: 665, webThickness: 2.830, flangeWidth: 17.650, flangeThickness: 4.520, area: 196, momentOfInertia: 12400 },
+  { id: 'W14X730', depth: 22.42, weight: 730, webThickness: 3.070, flangeWidth: 17.890, flangeThickness: 4.910, area: 215, momentOfInertia: 14300 },
+
+  // 16" Deep Beams
+  { id: 'W16X26', depth: 15.69, weight: 26, webThickness: 0.250, flangeWidth: 5.500, flangeThickness: 0.345, area: 7.68, momentOfInertia: 301 },
+  { id: 'W16X31', depth: 15.88, weight: 31, webThickness: 0.275, flangeWidth: 5.525, flangeThickness: 0.440, area: 9.12, momentOfInertia: 375 },
+  { id: 'W16X36', depth: 15.86, weight: 36, webThickness: 0.295, flangeWidth: 6.985, flangeThickness: 0.430, area: 10.6, momentOfInertia: 448 },
+  { id: 'W16X40', depth: 16.01, weight: 40, webThickness: 0.305, flangeWidth: 6.995, flangeThickness: 0.505, area: 11.8, momentOfInertia: 518 },
+  { id: 'W16X45', depth: 16.13, weight: 45, webThickness: 0.345, flangeWidth: 7.035, flangeThickness: 0.565, area: 13.3, momentOfInertia: 586 },
+  { id: 'W16X50', depth: 16.26, weight: 50, webThickness: 0.380, flangeWidth: 7.070, flangeThickness: 0.630, area: 14.7, momentOfInertia: 659 },
+  { id: 'W16X57', depth: 16.43, weight: 57, webThickness: 0.430, flangeWidth: 7.120, flangeThickness: 0.715, area: 16.8, momentOfInertia: 758 },
+  { id: 'W16X67', depth: 16.33, weight: 67, webThickness: 0.395, flangeWidth: 10.235, flangeThickness: 0.665, area: 19.7, momentOfInertia: 954 },
+  { id: 'W16X77', depth: 16.52, weight: 77, webThickness: 0.455, flangeWidth: 10.295, flangeThickness: 0.760, area: 22.6, momentOfInertia: 1110 },
+  { id: 'W16X89', depth: 16.75, weight: 89, webThickness: 0.525, flangeWidth: 10.365, flangeThickness: 0.875, area: 26.2, momentOfInertia: 1300 },
+  { id: 'W16X100', depth: 16.97, weight: 100, webThickness: 0.585, flangeWidth: 10.425, flangeThickness: 0.985, area: 29.4, momentOfInertia: 1490 },
+
+  // 18" Deep Beams
+  { id: 'W18X35', depth: 17.70, weight: 35, webThickness: 0.300, flangeWidth: 6.000, flangeThickness: 0.425, area: 10.3, momentOfInertia: 510 },
+  { id: 'W18X40', depth: 17.90, weight: 40, webThickness: 0.315, flangeWidth: 6.015, flangeThickness: 0.525, area: 11.8, momentOfInertia: 612 },
+  { id: 'W18X46', depth: 18.06, weight: 46, webThickness: 0.360, flangeWidth: 6.060, flangeThickness: 0.605, area: 13.5, momentOfInertia: 712 },
+  { id: 'W18X50', depth: 17.99, weight: 50, webThickness: 0.355, flangeWidth: 7.495, flangeThickness: 0.570, area: 14.7, momentOfInertia: 800 },
+  { id: 'W18X55', depth: 18.11, weight: 55, webThickness: 0.390, flangeWidth: 7.530, flangeThickness: 0.630, area: 16.2, momentOfInertia: 890 },
+  { id: 'W18X60', depth: 18.24, weight: 60, webThickness: 0.415, flangeWidth: 7.555, flangeThickness: 0.695, area: 17.6, momentOfInertia: 984 },
+  { id: 'W18X65', depth: 18.35, weight: 65, webThickness: 0.450, flangeWidth: 7.590, flangeThickness: 0.750, area: 19.1, momentOfInertia: 1070 },
+  { id: 'W18X71', depth: 18.47, weight: 71, webThickness: 0.495, flangeWidth: 7.635, flangeThickness: 0.810, area: 20.8, momentOfInertia: 1170 },
+  { id: 'W18X76', depth: 18.21, weight: 76, webThickness: 0.425, flangeWidth: 11.035, flangeThickness: 0.680, area: 22.3, momentOfInertia: 1330 },
+  { id: 'W18X86', depth: 18.39, weight: 86, webThickness: 0.480, flangeWidth: 11.090, flangeThickness: 0.770, area: 25.3, momentOfInertia: 1530 },
+  { id: 'W18X97', depth: 18.59, weight: 97, webThickness: 0.535, flangeWidth: 11.145, flangeThickness: 0.870, area: 28.5, momentOfInertia: 1750 },
+  { id: 'W18X106', depth: 18.73, weight: 106, webThickness: 0.590, flangeWidth: 11.200, flangeThickness: 0.940, area: 31.1, momentOfInertia: 1910 },
+  { id: 'W18X119', depth: 18.97, weight: 119, webThickness: 0.655, flangeWidth: 11.265, flangeThickness: 1.060, area: 35.1, momentOfInertia: 2190 },
+
+  // 21" Deep Beams
+  { id: 'W21X44', depth: 20.66, weight: 44, webThickness: 0.350, flangeWidth: 6.500, flangeThickness: 0.450, area: 13.0, momentOfInertia: 843 },
+  { id: 'W21X50', depth: 20.83, weight: 50, webThickness: 0.380, flangeWidth: 6.530, flangeThickness: 0.535, area: 14.7, momentOfInertia: 984 },
+  { id: 'W21X57', depth: 21.06, weight: 57, webThickness: 0.405, flangeWidth: 6.555, flangeThickness: 0.650, area: 16.7, momentOfInertia: 1170 },
+  { id: 'W21X62', depth: 20.99, weight: 62, webThickness: 0.400, flangeWidth: 8.240, flangeThickness: 0.615, area: 18.3, momentOfInertia: 1330 },
+  { id: 'W21X68', depth: 21.13, weight: 68, webThickness: 0.430, flangeWidth: 8.270, flangeThickness: 0.685, area: 20.0, momentOfInertia: 1480 },
+  { id: 'W21X73', depth: 21.24, weight: 73, webThickness: 0.455, flangeWidth: 8.295, flangeThickness: 0.740, area: 21.5, momentOfInertia: 1600 },
+  { id: 'W21X83', depth: 21.43, weight: 83, webThickness: 0.515, flangeWidth: 8.355, flangeThickness: 0.835, area: 24.3, momentOfInertia: 1830 },
+  { id: 'W21X93', depth: 21.62, weight: 93, webThickness: 0.580, flangeWidth: 8.420, flangeThickness: 0.930, area: 27.3, momentOfInertia: 2070 },
+
+  // 24" Deep Beams
+  { id: 'W24X55', depth: 23.57, weight: 55, webThickness: 0.395, flangeWidth: 7.005, flangeThickness: 0.505, area: 16.2, momentOfInertia: 1350 },
+  { id: 'W24X62', depth: 23.74, weight: 62, webThickness: 0.430, flangeWidth: 7.040, flangeThickness: 0.590, area: 18.2, momentOfInertia: 1550 },
+  { id: 'W24X68', depth: 23.73, weight: 68, webThickness: 0.415, flangeWidth: 8.965, flangeThickness: 0.585, area: 20.1, momentOfInertia: 1830 },
+  { id: 'W24X76', depth: 23.92, weight: 76, webThickness: 0.440, flangeWidth: 8.990, flangeThickness: 0.680, area: 22.4, momentOfInertia: 2100 },
+  { id: 'W24X84', depth: 24.10, weight: 84, webThickness: 0.470, flangeWidth: 9.020, flangeThickness: 0.770, area: 24.7, momentOfInertia: 2370 },
+  { id: 'W24X94', depth: 24.31, weight: 94, webThickness: 0.515, flangeWidth: 9.065, flangeThickness: 0.875, area: 27.7, momentOfInertia: 2700 },
+  { id: 'W24X103', depth: 24.53, weight: 103, webThickness: 0.550, flangeWidth: 9.000, flangeThickness: 0.980, area: 30.3, momentOfInertia: 3000 },
+  { id: 'W24X104', depth: 24.06, weight: 104, webThickness: 0.500, flangeWidth: 12.750, flangeThickness: 0.750, area: 30.6, momentOfInertia: 3100 },
+  { id: 'W24X117', depth: 24.26, weight: 117, webThickness: 0.550, flangeWidth: 12.800, flangeThickness: 0.850, area: 34.4, momentOfInertia: 3540 },
+  { id: 'W24X131', depth: 24.48, weight: 131, webThickness: 0.605, flangeWidth: 12.855, flangeThickness: 0.960, area: 38.5, momentOfInertia: 4020 },
+  { id: 'W24X146', depth: 24.74, weight: 146, webThickness: 0.650, flangeWidth: 12.900, flangeThickness: 1.090, area: 43.0, momentOfInertia: 4580 },
+  { id: 'W24X162', depth: 25.00, weight: 162, webThickness: 0.705, flangeWidth: 12.955, flangeThickness: 1.220, area: 47.7, momentOfInertia: 5170 },
+
+  // 27" Deep Beams
+  { id: 'W27X84', depth: 26.71, weight: 84, webThickness: 0.460, flangeWidth: 9.960, flangeThickness: 0.640, area: 24.8, momentOfInertia: 2850 },
+  { id: 'W27X94', depth: 26.92, weight: 94, webThickness: 0.490, flangeWidth: 9.990, flangeThickness: 0.745, area: 27.7, momentOfInertia: 3270 },
+  { id: 'W27X102', depth: 27.09, weight: 102, webThickness: 0.515, flangeWidth: 10.015, flangeThickness: 0.830, area: 30.0, momentOfInertia: 3620 },
+  { id: 'W27X114', depth: 27.29, weight: 114, webThickness: 0.570, flangeWidth: 10.070, flangeThickness: 0.930, area: 33.5, momentOfInertia: 4090 },
+
+  // 30" Deep Beams
+  { id: 'W30X90', depth: 29.53, weight: 90, webThickness: 0.470, flangeWidth: 10.400, flangeThickness: 0.610, area: 26.4, momentOfInertia: 3610 },
+  { id: 'W30X99', depth: 29.65, weight: 99, webThickness: 0.520, flangeWidth: 10.450, flangeThickness: 0.670, area: 29.1, momentOfInertia: 3990 },
+  { id: 'W30X108', depth: 29.83, weight: 108, webThickness: 0.545, flangeWidth: 10.475, flangeThickness: 0.760, area: 31.7, momentOfInertia: 4470 },
+  { id: 'W30X116', depth: 30.01, weight: 116, webThickness: 0.565, flangeWidth: 10.495, flangeThickness: 0.850, area: 34.2, momentOfInertia: 4930 },
+  { id: 'W30X124', depth: 30.17, weight: 124, webThickness: 0.585, flangeWidth: 10.515, flangeThickness: 0.930, area: 36.5, momentOfInertia: 5360 },
+  { id: 'W30X132', depth: 30.31, weight: 132, webThickness: 0.615, flangeWidth: 10.545, flangeThickness: 1.000, area: 38.9, momentOfInertia: 5770 },
+
+  // 33" Deep Beams
+  { id: 'W33X118', depth: 32.86, weight: 118, webThickness: 0.550, flangeWidth: 11.480, flangeThickness: 0.740, area: 34.7, momentOfInertia: 5900 },
+  { id: 'W33X130', depth: 33.09, weight: 130, webThickness: 0.580, flangeWidth: 11.510, flangeThickness: 0.855, area: 38.3, momentOfInertia: 6710 },
+  { id: 'W33X141', depth: 33.30, weight: 141, webThickness: 0.605, flangeWidth: 11.535, flangeThickness: 0.960, area: 41.6, momentOfInertia: 7450 },
+  { id: 'W33X152', depth: 33.49, weight: 152, webThickness: 0.635, flangeWidth: 11.565, flangeThickness: 1.055, area: 44.7, momentOfInertia: 8160 },
+
+  // 36" Deep Beams
+  { id: 'W36X135', depth: 35.55, weight: 135, webThickness: 0.600, flangeWidth: 11.950, flangeThickness: 0.790, area: 39.7, momentOfInertia: 7800 },
+  { id: 'W36X150', depth: 35.85, weight: 150, webThickness: 0.625, flangeWidth: 11.975, flangeThickness: 0.940, area: 44.2, momentOfInertia: 9040 },
+  { id: 'W36X160', depth: 36.01, weight: 160, webThickness: 0.650, flangeWidth: 12.000, flangeThickness: 1.020, area: 47.0, momentOfInertia: 9750 },
+  { id: 'W36X170', depth: 36.17, weight: 170, webThickness: 0.680, flangeWidth: 12.030, flangeThickness: 1.100, area: 50.0, momentOfInertia: 10500 },
+  { id: 'W36X182', depth: 36.33, weight: 182, webThickness: 0.725, flangeWidth: 12.075, flangeThickness: 1.180, area: 53.6, momentOfInertia: 11300 },
+  { id: 'W36X194', depth: 36.49, weight: 194, webThickness: 0.765, flangeWidth: 12.115, flangeThickness: 1.260, area: 57.0, momentOfInertia: 12100 },
+  { id: 'W36X210', depth: 36.69, weight: 210, webThickness: 0.830, flangeWidth: 12.180, flangeThickness: 1.360, area: 61.8, momentOfInertia: 13200 },
+  { id: 'W36X230', depth: 35.90, weight: 230, webThickness: 0.760, flangeWidth: 16.470, flangeThickness: 1.260, area: 67.6, momentOfInertia: 15000 },
+  { id: 'W36X245', depth: 36.08, weight: 245, webThickness: 0.800, flangeWidth: 16.510, flangeThickness: 1.350, area: 72.1, momentOfInertia: 16100 },
+  { id: 'W36X260', depth: 36.26, weight: 260, webThickness: 0.840, flangeWidth: 16.550, flangeThickness: 1.440, area: 76.5, momentOfInertia: 17300 },
+  { id: 'W36X280', depth: 36.52, weight: 280, webThickness: 0.885, flangeWidth: 16.595, flangeThickness: 1.570, area: 82.4, momentOfInertia: 18900 },
+  { id: 'W36X300', depth: 36.74, weight: 300, webThickness: 0.945, flangeWidth: 16.655, flangeThickness: 1.680, area: 88.3, momentOfInertia: 20300 }
+];
+
+export function getBeamById(id: string): BeamProfile | undefined {
+  return BEAM_CATALOG.find(beam => beam.id === id);
+}
+
+export function getBeamsByDepth(minDepth: number, maxDepth: number): BeamProfile[] {
+  return BEAM_CATALOG.filter(beam => beam.depth >= minDepth && beam.depth <= maxDepth);
+}
+
+export function getBeamsByWeight(minWeight: number, maxWeight: number): BeamProfile[] {
+  return BEAM_CATALOG.filter(beam => beam.weight >= minWeight && beam.weight <= maxWeight);
+}
