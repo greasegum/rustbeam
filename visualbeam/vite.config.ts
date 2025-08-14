@@ -5,9 +5,17 @@ export default defineConfig({
   root: '.',
   build: {
     outDir: 'dist',
-    sourcemap: true,
-    minify: 'terser',
-    target: 'es2020'
+    sourcemap: false,
+    minify: 'esbuild',
+    target: 'es2020',
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          phaser: ['phaser'],
+          vendor: ['zustand']
+        }
+      }
+    }
   },
   resolve: {
     alias: {
