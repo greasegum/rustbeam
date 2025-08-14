@@ -90,6 +90,8 @@ export class XMLDeserializer {
       rightBearing: this.getNumberContent(node, 'right-bearing') || 12,
       leftAbutmentHeight: this.getNumberContent(node, 'left-abutment-height') || 24,
       rightAbutmentHeight: this.getNumberContent(node, 'right-abutment-height') || 24,
+      backwallClearance: this.getNumberContent(node, 'backwall-clearance') || 0,
+      breastwallDistance: this.getNumberContent(node, 'breastwall-distance') || 0,
       units
     };
   }

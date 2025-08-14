@@ -105,6 +105,8 @@ export class XMLSerializer {
     lines.push(`${this.indent()}<right-bearing>${beam.rightBearing}</right-bearing>`);
     lines.push(`${this.indent()}<left-abutment-height>${beam.leftAbutmentHeight}</left-abutment-height>`);
     lines.push(`${this.indent()}<right-abutment-height>${beam.rightAbutmentHeight}</right-abutment-height>`);
+    lines.push(`${this.indent()}<backwall-clearance>${beam.backwallClearance}</backwall-clearance>`);
+    lines.push(`${this.indent()}<breastwall-distance>${beam.breastwallDistance}</breastwall-distance>`);
 
     this.indentLevel--;
     lines.push(`${this.indent()}</beam>`);

@@ -13,6 +13,9 @@ Cargo.lock
 .DS_Store
 Thumbs.db
 
+# Node packages
+node_modules/
+
 # Environment files
 .env
 .env.local

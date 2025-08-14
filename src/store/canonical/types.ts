@@ -58,6 +58,10 @@ export interface CanonicalBeam {
   // Abutment heights
   leftAbutmentHeight: number;
   rightAbutmentHeight: number;
+
+  // Abutment geometry
+  backwallClearance: number;
+  breastwallDistance: number;
   
   // Measurement units
   units: 'imperial' | 'metric';

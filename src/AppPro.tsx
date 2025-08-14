@@ -15,7 +15,7 @@ export const AppPro: React.FC = () => {
   const gameRef = useRef<Phaser.Game | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const [currentMode, setCurrentMode] = useState<'edit' | 'annotate' | 'view'>('edit');
-  const [showSetup, setShowSetup] = useState(false);
+  const [showSetup, setShowSetup] = useState(true);
   const [showExport, setShowExport] = useState(false);
   
   useEffect(() => {
@@ -75,7 +75,7 @@ export const AppPro: React.FC = () => {
       
       {/* Mode-specific Toolbar */}
       <div className="toolbar-container">
-        {currentMode === 'edit' && <EditToolbar />}
+        {currentMode === 'edit' && <EditToolbar onConfigure={() => setShowSetup(true)} />}
         {currentMode === 'annotate' && <AnnotateToolbar />}
         {currentMode === 'view' && <ViewToolbar />}
       </div>

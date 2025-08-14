@@ -190,7 +190,10 @@ export class MainSceneRefactored extends Phaser.Scene {
     
     // Draw bearings
     this.drawBearings(scale);
-    
+
+    // Draw abutments
+    this.drawAbutments(scale);
+
     // Draw dimensions if enabled
     if (tool.showDimensions) {
       this.drawDimensions(scale);
@@ -227,6 +230,39 @@ export class MainSceneRefactored extends Phaser.Scene {
     );
     rightBearingGraphic.setStrokeStyle(2, bearingStroke);
     this.beamContainer.add(rightBearingGraphic);
+  }
+
+  private drawAbutments(scale: number) {
+    const { beam } = useStore.getState();
+    const { profile, length, backwallClearance, breastwallDistance, leftAbutmentHeight, rightAbutmentHeight } = beam;
+    if (!profile || breastwallDistance <= 0) return;
+
+    const abutmentColor = 0x666666;
+    const abutmentStroke = 0x444444;
+    const wallThickness = 10;
+    const baseThickness = 8;
+    const baseY = (profile.depth / 2) * scale;
+    const baseLength = breastwallDistance * scale;
+
+    // Left abutment
+    const leftBackwallX = -(length / 2 + backwallClearance) * scale;
+    const leftHeight = leftAbutmentHeight * scale;
+    const leftWall = this.add.rectangle(leftBackwallX, baseY - leftHeight / 2, wallThickness, leftHeight, abutmentColor);
+    leftWall.setStrokeStyle(2, abutmentStroke);
+    const leftBase = this.add.rectangle(leftBackwallX - baseLength / 2, baseY + baseThickness / 2, baseLength, baseThickness, abutmentColor);
+    leftBase.setStrokeStyle(2, abutmentStroke);
+    this.beamContainer.add(leftWall);
+    this.beamContainer.add(leftBase);
+
+    // Right abutment
+    const rightBackwallX = (length / 2 + backwallClearance) * scale;
+    const rightHeight = rightAbutmentHeight * scale;
+    const rightWall = this.add.rectangle(rightBackwallX, baseY - rightHeight / 2, wallThickness, rightHeight, abutmentColor);
+    rightWall.setStrokeStyle(2, abutmentStroke);
+    const rightBase = this.add.rectangle(rightBackwallX + baseLength / 2, baseY + baseThickness / 2, baseLength, baseThickness, abutmentColor);
+    rightBase.setStrokeStyle(2, abutmentStroke);
+    this.beamContainer.add(rightWall);
+    this.beamContainer.add(rightBase);
   }
 
   private drawDimensions(scale: number) {
