@@ -14,7 +14,7 @@ export class MainSceneRefactored extends Phaser.Scene {
   }
 
   create() {
-    this.cameras.main.setBackgroundColor('#0a0a0a');
+    this.cameras.main.setBackgroundColor('#f8f8f8');
     
     // Create containers
     this.gridContainer = this.add.container(0, 0);
@@ -102,7 +102,7 @@ export class MainSceneRefactored extends Phaser.Scene {
           gridSize,
           gridSize
         );
-        rect.setStrokeStyle(0.5, 0x333333);
+        rect.setStrokeStyle(0.5, 0xcccccc);
         rect.setInteractive();
         rect.setData('row', row);
         rect.setData('col', col);
@@ -128,10 +128,10 @@ export class MainSceneRefactored extends Phaser.Scene {
     // Scale factor for visualization (pixels per inch)
     const scale = 10;
     
-    // Pastel green color (soft mint green)
-    const beamColor = 0x98D8A8;
-    const strokeColor = 0x4A8060;
-    const flangeLineColor = 0x6B9070;
+    // Professional colors for light background
+    const beamColor = 0x4CAF50;
+    const strokeColor = 0x2E7D32;
+    const flangeLineColor = 0x388E3C;
     
     // SIDE ELEVATION VIEW - Looking at the beam from the side
     // Shows full length horizontally and depth vertically
