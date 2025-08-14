@@ -4,18 +4,17 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-VisualBeam is a Rust-based structural beam inspection system that prioritizes visual excellence, intuitive user experience, and seamless CAD ecosystem integration. The system is designed for field inspections with professional presentation-quality outputs.
+VisualBeam Inspector is a TypeScript/React-based structural beam inspection system that prioritizes visual excellence, intuitive user experience, and seamless CAD ecosystem integration. The system is designed for field inspections with professional presentation-quality outputs.
 
-### Migration from JavaScript/TypeScript Reference
-This Rust implementation draws inspiration from the existing phaserBeam application (React/Phaser 3) while achieving:
-- Native performance through compiled Rust code
-- Memory safety without garbage collection overhead
-- Cross-platform deployment (WASM for web, native for desktop/mobile)
-- Enhanced rendering performance through direct GPU access
-- Type safety at compile time rather than runtime
+### Core Technologies
+- **React** for UI components and application shell
+- **Phaser 3** for high-performance canvas rendering
+- **TypeScript** for type safety and developer experience
+- **Zustand** for state management with clean separation of concerns
+- **Vite** for fast development and optimized production builds
 
 ### Beam Catalog Data
-The comprehensive beam catalog from phaserBeam has been ported to Rust in `src/data/beam_catalog.rs`. This includes:
+The comprehensive beam catalog is implemented in `src/data/beamCatalog.ts`. This includes:
 - Over 150 wide flange (WF) beam profiles from 8" to 36" depths
 - Complete dimensional data (depth, web thickness, flange dimensions, weight)
 - Helper functions for querying beams by ID, depth range, or weight range
@@ -23,58 +22,37 @@ The comprehensive beam catalog from phaserBeam has been ported to Rust in `src/d
 
 ## Build and Development Commands
 
-### Rust Project Setup (once implemented)
+### Development Setup
 ```bash
-# Build the project
-cargo build --release
+# Install dependencies
+npm install
 
-# Run tests
-cargo test
-
-# Run a specific test
-cargo test test_name
-
-# Check code without building
-cargo check
-
-# Format code
-cargo fmt
-
-# Run linter
-cargo clippy -- -D warnings
-
-# Run benchmarks
-cargo bench
-
-# Generate documentation
-cargo doc --open
-```
-
-### Development Server (once web UI is implemented)
-```bash
 # Run development server with hot reload
-cargo watch -x run
+npm run dev
 
-# Run with specific features
-cargo run --features "dev-tools"
+# Build for production
+npm run build
 
-# Build WASM target for web deployment
-wasm-pack build --target web --out-dir pkg
+# Preview production build
+npm run preview
 
-# Run WASM development server
-python3 -m http.server 8000 --directory ./www
+# Start production server
+npm start
 ```
 
-### Rust-Specific Testing Commands
+### Testing Commands
 ```bash
-# Run integration tests
-cargo test --test '*'
+# Run tests (when implemented)
+npm test
 
-# Run with coverage
-cargo tarpaulin --out Html
+# Run tests in watch mode
+npm run test:watch
 
-# Benchmark performance-critical paths
-cargo criterion
+# Run type checking
+tsc --noEmit
+
+# Run linting
+npm run lint
 ```
 
 ## Architecture Overview
@@ -105,116 +83,86 @@ The system follows a layered architecture with clear separation of concerns:
 
 ```
 src/
-├── core/                  # Core Rust domain logic
-│   ├── beam/             # Beam profiles and structural models
-│   ├── geometry/         # Coordinate systems and transformations
-│   ├── defect/           # Defect types and severity patterns
-│   └── grid/             # Grid-based measurement system
-├── ui/                    # User interface components
-│   ├── sketching/        # Grid sketching system and gesture recognition
-│   ├── visual/           # Visual design system and themes
-│   └── feedback/         # Real-time visual feedback mechanisms
-├── interaction/          # Smart interaction systems
-│   ├── snapping/        # Edge clamping and magnetic boundaries
-│   └── annotation/      # Smart annotation placement
-├── rendering/           # Rendering engines
-│   ├── wgpu/           # Native GPU rendering (desktop)
-│   ├── canvas/         # Canvas 2D fallback
-│   └── export/         # High-resolution export renderer
-├── wasm/               # WebAssembly bindings
-│   ├── bindings/       # JS/TS interop layer
-│   └── bridge/         # React component bridge
-├── native/             # Platform-specific implementations
-│   ├── windows/        # Windows-specific code
-│   ├── macos/          # macOS-specific code
-│   └── linux/          # Linux-specific code
-└── cad/                # Hermetic CAD translation layer
-    ├── dxf/            # DXF/DWG import/export
-    └── xml/            # XML exchange format
+├── components/           # React UI components
+│   ├── Header/          # Application header
+│   ├── Toolbar/         # Mode-specific toolbars
+│   ├── BottomBar/       # Status bar
+│   ├── Setup/           # Setup modal
+│   └── Export/          # Export modal
+├── scenes/              # Phaser scenes
+│   └── MainSceneRefactored.ts
+├── store/               # Zustand state management
+│   ├── canonical/       # Source-of-truth state
+│   ├── derived/         # Computed state
+│   └── slices/          # Store slices
+├── geometry/            # Geometry algorithms
+│   ├── gridSystem.ts
+│   ├── contourGenerator.ts
+│   └── coordinates.ts
+├── data/               # Static data
+│   └── beamCatalog.ts
+├── ui/                 # Additional UI components
+│   └── SetupMenu.tsx
+├── utils/              # Utility functions
+│   └── fileIO.ts
+└── xml/                # XML serialization
+    ├── serializer.ts
+    └── deserializer.ts
 ```
 
-## Development Phases
+## Current Implementation Status
 
-The project follows these implementation phases:
+The project is currently in active development with the following completed:
 
-### Phase 1: Core Rust Foundation (Weeks 1-4)
-- Implement beam profile models and geometry calculations in pure Rust
-- Create grid-based coordinate system with measurement logic
-- Develop defect type enums and severity classification
-- Set up cargo workspace with feature flags for different targets
-- Implement core business logic with comprehensive unit tests
+### Completed Features
+- ✅ Professional horizontal UI layout with React components
+- ✅ Phaser 3 canvas rendering with beam visualization
+- ✅ Zustand store with canonical/derived state separation
+- ✅ Setup modal with beam configuration
+- ✅ Export modal with multiple format options
+- ✅ Mode-specific toolbars (Edit, Annotate, View)
+- ✅ Comprehensive beam catalog (150+ profiles)
 
-### Phase 2: Rendering Infrastructure (Weeks 5-8)
-- Integrate wgpu for native GPU-accelerated rendering
-- Implement Canvas 2D rendering trait for web fallback
-- Create rendering abstraction layer for platform independence
-- Build WASM bindings using wasm-bindgen
-- Develop basic UI primitives (lines, shapes, text)
+### In Progress
+- 🚧 Grid-based defect marking system
+- 🚧 Marching squares contour generation
+- 🚧 Annotation system with constraints
+- 🚧 XML serialization/deserialization
 
-### Phase 3: Interactive Canvas (Weeks 9-12)
-- Port grid interaction system from phaserBeam reference
-- Implement magnetic snapping and edge detection algorithms
-- Create gesture recognition for touch/mouse input
-- Build annotation placement engine with collision detection
-- Add real-time visual feedback system
-
-### Phase 4: Export Pipeline (Weeks 13-16)
-- Implement PDF generation using pure Rust libraries
-- Create SVG export with proper layering and styling
-- Build high-resolution raster export (PNG/JPEG)
-- Develop print-optimized layouts with title blocks
-- Add batch export capabilities
-
-### Phase 5: CAD Integration (Weeks 17-20)
-- Implement DXF parser and generator in Rust
-- Create AutoCAD layer mapping system
-- Build XML exchange format support
-- Develop bidirectional conversion with validation
-- Add metadata preservation through XData
-
-### Phase 6: Web Assembly Integration (Weeks 21-24)
-- Optimize WASM bundle size through feature flags
-- Create TypeScript definitions for Rust APIs
-- Build React component wrappers for Rust modules
-- Implement efficient data serialization between JS and Rust
-- Add progressive enhancement for non-WASM browsers
-
-### Phase 7: Production Readiness (Weeks 25-28)
-- Performance optimization and profiling
-- Memory leak detection and prevention
-- Cross-platform testing (Windows, macOS, Linux, Web)
-- Documentation and API reference generation
-- Security audit and penetration testing
+### Planned Features
+- 📋 SVG/PDF/DXF export implementation
+- 📋 Touch gesture support
+- 📋 Smart snapping and alignment guides
+- 📋 Print-optimized layouts with title blocks
+- 📋 Offline storage with IndexedDB
 
 ## Key Implementation Notes
 
-### Rust-Specific Implementation Patterns
+### TypeScript/React Patterns
 
-#### Memory Management
-- Use `Arc<RwLock<T>>` for shared state between UI components
-- Implement custom allocators for performance-critical paths
-- Leverage Rust's ownership system to prevent memory leaks
-- Use `Cow<T>` for efficient string handling in rendering
+#### State Management
+- Use Zustand for centralized state with clear action boundaries
+- Separate canonical (source-of-truth) from derived (computed) state
+- Implement selectors for performance optimization
+- Use immer for immutable updates when needed
 
-#### Concurrency Strategy
-- Use Rayon for parallel processing of grid cells
-- Implement async/await for I/O operations (file export)
-- Leverage channels for UI event handling
-- Use atomic operations for real-time counters
-
+#### Performance Optimization
+- Use React.memo for expensive components
+- Implement virtual scrolling for large lists
+- Debounce expensive computations
+- Use Web Workers for heavy processing (marching squares)
 #### Error Handling
-- Define custom error types using `thiserror`
-- Implement Result<T, E> for all fallible operations
-- Use `anyhow` for application-level error handling
-- Provide graceful degradation for rendering failures
+- Use try-catch blocks for async operations
+- Implement error boundaries in React components
+- Provide user-friendly error messages
+- Log errors for debugging in development
 
-### Performance Optimization
-- Use dirty rectangle updates for rendering
-- Implement level-of-detail switching for complex scenes
-- Apply occlusion culling to avoid rendering hidden elements
-- Use texture atlasing for efficient GPU memory usage
-- Leverage SIMD instructions for coordinate transformations
-- Implement zero-copy serialization for WASM bridge
+### Canvas Rendering Optimization
+- Use Phaser's built-in dirty rectangle updates
+- Implement level-of-detail for complex scenes
+- Apply viewport culling for off-screen elements
+- Use texture atlasing for UI elements
+- Batch draw calls where possible
 
 ### Visual Testing Strategy
 - Implement screenshot comparison tests for visual regression
@@ -272,28 +220,28 @@ The system supports multiple export formats optimized for different use cases:
 - **DXF/DWG**: AutoCAD compatibility with proper layer structure
 - **XML**: Industry-standard exchange format with full metadata
 
-## Rust Implementation Benefits
+## TypeScript/React Implementation Benefits
 
-### Performance Advantages
-- **Zero-cost abstractions**: High-level code without runtime overhead
-- **Compile-time optimization**: LLVM backend produces highly optimized machine code
-- **No garbage collection**: Predictable performance without GC pauses
-- **Native SIMD support**: Vectorized operations for graphics calculations
+### Development Advantages
+- **Type Safety**: Full TypeScript support with strict mode
+- **Hot Module Replacement**: Instant feedback during development
+- **Rich Ecosystem**: Extensive library support through npm
+- **Component Reusability**: Modular React components
 
-### Safety Guarantees
-- **Memory safety**: No null pointer dereferences or buffer overflows
-- **Thread safety**: Race conditions prevented at compile time
-- **Type safety**: Strong typing prevents entire classes of bugs
-- **Resource management**: RAII ensures proper cleanup
+### Performance Features
+- **Virtual DOM**: Efficient UI updates through React
+- **WebGL Rendering**: Hardware acceleration via Phaser 3
+- **Code Splitting**: Optimized bundle sizes with Vite
+- **Tree Shaking**: Automatic dead code elimination
 
-### Cross-Platform Deployment
-- **Native binaries**: Direct compilation for Windows, macOS, Linux
-- **WebAssembly**: Near-native performance in browsers
-- **Mobile support**: Compile to iOS and Android through Rust toolchains
-- **Embedded systems**: Minimal runtime for IoT integration
+### Cross-Platform Support
+- **Progressive Web App**: Works offline with service workers
+- **Responsive Design**: Adapts to desktop, tablet, and mobile
+- **Browser Compatibility**: Runs on all modern browsers
+- **Cloud Deployment**: Easy deployment to any web server
 
 ### Developer Experience
-- **Excellent tooling**: Cargo, rustfmt, clippy, rust-analyzer
-- **Documentation**: Inline docs with rustdoc
-- **Testing**: Built-in test framework with cargo test
-- **Benchmarking**: Criterion for performance regression testing
+- **Excellent tooling**: VS Code, TypeScript, ESLint, Prettier
+- **Documentation**: JSDoc comments and TypeScript definitions
+- **Testing**: Jest/Vitest for unit and integration tests
+- **Debugging**: Chrome DevTools with source maps
