@@ -128,37 +128,56 @@ export class MainSceneRefactored extends Phaser.Scene {
     // Scale factor for visualization (pixels per inch)
     const scale = 10;
     
-    // Draw web
+    // Pastel green color (soft mint green)
+    const beamColor = 0x98D8A8;
+    const strokeColor = 0x4A8060;
+    
+    // For side view, we show the beam as an I-shape
+    // The web is the vertical part, flanges are horizontal parts at top and bottom
+    
+    // Draw web (vertical part in the middle - thin vertical rectangle)
     const web = this.add.rectangle(
       0, 0,
-      length * scale,
-      profile.webThickness * scale,
-      0x666666
+      profile.webThickness * scale,  // Web thickness (thin)
+      profile.depth * scale,          // Full height
+      beamColor
     );
-    web.setStrokeStyle(2, 0xffffff);
+    web.setStrokeStyle(1, strokeColor);
     this.beamContainer.add(web);
     
-    // Draw top flange
+    // Draw top flange (horizontal part at top - wider than web)
     const topFlange = this.add.rectangle(
       0,
       -(profile.depth / 2 - profile.flangeThickness / 2) * scale,
-      length * scale,
+      profile.flangeWidth * scale,    // Flange width (wider than web)
       profile.flangeThickness * scale,
-      0x888888
+      beamColor
     );
-    topFlange.setStrokeStyle(2, 0xffffff);
+    topFlange.setStrokeStyle(1, strokeColor);
     this.beamContainer.add(topFlange);
     
-    // Draw bottom flange
+    // Draw bottom flange (horizontal part at bottom - wider than web)
     const bottomFlange = this.add.rectangle(
       0,
       (profile.depth / 2 - profile.flangeThickness / 2) * scale,
-      length * scale,
+      profile.flangeWidth * scale,    // Flange width (wider than web)
       profile.flangeThickness * scale,
-      0x888888
+      beamColor
     );
-    bottomFlange.setStrokeStyle(2, 0xffffff);
+    bottomFlange.setStrokeStyle(1, strokeColor);
     this.beamContainer.add(bottomFlange);
+    
+    // Draw the length representation (side view showing the beam extending)
+    // This shows the beam from the side, so we see it as a long rectangle
+    const beamLength = this.add.rectangle(
+      0, 0,
+      length * scale,
+      profile.depth * scale,
+      beamColor,
+      0.3  // Semi-transparent to show it's the side view
+    );
+    beamLength.setStrokeStyle(2, strokeColor);
+    this.beamContainer.add(beamLength);
     
     // Draw bearings
     this.drawBearings(scale);
@@ -174,15 +193,19 @@ export class MainSceneRefactored extends Phaser.Scene {
     const { profile, length, leftBearing, rightBearing } = beam;
     if (!profile) return;
     
+    // Complementary color for bearings (coral/salmon)
+    const bearingColor = 0xFFA07A;
+    const bearingStroke = 0x8B5A3C;
+    
     const leftBearingGraphic = this.add.triangle(
       -(length / 2 - leftBearing) * scale,
       (profile.depth / 2 + 20) * scale,
       0, 0,
       -15 * scale, 30 * scale,
       15 * scale, 30 * scale,
-      0xffaa00
+      bearingColor
     );
-    leftBearingGraphic.setStrokeStyle(2, 0xffffff);
+    leftBearingGraphic.setStrokeStyle(2, bearingStroke);
     this.beamContainer.add(leftBearingGraphic);
     
     const rightBearingGraphic = this.add.triangle(
@@ -191,9 +214,9 @@ export class MainSceneRefactored extends Phaser.Scene {
       0, 0,
       -15 * scale, 30 * scale,
       15 * scale, 30 * scale,
-      0xffaa00
+      bearingColor
     );
-    rightBearingGraphic.setStrokeStyle(2, 0xffffff);
+    rightBearingGraphic.setStrokeStyle(2, bearingStroke);
     this.beamContainer.add(rightBearingGraphic);
   }
 
