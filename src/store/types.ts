@@ -18,6 +18,8 @@ export interface BeamState {
   rightBearing: number;
   leftAbutmentHeight: number;
   rightAbutmentHeight: number;
+  backwallClearance: number;
+  breastwallDistance: number;
   units: 'imperial' | 'metric';
 }
 

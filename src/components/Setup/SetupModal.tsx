@@ -8,7 +8,7 @@ interface SetupModalProps {
 }
 
 export const SetupModal: React.FC<SetupModalProps> = ({ onClose }) => {
-  const { beam, project, setBeamProfile, setBeamLength, setBearings, setProjectInfo } = useStore();
+  const { beam, project, setBeamProfile, setBeamLength, setBearings, setBeamDimensions, setProjectInfo } = useStore();
   
   // Canvas refs for previews
   const sectionCanvasRef = useRef<HTMLCanvasElement>(null);
@@ -29,9 +29,9 @@ export const SetupModal: React.FC<SetupModalProps> = ({ onClose }) => {
   const [bearingCLIn, setBearingCLIn] = useState((beam.length - 2 * beam.leftBearing) % 12);
   const [bearingDistanceFt, setBearingDistanceFt] = useState(Math.floor(beam.leftBearing / 12));
   const [bearingDistanceIn, setBearingDistanceIn] = useState(beam.leftBearing % 12);
-  const [backwallClearanceIn, setBackwallClearanceIn] = useState(2);
-  const [breastwallDistanceFt, setBreastwallDistanceFt] = useState(2);
-  const [breastwallDistanceIn, setBreastwallDistanceIn] = useState(6);
+  const [backwallClearanceIn, setBackwallClearanceIn] = useState(beam.backwallClearance);
+  const [breastwallDistanceFt, setBreastwallDistanceFt] = useState(Math.floor(beam.breastwallDistance / 12));
+  const [breastwallDistanceIn, setBreastwallDistanceIn] = useState(beam.breastwallDistance % 12);
   
   // Draw section preview
   const drawSectionPreview = () => {
@@ -146,6 +146,8 @@ export const SetupModal: React.FC<SetupModalProps> = ({ onClose }) => {
     const totalLength = lengthFt * 12 + lengthIn;
     const bearingCL = bearingCLFt * 12 + bearingCLIn;
     const bearingDistance = bearingDistanceFt * 12 + bearingDistanceIn;
+    const backwallClear = backwallClearanceIn;
+    const breastwallDist = breastwallDistanceFt * 12 + breastwallDistanceIn;
     
     // Set up scaling
     const scale = (canvas.width - 60) / totalLength;
@@ -168,29 +170,30 @@ export const SetupModal: React.FC<SetupModalProps> = ({ onClose }) => {
     
     const abutmentHeight = beamHeight * 1.5;
     const abutmentWidth = 20;
-    const abutmentBase = 30;
+    const abutmentBase = breastwallDist * scale;
     
     // Left abutment (L-shape)
+    const leftBackwallX = startX - backwallClear * scale;
     ctx.beginPath();
-    ctx.moveTo(startX - abutmentWidth, centerY - abutmentHeight / 2);
-    ctx.lineTo(startX, centerY - abutmentHeight / 2);
-    ctx.lineTo(startX, centerY + beamHeight / 2);
-    ctx.lineTo(startX - abutmentBase, centerY + beamHeight / 2);
-    ctx.lineTo(startX - abutmentBase, centerY + abutmentHeight / 2);
-    ctx.lineTo(startX - abutmentWidth, centerY + abutmentHeight / 2);
+    ctx.moveTo(leftBackwallX - abutmentWidth, centerY - abutmentHeight / 2);
+    ctx.lineTo(leftBackwallX, centerY - abutmentHeight / 2);
+    ctx.lineTo(leftBackwallX, centerY + beamHeight / 2);
+    ctx.lineTo(leftBackwallX - abutmentBase, centerY + beamHeight / 2);
+    ctx.lineTo(leftBackwallX - abutmentBase, centerY + abutmentHeight / 2);
+    ctx.lineTo(leftBackwallX - abutmentWidth, centerY + abutmentHeight / 2);
     ctx.closePath();
     ctx.fill();
     ctx.stroke();
     
     // Right abutment (L-shape mirrored)
-    const rightX = startX + totalLength * scale;
+    const rightBackwallX = startX + totalLength * scale + backwallClear * scale;
     ctx.beginPath();
-    ctx.moveTo(rightX + abutmentWidth, centerY - abutmentHeight / 2);
-    ctx.lineTo(rightX, centerY - abutmentHeight / 2);
-    ctx.lineTo(rightX, centerY + beamHeight / 2);
-    ctx.lineTo(rightX + abutmentBase, centerY + beamHeight / 2);
-    ctx.lineTo(rightX + abutmentBase, centerY + abutmentHeight / 2);
-    ctx.lineTo(rightX + abutmentWidth, centerY + abutmentHeight / 2);
+    ctx.moveTo(rightBackwallX + abutmentWidth, centerY - abutmentHeight / 2);
+    ctx.lineTo(rightBackwallX, centerY - abutmentHeight / 2);
+    ctx.lineTo(rightBackwallX, centerY + beamHeight / 2);
+    ctx.lineTo(rightBackwallX + abutmentBase, centerY + beamHeight / 2);
+    ctx.lineTo(rightBackwallX + abutmentBase, centerY + abutmentHeight / 2);
+    ctx.lineTo(rightBackwallX + abutmentWidth, centerY + abutmentHeight / 2);
     ctx.closePath();
     ctx.fill();
     ctx.stroke();
@@ -250,7 +253,7 @@ export const SetupModal: React.FC<SetupModalProps> = ({ onClose }) => {
   useEffect(() => {
     drawSectionPreview();
     drawElevationPreview();
-  }, [selectedProfile, lengthFt, lengthIn, bearingCLFt, bearingCLIn, bearingDistanceFt, bearingDistanceIn]);
+  }, [selectedProfile, lengthFt, lengthIn, bearingCLFt, bearingCLIn, bearingDistanceFt, bearingDistanceIn, backwallClearanceIn, breastwallDistanceFt, breastwallDistanceIn]);
   
   const handleApply = () => {
     // Update project info
@@ -273,7 +276,14 @@ export const SetupModal: React.FC<SetupModalProps> = ({ onClose }) => {
     // Update bearings
     const bearingDistance = bearingDistanceFt * 12 + bearingDistanceIn;
     setBearings(bearingDistance, bearingDistance);
-    
+
+    // Update abutments
+    const breastwallDistance = breastwallDistanceFt * 12 + breastwallDistanceIn;
+    setBeamDimensions({
+      backwallClearance: backwallClearanceIn,
+      breastwallDistance
+    });
+
     onClose();
   };
   

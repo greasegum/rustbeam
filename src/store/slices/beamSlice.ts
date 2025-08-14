@@ -24,6 +24,8 @@ export const createBeamSlice: StateCreator<
     rightBearing: 12,
     leftAbutmentHeight: 24,
     rightAbutmentHeight: 24,
+    backwallClearance: 2,
+    breastwallDistance: 30,
     units: 'imperial'
   },
   
