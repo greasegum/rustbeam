@@ -9,10 +9,7 @@ export default defineConfig({
     minify: 'esbuild',
     target: 'es2020',
     rollupOptions: {
-      input: {
-        main: path.resolve(__dirname, 'index.html'),
-        react: path.resolve(__dirname, 'index-react.html')
-      },
+      input: path.resolve(__dirname, 'index-react.html'),
       output: {
         manualChunks: {
           phaser: ['phaser'],
