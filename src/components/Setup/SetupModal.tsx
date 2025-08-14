@@ -152,6 +152,7 @@ export const SetupModal: React.FC<SetupModalProps> = ({ onClose }) => {
     // Set up scaling
     const scale = (canvas.width - 60) / totalLength;
     const centerY = canvas.height / 2;
+    const centerX = canvas.width / 2;
     const startX = 30;
     
     // Draw beam (side view)
