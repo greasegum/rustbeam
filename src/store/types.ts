@@ -3,6 +3,8 @@ import { BeamProfile, DefectType, Annotation } from '../types';
 export interface ProjectMetadata {
   id: string;
   name: string;
+  beamId?: string;
+  inspector?: string;
   description?: string;
   createdAt: string;
   modifiedAt: string;

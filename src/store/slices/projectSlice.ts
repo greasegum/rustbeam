@@ -4,6 +4,7 @@ import { AppStore, ProjectMetadata } from '../types';
 export interface ProjectSlice {
   project: ProjectMetadata;
   setProjectMetadata: (metadata: Partial<ProjectMetadata>) => void;
+  setProjectInfo: (info: Partial<ProjectMetadata>) => void;
 }
 
 export const createProjectSlice: StateCreator<
@@ -14,7 +15,9 @@ export const createProjectSlice: StateCreator<
 > = (set) => ({
   project: {
     id: crypto.randomUUID(),
-    name: 'Untitled Inspection',
+    name: 'Bridge A-47',
+    beamId: 'Beam 2',
+    inspector: 'J. Smith',
     description: '',
     createdAt: new Date().toISOString(),
     modifiedAt: new Date().toISOString(),
@@ -26,6 +29,15 @@ export const createProjectSlice: StateCreator<
       project: {
         ...state.project,
         ...metadata,
+        modifiedAt: new Date().toISOString()
+      }
+    })),
+    
+  setProjectInfo: (info) =>
+    set((state) => ({
+      project: {
+        ...state.project,
+        ...info,
         modifiedAt: new Date().toISOString()
       }
     }))

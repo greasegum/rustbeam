@@ -9,10 +9,15 @@ export default defineConfig({
     minify: 'esbuild',
     target: 'es2020',
     rollupOptions: {
+      input: {
+        main: path.resolve(__dirname, 'index.html'),
+        react: path.resolve(__dirname, 'index-react.html')
+      },
       output: {
         manualChunks: {
           phaser: ['phaser'],
-          vendor: ['zustand']
+          vendor: ['zustand'],
+          react: ['react', 'react-dom']
         }
       }
     }
@@ -24,9 +29,9 @@ export default defineConfig({
   },
   server: {
     port: 3000,
-    open: true
+    open: '/index-react.html'
   },
   optimizeDeps: {
-    include: ['phaser']
+    include: ['phaser', 'react', 'react-dom']
   }
 });

@@ -7,6 +7,8 @@ export interface BeamSlice {
   beam: BeamState;
   setBeamProfile: (profile: BeamProfile) => void;
   setBeamDimensions: (dims: Partial<BeamState>) => void;
+  setBeamLength: (length: number) => void;
+  setBearings: (left: number, right: number) => void;
 }
 
 export const createBeamSlice: StateCreator<
@@ -62,5 +64,33 @@ export const createBeamSlice: StateCreator<
           modifiedAt: new Date().toISOString()
         }
       };
-    })
+    }),
+    
+  setBeamLength: (length) =>
+    set((state) => {
+      const grid = state.grid;
+      const newCols = Math.ceil(length / grid.size);
+      
+      return {
+        beam: { ...state.beam, length },
+        grid: { ...grid, cols: newCols },
+        project: {
+          ...state.project,
+          modifiedAt: new Date().toISOString()
+        }
+      };
+    }),
+    
+  setBearings: (left, right) =>
+    set((state) => ({
+      beam: { 
+        ...state.beam, 
+        leftBearing: left,
+        rightBearing: right
+      },
+      project: {
+        ...state.project,
+        modifiedAt: new Date().toISOString()
+      }
+    }))
 });
