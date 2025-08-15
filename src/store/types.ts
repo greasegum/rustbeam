@@ -19,7 +19,8 @@ export interface BeamState {
   leftAbutmentHeight: number;
   rightAbutmentHeight: number;
   backwallClearance: number;
-  breastwallDistance: number;
+  breastwallDistance: number;  // Distance between facing brestwalls (clear span)
+  seatWidth: number;           // Width of bearing seat (breastwall to backwall)
   units: 'imperial' | 'metric';
 }
 

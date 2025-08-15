@@ -33,6 +33,13 @@ export const SetupModal: React.FC<SetupModalProps> = ({ onClose }) => {
   const [breastwallDistanceFt, setBreastwallDistanceFt] = useState(Math.floor(beam.breastwallDistance / 12));
   const [breastwallDistanceIn, setBreastwallDistanceIn] = useState(beam.breastwallDistance % 12);
   
+  // Compute seat width based on current parameters
+  const computedSeatWidth = () => {
+    const totalLength = lengthFt * 12 + lengthIn;
+    const breastwallDist = breastwallDistanceFt * 12 + breastwallDistanceIn;
+    return Math.round((totalLength + 2 * backwallClearanceIn - breastwallDist) / 2);
+  };
+  
   // Draw section preview
   const drawSectionPreview = () => {
     const canvas = sectionCanvasRef.current;
@@ -283,6 +290,7 @@ export const SetupModal: React.FC<SetupModalProps> = ({ onClose }) => {
     setBeamDimensions({
       backwallClearance: backwallClearanceIn,
       breastwallDistance
+      // seatWidth is automatically computed in the store
     });
 
     onClose();
@@ -449,6 +457,19 @@ export const SetupModal: React.FC<SetupModalProps> = ({ onClose }) => {
                       max="11"
                     />
                     <span>in</span>
+                  </div>
+                </div>
+                
+                <div className="form-field">
+                  <label>Seat Width (Computed)</label>
+                  <div className="dimension-input">
+                    <input 
+                      type="text" 
+                      value={`${computedSeatWidth()} in`}
+                      readOnly
+                      style={{ backgroundColor: '#f0f0f0', cursor: 'not-allowed' }}
+                      title={`Computed: (${lengthFt * 12 + lengthIn} + 2×${backwallClearanceIn} - ${breastwallDistanceFt * 12 + breastwallDistanceIn}) ÷ 2`}
+                    />
                   </div>
                 </div>
               </div>

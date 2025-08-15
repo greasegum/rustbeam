@@ -3,6 +3,11 @@ import { AppStore, BeamState } from '../types';
 import { BeamProfile } from '../../types';
 import { getBeamById } from '../../data/beamCatalog';
 
+// Helper to compute derived seat width
+const computeSeatWidth = (beamLength: number, backwallClearance: number, breastwallDistance: number): number => {
+  return (beamLength + 2 * backwallClearance - breastwallDistance) / 2;
+};
+
 export interface BeamSlice {
   beam: BeamState;
   setBeamProfile: (profile: BeamProfile) => void;
@@ -25,7 +30,8 @@ export const createBeamSlice: StateCreator<
     leftAbutmentHeight: 24,
     rightAbutmentHeight: 24,
     backwallClearance: 2,
-    breastwallDistance: 30,
+    breastwallDistance: 200,  // Distance between facing brestwalls (clear span)
+    seatWidth: 22,           // DERIVED: (240 + 2*2 - 200) / 2 = 44/2 = 22
     units: 'imperial'
   },
   
@@ -48,7 +54,16 @@ export const createBeamSlice: StateCreator<
   
   setBeamDimensions: (dims) =>
     set((state) => {
-      const newBeam = { ...state.beam, ...dims };
+      let newBeam = { ...state.beam, ...dims };
+      
+      // Automatically compute seat width when relevant parameters change
+      const length = dims.length !== undefined ? dims.length : state.beam.length;
+      const backwallClearance = dims.backwallClearance !== undefined ? dims.backwallClearance : state.beam.backwallClearance;
+      const breastwallDistance = dims.breastwallDistance !== undefined ? dims.breastwallDistance : state.beam.breastwallDistance;
+      
+      // Always recompute seat width based on the formula
+      newBeam.seatWidth = computeSeatWidth(length, backwallClearance, breastwallDistance);
+      
       const grid = state.grid;
       
       // Recalculate grid if length changes
@@ -73,8 +88,11 @@ export const createBeamSlice: StateCreator<
       const grid = state.grid;
       const newCols = Math.ceil(length / grid.size);
       
+      // Recompute seat width with new length
+      const seatWidth = computeSeatWidth(length, state.beam.backwallClearance, state.beam.breastwallDistance);
+      
       return {
-        beam: { ...state.beam, length },
+        beam: { ...state.beam, length, seatWidth },
         grid: { ...grid, cols: newCols },
         project: {
           ...state.project,
