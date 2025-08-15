@@ -80,26 +80,49 @@ export const useStore = create<AppStore>()(
       }),
       {
         name: 'visualbeam-storage',
-        partialize: (state) => ({
-          project: state.project,
-          beam: state.beam,
-          grid: { ...state.grid, cells: Array.from(state.grid.cells.entries()) },
-          tool: state.tool,
-          annotations: {
-            ...state.annotations,
-            annotations: Array.from(state.annotations.annotations.entries())
-          },
-          view: state.view
-        }),
+        partialize: (state) => {
+          const gridCells =
+            state.grid.cells instanceof Map
+              ? state.grid.cells
+              : new Map(Object.entries(state.grid.cells || {}));
+          const annotationMap =
+            state.annotations.annotations instanceof Map
+              ? state.annotations.annotations
+              : new Map(Object.entries(state.annotations.annotations || {}));
+
+          return {
+            project: state.project,
+            beam: state.beam,
+            grid: { ...state.grid, cells: Array.from(gridCells.entries()) },
+            tool: state.tool,
+            annotations: {
+              ...state.annotations,
+              annotations: Array.from(annotationMap.entries())
+            },
+            view: state.view
+          };
+        },
         deserialize: (str) => {
           const data = JSON.parse(str);
           if (data.state?.grid?.cells) {
-            data.state.grid.cells = new Map(data.state.grid.cells);
+            if (Array.isArray(data.state.grid.cells)) {
+              data.state.grid.cells = new Map(data.state.grid.cells);
+            } else {
+              data.state.grid.cells = new Map(
+                Object.entries(data.state.grid.cells)
+              );
+            }
           }
           if (data.state?.annotations?.annotations) {
-            data.state.annotations.annotations = new Map(
-              data.state.annotations.annotations
-            );
+            if (Array.isArray(data.state.annotations.annotations)) {
+              data.state.annotations.annotations = new Map(
+                data.state.annotations.annotations
+              );
+            } else {
+              data.state.annotations.annotations = new Map(
+                Object.entries(data.state.annotations.annotations)
+              );
+            }
           }
           return data;
         }
