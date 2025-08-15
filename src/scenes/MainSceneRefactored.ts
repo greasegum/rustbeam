@@ -387,6 +387,12 @@ export class MainSceneRefactored extends Phaser.Scene {
   private updateGridVisuals() {
     const { grid } = useStore.getState();
     
+    // Ensure cells is a Map
+    if (!(grid.cells instanceof Map)) {
+      console.warn('Grid cells is not a Map, initializing as empty Map');
+      return;
+    }
+    
     // Update all grid cells
     this.gridRects.forEach((rect, key) => {
       const cell = grid.cells.get(key);
