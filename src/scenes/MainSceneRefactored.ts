@@ -82,11 +82,11 @@ export class MainSceneRefactored extends Phaser.Scene {
   }
 
   private createGrid() {
-    const { beam, grid } = useStore.getState();
-    if (!beam.profile) return;
+    const { bridgeGeometry, grid } = useStore.getState();
+    if (!bridgeGeometry.profile) return;
     
-    const { length } = beam;
-    const beamDepth = beam.profile.depth;
+    const { length, profile } = bridgeGeometry;
+    const beamDepth = profile.depth;
     const gridSize = grid.size;
     
     // Use consistent scale factor
@@ -443,8 +443,10 @@ export class MainSceneRefactored extends Phaser.Scene {
     this.beamContainer.add(lengthText);
 
     // Span: CL bearing to CL bearing (technical definition)
-    const spanStart = -(length / 2 - beam.backwallClearance) * scale;
-    const spanEnd = (length / 2 - beam.backwallClearance) * scale;
+    const leftBackwallClearance = abutments.left.backwallClearance;
+    const rightBackwallClearance = abutments.right.backwallClearance;
+    const spanStart = -(length / 2 - leftBackwallClearance) * scale;
+    const spanEnd = (length / 2 - rightBackwallClearance) * scale;
     const spanY = (profile.depth / 2 + 20) * scale;
     const spanLine = this.add.line(0, spanY, spanStart, spanY, spanEnd, spanY, dimColor);
     spanLine.setLineWidth(1);
@@ -454,14 +456,14 @@ export class MainSceneRefactored extends Phaser.Scene {
     const spanText = this.add.text(
       0,
       spanY - 20,
-      `Span (CL-CL): ${(length - 2 * beam.backwallClearance)}"`,
+      `Span (CL-CL): ${(length - leftBackwallClearance - rightBackwallClearance)}"`,
       { fontSize: '12px', color: '#000000', align: 'center', fontStyle: 'bold' }
     );
     spanText.setOrigin(0.5);
     this.beamContainer.add(spanText);
 
     // Backwall clearance (left)
-    const backwallX = -(length / 2 + beam.backwallClearance) * scale;
+    const backwallX = -(length / 2 + leftBackwallClearance) * scale;
     const bwStart = backwallX;
     const bwEnd = -(length / 2) * scale;
     const bwY = (profile.depth / 2 + 20) * scale;
@@ -473,7 +475,7 @@ export class MainSceneRefactored extends Phaser.Scene {
     const bwText = this.add.text(
       (bwStart + bwEnd) / 2,
       bwY - 20,
-      `${beam.backwallClearance}\"`,
+      `${leftBackwallClearance}\"`,
       { fontSize: '12px', color: '#000000', align: 'center' }
     );
     bwText.setOrigin(0.5);
@@ -751,7 +753,7 @@ export class MainSceneRefactored extends Phaser.Scene {
       
       debugText.setText([
         `Camera: (${cam.scrollX.toFixed(1)}, ${cam.scrollY.toFixed(1)}) zoom: ${cam.zoom.toFixed(2)}`,
-        `Beam: ${state.beam.profile} L=${state.beam.length}"`,
+        `Beam: ${state.bridgeGeometry.profile?.id} L=${state.bridgeGeometry.length}"`,
         `Grid: ${state.grid.size.rows}x${state.grid.size.cols}`,
         `Containers: Grid=${this.gridContainer.list.length} Beam=${this.beamContainer.list.length}`,
         `Scene objects: ${this.children.list.length}`
