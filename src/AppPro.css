@@ -1,0 +1,133 @@
+/* CSS Variables */
+:root {
+  /* Color Palette */
+  --primary: #2196F3;
+  --primary-dark: #1976D2;
+  --secondary: #FF5722;
+  --success: #4CAF50;
+  --warning: #FFC107;
+  --danger: #F44336;
+  
+  /* Condition States */
+  --cs-1: #90EE90;
+  --cs-2: #FFD700;
+  --cs-3: #FFA500;
+  --cs-4: #FF4444;
+  --cs-holes: #FFFFFF;
+  
+  /* UI Colors */
+  --bg-dark: #1a1a1a;
+  --bg-medium: #242424;
+  --bg-light: #2d2d2d;
+  --bg-canvas: #f8f8f8;
+  --text-light: #e0e0e0;
+  --text-dim: #999;
+  --border: #333;
+  --border-light: #444;
+  
+  /* Sizes */
+  --header-height: 88px;
+  --toolbar-height: 48px;
+  --bottom-bar-height: 48px;
+  --status-height: 32px;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', system-ui, sans-serif;
+  background: var(--bg-canvas);
+  color: var(--text-light);
+  overflow: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Main App Layout - Horizontal Bars Only */
+.app-pro {
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* Main Canvas - Maximum Horizontal Space */
+.main-canvas {
+  flex: 1;
+  position: relative;
+  background: var(--bg-canvas);
+  overflow: hidden;
+  width: 100%;
+}
+
+/* Setup Float Button */
+.setup-float-btn {
+  position: fixed;
+  bottom: 80px;
+  right: 20px;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: var(--primary);
+  border: none;
+  color: white;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 12px rgba(33, 150, 243, 0.4);
+  transition: all 0.3s ease;
+  z-index: 100;
+}
+
+.setup-float-btn:hover {
+  transform: scale(1.1);
+  box-shadow: 0 6px 20px rgba(33, 150, 243, 0.5);
+}
+
+.setup-float-btn:active {
+  transform: scale(0.95);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  :root {
+    --header-height: 72px;
+    --toolbar-height: 44px;
+    --bottom-bar-height: 44px;
+  }
+  
+  .statistics {
+    display: none;
+  }
+  
+  .setup-float-btn {
+    bottom: 60px;
+    right: 16px;
+    width: 48px;
+    height: 48px;
+  }
+}
+
+@media (max-width: 480px) {
+  .mode-tabs {
+    padding: 0 0.5rem;
+  }
+  
+  .mode-tab span {
+    display: none;
+  }
+  
+  .tool-group label {
+    display: none;
+  }
+  
+  .action-btn span {
+    display: none;
+  }
+}

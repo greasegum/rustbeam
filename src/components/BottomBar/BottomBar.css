@@ -1,0 +1,114 @@
+/* Bottom Bar */
+.bottom-bar {
+  background: var(--bg-medium);
+  border-top: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.bottom-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.5rem 1rem;
+  min-height: var(--bottom-bar-height);
+}
+
+/* Quick Actions */
+.quick-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.quick-btn {
+  width: 36px;
+  height: 36px;
+  background: var(--bg-light);
+  border: 1px solid var(--border-light);
+  border-radius: 4px;
+  color: var(--text-light);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+
+.quick-btn:hover {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: white;
+}
+
+/* Statistics */
+.statistics {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  font-size: 0.875rem;
+}
+
+.stat-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.stat-label {
+  color: var(--text-dim);
+}
+
+.stat-value {
+  color: var(--text-light);
+  font-weight: 500;
+}
+
+.stat-divider {
+  color: var(--border-light);
+}
+
+/* View Controls */
+.view-controls {
+  display: flex;
+  gap: 0.25rem;
+}
+
+.view-btn {
+  width: 32px;
+  height: 32px;
+  background: var(--bg-light);
+  border: 1px solid var(--border-light);
+  border-radius: 4px;
+  color: var(--text-light);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+
+.view-btn:hover {
+  background: var(--bg-light);
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+/* Status Bar */
+.status-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.25rem 1rem;
+  background: var(--bg-dark);
+  border-top: 1px solid var(--border);
+  min-height: var(--status-height);
+  font-size: 0.75rem;
+}
+
+.status-text {
+  color: var(--text-dim);
+}
+
+.coordinates {
+  color: var(--text-dim);
+  font-family: 'SF Mono', 'Monaco', 'Inconsolata', monospace;
+}

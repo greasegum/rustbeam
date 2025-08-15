@@ -1,0 +1,31 @@
+# Rust build artifacts
+/target/
+Cargo.lock
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Node packages
+node_modules/
+
+# Environment files
+.env
+.env.local
+
+# Generated documentation
+/doc/
+
+# Benchmark results
+/benches/results/
+
+# Coverage reports
+/coverage/
+tarpaulin-report.html
