@@ -523,7 +523,7 @@ export class MainSceneRefactored extends Phaser.Scene {
     this.beamContainer.add(breastwallText);
     
     // Seat Width dimension (horizontal distance from breastwall to backwall)
-    const seatStartX = -(length / 2 + backwallClearance) * scale;
+    const seatStartX = -(length / 2 + leftBackwallClearance) * scale;
     const seatEndX = breastwallLeft;
     const seatY = (profile.depth / 2 + 10) * scale;
     
