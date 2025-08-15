@@ -7,6 +7,8 @@ export class MainSceneRefactored extends Phaser.Scene {
   private beamContainer!: Phaser.GameObjects.Container;
   private gridRects: Map<string, Phaser.GameObjects.Rectangle> = new Map();
   private isDragging = false;
+  private isPanning = false;
+  private lastPointer?: Phaser.Math.Vector2;
   private unsubscribe?: () => void;
   
   constructor() {
@@ -112,6 +114,9 @@ export class MainSceneRefactored extends Phaser.Scene {
       }
     }
     
+    // Ensure grid draws above beam for visibility
+    this.gridContainer.setDepth(10);
+
     // Set visibility based on tool state
     const { tool } = useStore.getState();
     this.gridContainer.setVisible(tool.showGrid);
@@ -188,10 +193,8 @@ export class MainSceneRefactored extends Phaser.Scene {
     );
     this.beamContainer.add(bottomFlangeZone);
     
-    // Draw bearings
+    // Draw bearings and abutments
     this.drawBearings(scale);
-
-    // Draw abutments
     this.drawAbutments(scale);
 
     // Draw dimensions if enabled
@@ -209,27 +212,22 @@ export class MainSceneRefactored extends Phaser.Scene {
     const bearingColor = 0xFFA07A;
     const bearingStroke = 0x8B5A3C;
     
-    const leftBearingGraphic = this.add.triangle(
-      -(length / 2 - leftBearing) * scale,
-      (profile.depth / 2 + 20) * scale,
-      0, 0,
-      -15 * scale, 30 * scale,
-      15 * scale, 30 * scale,
-      bearingColor
-    );
-    leftBearingGraphic.setStrokeStyle(2, bearingStroke);
-    this.beamContainer.add(leftBearingGraphic);
-    
-    const rightBearingGraphic = this.add.triangle(
-      (length / 2 - rightBearing) * scale,
-      (profile.depth / 2 + 20) * scale,
-      0, 0,
-      -15 * scale, 30 * scale,
-      15 * scale, 30 * scale,
-      bearingColor
-    );
-    rightBearingGraphic.setStrokeStyle(2, bearingStroke);
-    this.beamContainer.add(rightBearingGraphic);
+    const padWidth = 6;
+    const padHeight = 1;
+
+    const drawBearing = (x: number) => {
+      const topY = (profile.depth / 2) * scale + (padHeight * scale) / 2;
+      const bottomY = topY + padHeight * scale;
+      const upper = this.add.rectangle(x, topY, padWidth * scale, padHeight * scale, bearingColor);
+      upper.setStrokeStyle(2, bearingStroke);
+      const lower = this.add.rectangle(x, bottomY, padWidth * scale, padHeight * scale, bearingColor);
+      lower.setStrokeStyle(2, bearingStroke);
+      this.beamContainer.add(upper);
+      this.beamContainer.add(lower);
+    };
+
+    drawBearing(-(length / 2 - leftBearing) * scale);
+    drawBearing((length / 2 - rightBearing) * scale);
   }
 
   private drawAbutments(scale: number) {
@@ -237,32 +235,38 @@ export class MainSceneRefactored extends Phaser.Scene {
     const { profile, length, backwallClearance, breastwallDistance, leftAbutmentHeight, rightAbutmentHeight } = beam;
     if (!profile || breastwallDistance <= 0) return;
 
-    const abutmentColor = 0x666666;
-    const abutmentStroke = 0x444444;
-    const wallThickness = 10;
-    const baseThickness = 8;
+    const abutmentColor = 0xcccccc;
+    const abutmentStroke = 0x999999;
+    const seatRatio = 0.25;
+    const footingRatio = 0.3;
     const baseY = (profile.depth / 2) * scale;
-    const baseLength = breastwallDistance * scale;
 
-    // Left abutment
-    const leftBackwallX = -(length / 2 + backwallClearance) * scale;
-    const leftHeight = leftAbutmentHeight * scale;
-    const leftWall = this.add.rectangle(leftBackwallX, baseY - leftHeight / 2, wallThickness, leftHeight, abutmentColor);
-    leftWall.setStrokeStyle(2, abutmentStroke);
-    const leftBase = this.add.rectangle(leftBackwallX - baseLength / 2, baseY + baseThickness / 2, baseLength, baseThickness, abutmentColor);
-    leftBase.setStrokeStyle(2, abutmentStroke);
-    this.beamContainer.add(leftWall);
-    this.beamContainer.add(leftBase);
+    const drawAbutment = (isLeft: boolean, height: number) => {
+      const dir = isLeft ? -1 : 1;
+      const backwallX = dir * (length / 2 + backwallClearance) * scale;
+      const seatWidth = breastwallDistance * scale * dir;
+      const seatHeight = height * seatRatio * scale;
+      const footing = height * footingRatio * scale * dir;
+      const totalHeight = height * scale;
 
-    // Right abutment
-    const rightBackwallX = (length / 2 + backwallClearance) * scale;
-    const rightHeight = rightAbutmentHeight * scale;
-    const rightWall = this.add.rectangle(rightBackwallX, baseY - rightHeight / 2, wallThickness, rightHeight, abutmentColor);
-    rightWall.setStrokeStyle(2, abutmentStroke);
-    const rightBase = this.add.rectangle(rightBackwallX + baseLength / 2, baseY + baseThickness / 2, baseLength, baseThickness, abutmentColor);
-    rightBase.setStrokeStyle(2, abutmentStroke);
-    this.beamContainer.add(rightWall);
-    this.beamContainer.add(rightBase);
+      const points = [
+        backwallX + seatWidth, baseY,
+        backwallX + seatWidth, baseY + seatHeight,
+        backwallX, baseY + seatHeight,
+        backwallX, baseY + totalHeight,
+        backwallX - footing, baseY + totalHeight,
+        backwallX - footing, baseY + totalHeight + seatHeight,
+        backwallX + seatWidth, baseY + totalHeight + seatHeight,
+        backwallX + seatWidth, baseY
+      ];
+
+      const poly = this.add.polygon(0, 0, points, abutmentColor);
+      poly.setStrokeStyle(2, abutmentStroke);
+      this.beamContainer.add(poly);
+    };
+
+    drawAbutment(true, leftAbutmentHeight);
+    drawAbutment(false, rightAbutmentHeight);
   }
 
   private drawDimensions(scale: number) {
@@ -270,19 +274,84 @@ export class MainSceneRefactored extends Phaser.Scene {
     const { profile, length } = beam;
     if (!profile) return;
     
-    // Length dimension
+    const dimColor = 0x000000;
+
+    // Length dimension line with arrows
+    const lengthY = (profile.depth / 2 + 40) * scale;
+    const lengthLine = this.add.line(
+      0,
+      lengthY,
+      -length * scale / 2,
+      lengthY,
+      length * scale / 2,
+      lengthY,
+      dimColor
+    );
+    lengthLine.setLineWidth(1);
+    this.beamContainer.add(lengthLine);
+
+    const arrowSize = 4 * scale;
+    const drawArrow = (x: number, y: number, direction: number) => {
+      const arrow = this.add.triangle(
+        x,
+        y,
+        x + direction * arrowSize,
+        y - arrowSize / 2,
+        x + direction * arrowSize,
+        y + arrowSize / 2,
+        dimColor
+      );
+      this.beamContainer.add(arrow);
+    };
+    drawArrow(-length * scale / 2, lengthY, -1);
+    drawArrow(length * scale / 2, lengthY, 1);
+
     const lengthText = this.add.text(
       0,
-      (profile.depth / 2 + 60) * scale,
-      `${length}"`,
-      {
-        fontSize: '14px',
-        color: '#ffffff',
-        align: 'center'
-      }
+      lengthY - 20,
+      `${length}\"`,
+      { fontSize: '14px', color: '#000000', align: 'center' }
     );
     lengthText.setOrigin(0.5);
     this.beamContainer.add(lengthText);
+
+    // Span length between bearing centers
+    const { leftBearing, rightBearing } = beam;
+    const spanStart = -(length / 2 - leftBearing) * scale;
+    const spanEnd = (length / 2 - rightBearing) * scale;
+    const spanY = (profile.depth / 2 + 20) * scale;
+    const spanLine = this.add.line(0, spanY, spanStart, spanY, spanEnd, spanY, dimColor);
+    spanLine.setLineWidth(1);
+    this.beamContainer.add(spanLine);
+    drawArrow(spanStart, spanY, -1);
+    drawArrow(spanEnd, spanY, 1);
+    const spanText = this.add.text(
+      0,
+      spanY - 20,
+      `${(length - leftBearing - rightBearing)}\"`,
+      { fontSize: '14px', color: '#000000', align: 'center' }
+    );
+    spanText.setOrigin(0.5);
+    this.beamContainer.add(spanText);
+
+    // Backwall clearance (left)
+    const backwallX = -(length / 2 + beam.backwallClearance) * scale;
+    const bwStart = backwallX;
+    const bwEnd = -(length / 2) * scale;
+    const bwY = (profile.depth / 2 + 20) * scale;
+    const bwLine = this.add.line(0, bwY, bwStart, bwY, bwEnd, bwY, dimColor);
+    bwLine.setLineWidth(1);
+    this.beamContainer.add(bwLine);
+    drawArrow(bwStart, bwY, -1);
+    drawArrow(bwEnd, bwY, 1);
+    const bwText = this.add.text(
+      (bwStart + bwEnd) / 2,
+      bwY - 20,
+      `${beam.backwallClearance}\"`,
+      { fontSize: '12px', color: '#000000', align: 'center' }
+    );
+    bwText.setOrigin(0.5);
+    this.beamContainer.add(bwText);
     
     // Depth dimension
     const depthText = this.add.text(
@@ -391,20 +460,32 @@ export class MainSceneRefactored extends Phaser.Scene {
   private handlePointerDown(pointer: Phaser.Input.Pointer) {
     const { tool } = useStore.getState();
     
-    if (tool.currentTool === 'mark') {
+    const hit = this.input.hitTestPointer(pointer)[0];
+    if (tool.currentTool === 'mark' && hit && hit.getData('row') !== undefined) {
       this.isDragging = true;
       this.markAtPointer(pointer);
+    } else {
+      this.isPanning = true;
+      this.lastPointer = this.cameras.main.getWorldPoint(pointer.x, pointer.y);
     }
   }
 
   private handlePointerMove(pointer: Phaser.Input.Pointer) {
     if (this.isDragging) {
       this.markAtPointer(pointer);
+    } else if (this.isPanning && this.lastPointer) {
+      const newPoint = this.cameras.main.getWorldPoint(pointer.x, pointer.y);
+      const { view, setPan } = useStore.getState();
+      const dx = this.lastPointer.x - newPoint.x;
+      const dy = this.lastPointer.y - newPoint.y;
+      setPan(view.panX + dx, view.panY + dy);
+      this.lastPointer = newPoint;
     }
   }
 
   private handlePointerUp() {
     this.isDragging = false;
+    this.isPanning = false;
   }
 
   private markAtPointer(pointer: Phaser.Input.Pointer) {
