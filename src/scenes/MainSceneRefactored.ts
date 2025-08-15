@@ -251,7 +251,7 @@ export class MainSceneRefactored extends Phaser.Scene {
 
   private drawAbutments(scale: number) {
     const { beam } = useStore.getState();
-    const { profile, length, backwallClearance, breastwallDistance, leftAbutmentHeight, rightAbutmentHeight } = beam;
+    const { profile, length, backwallClearance, leftAbutmentHeight, rightAbutmentHeight } = beam;
     if (!profile) return;
 
     const baseY = (profile.depth / 2) * scale;
@@ -259,21 +259,28 @@ export class MainSceneRefactored extends Phaser.Scene {
     const abutmentStroke = 0x444444;
 
     // Proportions based on design sketch
-    const frontOffsetRatio = 2 / 14;
-    const seatHeightRatio = 7 / 16;
-
-    const seatWidth = (breastwallDistance / 2) * scale;
-    const footingProjection = seatWidth * frontOffsetRatio;
+    const seatWidthRatio = 14 / 16; // seat width vs. total height
+    const seatHeightRatio = 7 / 16; // seat step height
+    const footingProjectionRatio = 2 / 16; // footing projection vs. total height
 
     const leftTotal = leftAbutmentHeight * scale;
     const rightTotal = rightAbutmentHeight * scale;
+
     const leftSeat = leftTotal * seatHeightRatio;
     const rightSeat = rightTotal * seatHeightRatio;
+
+    const leftSeatWidth = leftTotal * seatWidthRatio;
+    const rightSeatWidth = rightTotal * seatWidthRatio;
+
+    const leftFooting = leftTotal * footingProjectionRatio;
+    const rightFooting = rightTotal * footingProjectionRatio;
 
     const drawAbutment = (
       backwallX: number,
       seatHeight: number,
       totalHeight: number,
+      seatWidth: number,
+      footingProjection: number,
       direction: 1 | -1
     ) => {
       const g = this.add.graphics();
@@ -294,10 +301,10 @@ export class MainSceneRefactored extends Phaser.Scene {
 
     // Left and right abutments
     const leftBackwallX = -(length / 2 + backwallClearance) * scale;
-    drawAbutment(leftBackwallX, leftSeat, leftTotal, -1);
+    drawAbutment(leftBackwallX, leftSeat, leftTotal, leftSeatWidth, leftFooting, -1);
 
     const rightBackwallX = (length / 2 + backwallClearance) * scale;
-    drawAbutment(rightBackwallX, rightSeat, rightTotal, 1);
+    drawAbutment(rightBackwallX, rightSeat, rightTotal, rightSeatWidth, rightFooting, 1);
   }
 
   private drawDimensions(scale: number) {
