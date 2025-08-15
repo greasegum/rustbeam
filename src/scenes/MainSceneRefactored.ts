@@ -1,24 +1,12 @@
 import Phaser from 'phaser';
 import { useStore } from '../store';
 import { DefectType } from '../types';
-import { CellState } from '../store/types';
 
 export class MainSceneRefactored extends Phaser.Scene {
   private gridContainer!: Phaser.GameObjects.Container;
   private beamContainer!: Phaser.GameObjects.Container;
-  private gridGraphics!: Phaser.GameObjects.Graphics;
-  private cellRects: Map<string, Phaser.GameObjects.Rectangle> = new Map();
-  private gridCols = 0;
-  private gridRows = 0;
-  private gridStartX = 0;
-  private gridStartY = 0;
-  private currentGridSize = 0;
-  private isMarking = false;
-  private isPanning = false;
-  private panStartX = 0;
-  private panStartY = 0;
-  private cameraStartX = 0;
-  private cameraStartY = 0;
+  private gridRects: Map<string, Phaser.GameObjects.Rectangle> = new Map();
+  private isDragging = false;
   private unsubscribe?: () => void;
   
   constructor() {
@@ -31,8 +19,6 @@ export class MainSceneRefactored extends Phaser.Scene {
     // Create containers
     this.gridContainer = this.add.container(0, 0);
     this.beamContainer = this.add.container(0, 0);
-    this.beamContainer.setDepth(1);
-    this.gridContainer.setDepth(2);
     
     // Subscribe to store changes
     this.subscribeToStore();
@@ -93,36 +79,38 @@ export class MainSceneRefactored extends Phaser.Scene {
     // Calculate grid dimensions
     const cols = Math.ceil(length / gridSize);
     const rows = Math.ceil(beamDepth / gridSize);
-
+    
     // Center grid position
     const startX = -length / 2;
     const startY = -beamDepth / 2;
-
-    // Store for interaction calculations
-    this.gridCols = cols;
-    this.gridRows = rows;
-    this.gridStartX = startX;
-    this.gridStartY = startY;
-    this.currentGridSize = gridSize;
     
-    // Clear existing grid graphics and cell overlays
+    // Clear existing grid
     this.gridContainer.removeAll(true);
-    this.cellRects.clear();
-
-    // Draw grid lines using a single graphics object for performance
-    this.gridGraphics = this.add.graphics();
-    this.gridGraphics.lineStyle(0.5, 0xcccccc, 1);
-
-    for (let row = 0; row <= rows; row++) {
-      const y = startY + row * gridSize;
-      this.gridGraphics.lineBetween(startX, y, startX + cols * gridSize, y);
+    this.gridRects.clear();
+    
+    // Create grid cells
+    for (let row = 0; row < rows; row++) {
+      for (let col = 0; col < cols; col++) {
+        const x = startX + col * gridSize;
+        const y = startY + row * gridSize;
+        const key = `${row},${col}`;
+        
+        // Draw grid cell
+        const rect = this.add.rectangle(
+          x + gridSize / 2,
+          y + gridSize / 2,
+          gridSize,
+          gridSize
+        );
+        rect.setStrokeStyle(0.5, 0xcccccc);
+        rect.setInteractive();
+        rect.setData('row', row);
+        rect.setData('col', col);
+        
+        this.gridRects.set(key, rect);
+        this.gridContainer.add(rect);
+      }
     }
-    for (let col = 0; col <= cols; col++) {
-      const x = startX + col * gridSize;
-      this.gridGraphics.lineBetween(x, startY, x, startY + rows * gridSize);
-    }
-
-    this.gridContainer.add(this.gridGraphics);
     
     // Set visibility based on tool state
     const { tool } = useStore.getState();
@@ -133,24 +121,21 @@ export class MainSceneRefactored extends Phaser.Scene {
     const { beam, tool } = useStore.getState();
     if (!beam.profile) return;
     
-    const { profile, length } = beam;
-
+    const { profile, length, leftBearing, rightBearing } = beam;
+    
     this.beamContainer.removeAll(true);
-
+    
     // Scale factor for visualization (pixels per inch)
     const scale = 10;
-
-    // Draw abutments first so they render behind the beam
-    this.drawAbutments(scale);
-
+    
     // Professional colors for light background
     const beamColor = 0x4CAF50;
     const strokeColor = 0x2E7D32;
     const flangeLineColor = 0x388E3C;
-
+    
     // SIDE ELEVATION VIEW - Looking at the beam from the side
     // Shows full length horizontally and depth vertically
-
+    
     // Draw main beam body (side elevation)
     const beamBody = this.add.rectangle(
       0, 0,
@@ -203,8 +188,11 @@ export class MainSceneRefactored extends Phaser.Scene {
     );
     this.beamContainer.add(bottomFlangeZone);
     
-    // Draw bearings on top of abutments
+    // Draw bearings
     this.drawBearings(scale);
+
+    // Draw abutments
+    this.drawAbutments(scale);
 
     // Draw dimensions if enabled
     if (tool.showDimensions) {
@@ -216,95 +204,65 @@ export class MainSceneRefactored extends Phaser.Scene {
     const { beam } = useStore.getState();
     const { profile, length, leftBearing, rightBearing } = beam;
     if (!profile) return;
-
+    
+    // Complementary color for bearings (coral/salmon)
     const bearingColor = 0xFFA07A;
     const bearingStroke = 0x8B5A3C;
-    const plateWidth = profile.flangeWidth * scale;
-    const plateHeight = 0.8 * scale;
-    const gap = 0.4 * scale;
-    const seatY = (profile.depth / 2) * scale;
-
-    const drawPair = (x: number) => {
-      const lower = this.add.rectangle(
-        x,
-        seatY + plateHeight / 2,
-        plateWidth,
-        plateHeight,
-        bearingColor
-      );
-      lower.setStrokeStyle(1, bearingStroke);
-      const upper = this.add.rectangle(
-        x,
-        seatY + plateHeight + gap + plateHeight / 2,
-        plateWidth,
-        plateHeight,
-        bearingColor
-      );
-      upper.setStrokeStyle(1, bearingStroke);
-      this.beamContainer.add(lower);
-      this.beamContainer.add(upper);
-    };
-
-    drawPair(-(length / 2 - leftBearing) * scale);
-    drawPair((length / 2 - rightBearing) * scale);
+    
+    const leftBearingGraphic = this.add.triangle(
+      -(length / 2 - leftBearing) * scale,
+      (profile.depth / 2 + 20) * scale,
+      0, 0,
+      -15 * scale, 30 * scale,
+      15 * scale, 30 * scale,
+      bearingColor
+    );
+    leftBearingGraphic.setStrokeStyle(2, bearingStroke);
+    this.beamContainer.add(leftBearingGraphic);
+    
+    const rightBearingGraphic = this.add.triangle(
+      (length / 2 - rightBearing) * scale,
+      (profile.depth / 2 + 20) * scale,
+      0, 0,
+      -15 * scale, 30 * scale,
+      15 * scale, 30 * scale,
+      bearingColor
+    );
+    rightBearingGraphic.setStrokeStyle(2, bearingStroke);
+    this.beamContainer.add(rightBearingGraphic);
   }
 
   private drawAbutments(scale: number) {
     const { beam } = useStore.getState();
-    const { profile, length, backwallClearance, leftAbutmentHeight, rightAbutmentHeight } = beam;
-    if (!profile) return;
+    const { profile, length, backwallClearance, breastwallDistance, leftAbutmentHeight, rightAbutmentHeight } = beam;
+    if (!profile || breastwallDistance <= 0) return;
 
-    const baseY = (profile.depth / 2) * scale;
     const abutmentColor = 0x666666;
     const abutmentStroke = 0x444444;
+    const wallThickness = 10;
+    const baseThickness = 8;
+    const baseY = (profile.depth / 2) * scale;
+    const baseLength = breastwallDistance * scale;
 
-    // Proportions based on design sketch
-    const seatWidthRatio = 14 / 16; // seat width vs. total height
-    const seatHeightRatio = 7 / 16; // seat step height
-    const footingProjectionRatio = 2 / 16; // footing projection vs. total height
-
-    const leftTotal = leftAbutmentHeight * scale;
-    const rightTotal = rightAbutmentHeight * scale;
-
-    const leftSeat = leftTotal * seatHeightRatio;
-    const rightSeat = rightTotal * seatHeightRatio;
-
-    const leftSeatWidth = leftTotal * seatWidthRatio;
-    const rightSeatWidth = rightTotal * seatWidthRatio;
-
-    const leftFooting = leftTotal * footingProjectionRatio;
-    const rightFooting = rightTotal * footingProjectionRatio;
-
-    const drawAbutment = (
-      backwallX: number,
-      seatHeight: number,
-      totalHeight: number,
-      seatWidth: number,
-      footingProjection: number,
-      direction: 1 | -1
-    ) => {
-      const g = this.add.graphics();
-      g.fillStyle(abutmentColor, 1);
-      g.lineStyle(2, abutmentStroke, 1);
-      g.beginPath();
-      g.moveTo(backwallX, baseY);
-      g.lineTo(backwallX, baseY + seatHeight);
-      g.lineTo(backwallX + direction * seatWidth, baseY + seatHeight);
-      g.lineTo(backwallX + direction * seatWidth, baseY + totalHeight);
-      g.lineTo(backwallX + direction * (seatWidth + footingProjection), baseY + totalHeight);
-      g.lineTo(backwallX + direction * (seatWidth + footingProjection), baseY);
-      g.closePath();
-      g.fillPath();
-      g.strokePath();
-      this.beamContainer.add(g);
-    };
-
-    // Left and right abutments
+    // Left abutment
     const leftBackwallX = -(length / 2 + backwallClearance) * scale;
-    drawAbutment(leftBackwallX, leftSeat, leftTotal, leftSeatWidth, leftFooting, -1);
+    const leftHeight = leftAbutmentHeight * scale;
+    const leftWall = this.add.rectangle(leftBackwallX, baseY - leftHeight / 2, wallThickness, leftHeight, abutmentColor);
+    leftWall.setStrokeStyle(2, abutmentStroke);
+    const leftBase = this.add.rectangle(leftBackwallX - baseLength / 2, baseY + baseThickness / 2, baseLength, baseThickness, abutmentColor);
+    leftBase.setStrokeStyle(2, abutmentStroke);
+    this.beamContainer.add(leftWall);
+    this.beamContainer.add(leftBase);
 
+    // Right abutment
     const rightBackwallX = (length / 2 + backwallClearance) * scale;
-    drawAbutment(rightBackwallX, rightSeat, rightTotal, rightSeatWidth, rightFooting, 1);
+    const rightHeight = rightAbutmentHeight * scale;
+    const rightWall = this.add.rectangle(rightBackwallX, baseY - rightHeight / 2, wallThickness, rightHeight, abutmentColor);
+    rightWall.setStrokeStyle(2, abutmentStroke);
+    const rightBase = this.add.rectangle(rightBackwallX + baseLength / 2, baseY + baseThickness / 2, baseLength, baseThickness, abutmentColor);
+    rightBase.setStrokeStyle(2, abutmentStroke);
+    this.beamContainer.add(rightWall);
+    this.beamContainer.add(rightBase);
   }
 
   private drawDimensions(scale: number) {
@@ -359,41 +317,12 @@ export class MainSceneRefactored extends Phaser.Scene {
 
   private updateGridVisuals() {
     const { grid } = useStore.getState();
-    const cells: Map<string, CellState> =
-      grid.cells instanceof Map
-        ? (grid.cells as Map<string, CellState>)
-        : new Map<string, CellState>(Object.entries(grid.cells || {}));
-
-    // Remove overlays that no longer have defects
-    this.cellRects.forEach((rect, key) => {
-      if (!cells.has(key)) {
-        rect.destroy();
-        this.cellRects.delete(key);
-      }
-    });
-
-    // Add or update overlays for defect cells
-    cells.forEach((cell: CellState, key: string) => {
-      let rect = this.cellRects.get(key);
-      const col = cell.col;
-      const row = cell.row;
-      const x = this.gridStartX + col * this.currentGridSize + this.currentGridSize / 2;
-      const y = this.gridStartY + row * this.currentGridSize + this.currentGridSize / 2;
-
-      if (!rect) {
-        rect = this.add.rectangle(
-          x,
-          y,
-          this.currentGridSize,
-          this.currentGridSize,
-          0x000000,
-          0
-        );
-        this.gridContainer.add(rect);
-        this.cellRects.set(key, rect);
-      }
-
-      if (cell.defectType) {
+    
+    // Update all grid cells
+    this.gridRects.forEach((rect, key) => {
+      const cell = grid.cells.get(key);
+      
+      if (cell?.defectType) {
         const color = this.getDefectColor(cell.defectType, cell.severity!);
         rect.setFillStyle(color, 0.5);
       } else {
@@ -460,69 +389,41 @@ export class MainSceneRefactored extends Phaser.Scene {
   }
 
   private handlePointerDown(pointer: Phaser.Input.Pointer) {
-    const { beam, tool } = useStore.getState();
-    if (!beam.profile) return;
-
-    const worldPoint = this.cameras.main.getWorldPoint(pointer.x, pointer.y);
-    const halfLength = beam.length / 2;
-    const halfDepth = beam.profile.depth / 2;
-    const insideBeam =
-      worldPoint.x >= -halfLength &&
-      worldPoint.x <= halfLength &&
-      worldPoint.y >= -halfDepth &&
-      worldPoint.y <= halfDepth;
-
-    if (tool.currentTool === 'mark' && insideBeam) {
-      this.isMarking = true;
+    const { tool } = useStore.getState();
+    
+    if (tool.currentTool === 'mark') {
+      this.isDragging = true;
       this.markAtPointer(pointer);
-    } else {
-      this.isPanning = true;
-      this.panStartX = pointer.x;
-      this.panStartY = pointer.y;
-      this.cameraStartX = this.cameras.main.scrollX;
-      this.cameraStartY = this.cameras.main.scrollY;
     }
   }
 
   private handlePointerMove(pointer: Phaser.Input.Pointer) {
-    if (this.isMarking) {
+    if (this.isDragging) {
       this.markAtPointer(pointer);
-    } else if (this.isPanning) {
-      const dx = pointer.x - this.panStartX;
-      const dy = pointer.y - this.panStartY;
-      const cam = this.cameras.main;
-      cam.scrollX = this.cameraStartX - dx;
-      cam.scrollY = this.cameraStartY - dy;
-      useStore.getState().setPan(cam.scrollX, cam.scrollY);
     }
   }
 
   private handlePointerUp() {
-    this.isMarking = false;
-    this.isPanning = false;
+    this.isDragging = false;
   }
 
   private markAtPointer(pointer: Phaser.Input.Pointer) {
     const worldPoint = this.cameras.main.getWorldPoint(pointer.x, pointer.y);
-
-    const col = Math.floor((worldPoint.x - this.gridStartX) / this.currentGridSize);
-    const row = Math.floor((worldPoint.y - this.gridStartY) / this.currentGridSize);
-
-    if (
-      row < 0 ||
-      col < 0 ||
-      row >= this.gridRows ||
-      col >= this.gridCols
-    ) {
-      return;
-    }
-
-    const { tool, markCell } = useStore.getState();
-
-    if (tool.selectedDefect === 'none') {
-      markCell(row, col);
-    } else {
-      markCell(row, col, tool.selectedDefect as DefectType, tool.selectedSeverity);
+    const gameObject = this.input.hitTestPointer(pointer)[0];
+    
+    if (gameObject && gameObject.getData) {
+      const row = gameObject.getData('row');
+      const col = gameObject.getData('col');
+      
+      if (row !== undefined && col !== undefined) {
+        const { tool, markCell } = useStore.getState();
+        
+        if (tool.selectedDefect === 'none') {
+          markCell(row, col);
+        } else {
+          markCell(row, col, tool.selectedDefect as DefectType, tool.selectedSeverity);
+        }
+      }
     }
   }
 
@@ -548,6 +449,7 @@ export class MainSceneRefactored extends Phaser.Scene {
     cam.zoom = view.zoom;
     cam.scrollX = view.panX;
     cam.scrollY = view.panY;
+    cam.rotation = view.rotation * Math.PI / 180;
   }
 
   destroy() {
@@ -555,5 +457,6 @@ export class MainSceneRefactored extends Phaser.Scene {
     if (this.unsubscribe) {
       this.unsubscribe();
     }
+    super.destroy();
   }
 }
