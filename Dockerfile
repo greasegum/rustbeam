@@ -7,8 +7,8 @@ WORKDIR /app
 COPY package*.json ./
 
 # Install dependencies
-RUN npm ci --only=production && \
-    npm install --save-dev vite typescript @types/node
+RUN npm ci --prefer-offline --only=production && \
+    npm install --prefer-offline --save-dev vite typescript @types/node
 
 # Copy source code
 COPY . .
@@ -23,7 +23,7 @@ WORKDIR /app
 
 # Copy package files and install production dependencies
 COPY package*.json ./
-RUN npm ci --only=production
+RUN npm ci --prefer-offline --only=production
 
 # Copy built application and server
 COPY --from=builder /app/dist ./dist

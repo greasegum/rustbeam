@@ -1,4 +1,5 @@
 #!/bin/bash
+set -e
 # Build script for Railway deployment
 
 echo "Starting build process..."
@@ -6,11 +7,11 @@ echo "Starting build process..."
 # Install dependencies if not present
 if [ ! -d "node_modules" ]; then
   echo "Installing dependencies..."
-  npm install
+  npm ci --prefer-offline
 fi
 
 # Build with Vite
 echo "Building application..."
-npx vite build
+npm run build
 
 echo "Build complete!"
