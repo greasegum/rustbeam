@@ -78,10 +78,10 @@ export const AnnotateToolbar: React.FC = () => {
       {/* Text Size */}
       <div className="tool-group">
         <label>Size:</label>
-        <select className="text-size-select">
+        <select className="text-size-select" defaultValue="14">
           <option value="10">10pt</option>
           <option value="12">12pt</option>
-          <option value="14" selected>14pt</option>
+          <option value="14">14pt</option>
           <option value="16">16pt</option>
           <option value="18">18pt</option>
         </select>

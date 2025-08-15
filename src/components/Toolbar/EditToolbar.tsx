@@ -12,7 +12,7 @@ export const EditToolbar: React.FC<EditToolbarProps> = ({ onConfigure }) => {
   const [brushRadius, setBrushRadius] = useState<number>(1);
   const [holesPercentage, setHolesPercentage] = useState<number>(50);
   
-  const { setTool, setSelectedSeverity, clearAllCells } = useStore();
+  const { setCurrentTool, setSeverity, setDefectType, clearAllCells } = useStore();
   
   const handleToolChange = (tool: string) => {
     setActiveTool(tool);
@@ -23,12 +23,19 @@ export const EditToolbar: React.FC<EditToolbarProps> = ({ onConfigure }) => {
       'region': 'select',
       'erase': 'mark'
     };
-    setTool(toolMap[tool] || 'select');
+    setCurrentTool(toolMap[tool] || 'select');
+    
+    // When selecting erase tool, set defect type to 'none'
+    if (tool === 'erase') {
+      setDefectType('none');
+    } else if (tool === 'brush') {
+      setDefectType('corrosion'); // Default defect type
+    }
   };
   
   const handleCSChange = (cs: number) => {
     setActiveCS(cs);
-    setSelectedSeverity(cs);
+    setSeverity(cs);
   };
   
   return (

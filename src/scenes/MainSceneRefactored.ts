@@ -10,6 +10,7 @@ export class MainSceneRefactored extends Phaser.Scene {
   private isPanning = false;
   private lastPointer?: Phaser.Math.Vector2;
   private unsubscribe?: () => void;
+  private readonly SCALE = 10; // pixels per inch - consistent scaling factor
   
   constructor() {
     super({ key: 'MainSceneRefactored' });
@@ -78,13 +79,16 @@ export class MainSceneRefactored extends Phaser.Scene {
     const beamDepth = beam.profile.depth;
     const gridSize = grid.size;
     
+    // Use consistent scale factor
+    const scale = this.SCALE;
+    
     // Calculate grid dimensions
     const cols = Math.ceil(length / gridSize);
     const rows = Math.ceil(beamDepth / gridSize);
     
-    // Center grid position
-    const startX = -length / 2;
-    const startY = -beamDepth / 2;
+    // Center grid position (scaled)
+    const startX = (-length / 2) * scale;
+    const startY = (-beamDepth / 2) * scale;
     
     // Clear existing grid
     this.gridContainer.removeAll(true);
@@ -93,16 +97,16 @@ export class MainSceneRefactored extends Phaser.Scene {
     // Create grid cells
     for (let row = 0; row < rows; row++) {
       for (let col = 0; col < cols; col++) {
-        const x = startX + col * gridSize;
-        const y = startY + row * gridSize;
+        const x = startX + col * gridSize * scale;
+        const y = startY + row * gridSize * scale;
         const key = `${row},${col}`;
         
-        // Draw grid cell
+        // Draw grid cell (scaled)
         const rect = this.add.rectangle(
-          x + gridSize / 2,
-          y + gridSize / 2,
-          gridSize,
-          gridSize
+          x + (gridSize * scale) / 2,
+          y + (gridSize * scale) / 2,
+          gridSize * scale,
+          gridSize * scale
         );
         rect.setStrokeStyle(0.5, 0xcccccc);
         rect.setInteractive();
@@ -130,8 +134,8 @@ export class MainSceneRefactored extends Phaser.Scene {
     
     this.beamContainer.removeAll(true);
     
-    // Scale factor for visualization (pixels per inch)
-    const scale = 10;
+    // Use consistent scale factor
+    const scale = this.SCALE;
     
     // Professional colors for light background
     const beamColor = 0x4CAF50;
