@@ -6,6 +6,11 @@ export class MainSceneRefactored extends Phaser.Scene {
   private gridContainer!: Phaser.GameObjects.Container;
   private beamContainer!: Phaser.GameObjects.Container;
   private gridRects: Map<string, Phaser.GameObjects.Rectangle> = new Map();
+  private gridCols = 0;
+  private gridRows = 0;
+  private gridStartX = 0;
+  private gridStartY = 0;
+  private currentGridSize = 0;
   private isDragging = false;
   private unsubscribe?: () => void;
   
@@ -79,10 +84,17 @@ export class MainSceneRefactored extends Phaser.Scene {
     // Calculate grid dimensions
     const cols = Math.ceil(length / gridSize);
     const rows = Math.ceil(beamDepth / gridSize);
-    
+
     // Center grid position
     const startX = -length / 2;
     const startY = -beamDepth / 2;
+
+    // Store for interaction calculations
+    this.gridCols = cols;
+    this.gridRows = rows;
+    this.gridStartX = startX;
+    this.gridStartY = startY;
+    this.currentGridSize = gridSize;
     
     // Clear existing grid
     this.gridContainer.removeAll(true);
@@ -103,9 +115,6 @@ export class MainSceneRefactored extends Phaser.Scene {
           gridSize
         );
         rect.setStrokeStyle(0.5, 0xcccccc);
-        rect.setInteractive();
-        rect.setData('row', row);
-        rect.setData('col', col);
         
         this.gridRects.set(key, rect);
         this.gridContainer.add(rect);
@@ -339,11 +348,15 @@ export class MainSceneRefactored extends Phaser.Scene {
 
   private updateGridVisuals() {
     const { grid } = useStore.getState();
-    
+    const cells =
+      grid.cells instanceof Map
+        ? grid.cells
+        : new Map(Object.entries(grid.cells || {}));
+
     // Update all grid cells
     this.gridRects.forEach((rect, key) => {
-      const cell = grid.cells.get(key);
-      
+      const cell = cells.get(key);
+
       if (cell?.defectType) {
         const color = this.getDefectColor(cell.defectType, cell.severity!);
         rect.setFillStyle(color, 0.5);
@@ -431,21 +444,25 @@ export class MainSceneRefactored extends Phaser.Scene {
 
   private markAtPointer(pointer: Phaser.Input.Pointer) {
     const worldPoint = this.cameras.main.getWorldPoint(pointer.x, pointer.y);
-    const gameObject = this.input.hitTestPointer(pointer)[0];
-    
-    if (gameObject && gameObject.getData) {
-      const row = gameObject.getData('row');
-      const col = gameObject.getData('col');
-      
-      if (row !== undefined && col !== undefined) {
-        const { tool, markCell } = useStore.getState();
-        
-        if (tool.selectedDefect === 'none') {
-          markCell(row, col);
-        } else {
-          markCell(row, col, tool.selectedDefect as DefectType, tool.selectedSeverity);
-        }
-      }
+
+    const col = Math.floor((worldPoint.x - this.gridStartX) / this.currentGridSize);
+    const row = Math.floor((worldPoint.y - this.gridStartY) / this.currentGridSize);
+
+    if (
+      row < 0 ||
+      col < 0 ||
+      row >= this.gridRows ||
+      col >= this.gridCols
+    ) {
+      return;
+    }
+
+    const { tool, markCell } = useStore.getState();
+
+    if (tool.selectedDefect === 'none') {
+      markCell(row, col);
+    } else {
+      markCell(row, col, tool.selectedDefect as DefectType, tool.selectedSeverity);
     }
   }
 
