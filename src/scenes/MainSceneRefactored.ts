@@ -497,8 +497,8 @@ export class MainSceneRefactored extends Phaser.Scene {
     this.beamContainer.add(depthText);
     
     // Breastwall Distance (clear span between facing brestwalls)
-    const breastwallLeft = -((length / 2) - (length - breastwallDistance) / 2) * scale;
-    const breastwallRight = ((length / 2) - (length - breastwallDistance) / 2) * scale;
+    const breastwallLeft = -((length / 2) - (length - constraints.breastwallDistance) / 2) * scale;
+    const breastwallRight = ((length / 2) - (length - constraints.breastwallDistance) / 2) * scale;
     const breastwallY = (profile.depth / 2 + 50) * scale;
     
     const breastwallLine = this.add.line(
@@ -516,7 +516,7 @@ export class MainSceneRefactored extends Phaser.Scene {
     const breastwallText = this.add.text(
       0,
       breastwallY + 20,
-      `Breastwall Distance: ${breastwallDistance}"`,
+      `Breastwall Distance: ${constraints.breastwallDistance}"`,
       { fontSize: '12px', color: '#FF6B6B', align: 'center', fontStyle: 'bold' }
     );
     breastwallText.setOrigin(0.5);
