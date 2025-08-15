@@ -2,6 +2,9 @@ import { StateCreator } from 'zustand';
 import { AppStore, GridState, CellState } from '../types';
 import { DefectType } from '../../types';
 
+const toMap = (cells: any): Map<string, CellState> =>
+  cells instanceof Map ? cells : new Map(Object.entries(cells || {}));
+
 export interface GridSlice {
   grid: GridState;
   setGridSize: (size: number) => void;
@@ -33,7 +36,7 @@ export const createGridSlice: StateCreator<
       
       // Remap cells to new grid
       const newCells = new Map<string, CellState>();
-      state.grid.cells.forEach((cell) => {
+      toMap(state.grid.cells).forEach((cell) => {
         // Calculate position in new grid
         const oldY = cell.row * state.grid.size;
         const oldX = cell.col * state.grid.size;
@@ -70,7 +73,7 @@ export const createGridSlice: StateCreator<
   markCell: (row, col, defect, severity) =>
     set((state) => {
       const key = `${row},${col}`;
-      const cells = new Map(state.grid.cells);
+      const cells = new Map(toMap(state.grid.cells));
       
       if (!defect) {
         cells.delete(key);
@@ -96,7 +99,7 @@ export const createGridSlice: StateCreator<
   clearCell: (row, col) =>
     set((state) => {
       const key = `${row},${col}`;
-      const cells = new Map(state.grid.cells);
+      const cells = new Map(toMap(state.grid.cells));
       cells.delete(key);
       
       return {
