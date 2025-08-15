@@ -283,20 +283,33 @@ abutmentBase = beamBottom + bearingHeight + seatHeight
 ### 1. **Parametric Relationships**
 All geometry is driven by key parameters with derived values computed automatically:
 
-**Example**: For a 240" beam with 2" backwall clearance and 200" breastwall distance:
+**Example**: For a W12X26 beam (12.22" depth) with 240" length, 2" backwall clearance and 200" breastwall distance:
 ```
 seatWidth = (beamLength + 2 * backwallClearance - breastwallDistance) / 2
 seatWidth = (240 + 2 * 2 - 200) / 2
 seatWidth = (240 + 4 - 200) / 2
 seatWidth = 44 / 2
 seatWidth = 22 inches
+
+backwallWidth = seatWidth / 3 = 22 / 3 ≈ 7.3 inches
+abutmentBottomWidth = seatWidth + backwallWidth = 22 + 7.3 = 29.3 inches
 ```
+
+**Geometric Rules** (implemented in MainSceneRefactored.ts):
+- Backwall top is truncated colinear with beam top (uses actual beam depth from catalog)
+- Breastwall bottom extends 1× seat width below the seat surface
+- Backwall width = seat width ÷ 3
+- Stepped abutment shape: backwall outer → backwall inner (stepped by backwall width) → breastwall
+- Bearing width: 6-12 inches, constrained to not overhang breastwall
+- Span = CL bearing to CL bearing (technical definition)
+- Setup modal opens only from gear icon, Configure button opens contour settings
 
 Changing any of these parameters automatically updates:
 - Seat width (recomputed)
+- Backwall width (derived from seat width)
 - Beam end positions
-- Backwall positions
-- Abutment geometry
+- Abutment geometry (truncated at beam top)
+- Bearing constraints
 - Grid extent
 - Dimension lines
 
@@ -318,25 +331,40 @@ A regular grid (default 3" cells) overlays the beam for precise defect marking:
 - Cells can be marked with defect types and severity
 - Grid transforms with view but stores in world coordinates
 
+## Current Implementation Status (as of latest update)
+
+✅ **Completed Features**:
+- Stepped abutment shapes with proper geometric relationships
+- Setup modal separation (gear icon only, Configure button for contours)
+- Parametric seat width calculation (beamLength + 2*backwallClearance - breastwallDistance) / 2
+- Beam rendering with proper W-flange dimensions from catalog
+- Grid system with 10px/inch scaling factor
+- Bearing constraints preventing overhang
+- Scene rendering pipeline debugged and functional
+
+🚧 **In Progress**:
+- Contour generation settings modal (placeholder implemented)
+- Marching squares algorithm for defect contours
+
 ## Rendering Pipeline
 
 ```
-1. Parse Parameters
+1. Parse Parameters from Store
    ↓
-2. Calculate Derived Values (spans, positions)
+2. Calculate Derived Values (seat width, spans, positions)
    ↓
-3. Apply Constraints
+3. Apply Geometric Constraints
    ↓
-4. Transform to Screen Space (scale × world coordinates)
+4. Transform to Screen Space (10px/inch scale factor)
    ↓
 5. Render in Order:
-   - Abutments (background)
-   - Beam body
-   - Beam zones
-   - Bearings
-   - Grid overlay
-   - Dimensions (foreground)
-   - Annotations (top)
+   - Abutments (stepped polygons with highlights)
+   - Beam body (main rectangle with zone lines)
+   - Beam zones (subtle overlay for flanges)
+   - Bearings (dual-layer plates with constraints)
+   - Grid overlay (3" cells, toggleable)
+   - Dimensions (if enabled)
+   - Annotations (future)
 ```
 
 ## Benefits of This Approach

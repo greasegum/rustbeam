@@ -15,8 +15,9 @@ export const AppPro: React.FC = () => {
   const gameRef = useRef<Phaser.Game | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const [currentMode, setCurrentMode] = useState<'edit' | 'annotate' | 'view'>('edit');
-  const [showSetup, setShowSetup] = useState(true);
+  const [showSetup, setShowSetup] = useState(false);
   const [showExport, setShowExport] = useState(false);
+  const [showContourConfig, setShowContourConfig] = useState(false);
   
   useEffect(() => {
     if (!containerRef.current || gameRef.current) return;
@@ -75,7 +76,7 @@ export const AppPro: React.FC = () => {
       
       {/* Mode-specific Toolbar */}
       <div className="toolbar-container">
-        {currentMode === 'edit' && <EditToolbar onConfigure={() => setShowSetup(true)} />}
+        {currentMode === 'edit' && <EditToolbar onConfigure={() => setShowContourConfig(true)} />}
         {currentMode === 'annotate' && <AnnotateToolbar />}
         {currentMode === 'view' && <ViewToolbar />}
       </div>
@@ -106,6 +107,26 @@ export const AppPro: React.FC = () => {
       {/* Modals */}
       {showSetup && <SetupModal onClose={() => setShowSetup(false)} />}
       {showExport && <ExportModal onClose={() => setShowExport(false)} />}
+      
+      {/* Contour Configuration Modal - Placeholder */}
+      {showContourConfig && (
+        <div className="export-modal-overlay" onClick={() => setShowContourConfig(false)}>
+          <div className="export-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="export-header">
+              <h2>Contour Generation Settings</h2>
+              <button className="modal-close" onClick={() => setShowContourConfig(false)}>×</button>
+            </div>
+            <div className="export-content">
+              <p>Contour generation settings will be implemented here.</p>
+              <p>This is where users will configure marching squares algorithm parameters, smoothing options, and output preferences for defect contours.</p>
+            </div>
+            <div className="export-footer">
+              <button className="btn-cancel" onClick={() => setShowContourConfig(false)}>Cancel</button>
+              <button className="btn-export">Apply Settings</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

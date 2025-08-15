@@ -167,18 +167,20 @@ export const EditToolbar: React.FC<EditToolbarProps> = ({ onConfigure }) => {
       </div>
       
       <div className="tool-group ml-auto">
-        {/* Configure button for advanced settings */}
+        {/* Configure button for contour generation settings */}
         <button
           className="action-btn"
-          id="configure-btn"
-          title="Advanced Settings"
+          id="contour-config-btn"
+          title="Contour Generation Settings"
           onClick={onConfigure}
         >
           <svg width="16" height="16" viewBox="0 0 16 16">
-            <circle cx="8" cy="8" r="3" stroke="currentColor" fill="none"/>
-            <path d="M8 1 L8 3 M8 13 L8 15 M1 8 L3 8 M13 8 L15 8" stroke="currentColor"/>
+            <path d="M2 8 Q8 2, 14 8 Q8 14, 2 8" stroke="currentColor" fill="none"/>
+            <circle cx="4" cy="8" r="1" fill="currentColor"/>
+            <circle cx="8" cy="5" r="1" fill="currentColor"/>
+            <circle cx="12" cy="8" r="1" fill="currentColor"/>
           </svg>
-          Configure
+          Contours
         </button>
         <button 
           className="action-btn" 

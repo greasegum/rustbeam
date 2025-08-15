@@ -209,7 +209,7 @@ export class MainSceneRefactored extends Phaser.Scene {
 
   private drawBearings(scale: number) {
     const { beam } = useStore.getState();
-    const { profile, length, leftBearing, rightBearing } = beam;
+    const { profile, length, leftBearing, rightBearing, seatWidth, breastwallDistance } = beam;
     if (!profile) return;
     
     // Two-tone bearing colors matching the sketch
@@ -217,99 +217,153 @@ export class MainSceneRefactored extends Phaser.Scene {
     const lowerBearingColor = 0xFFD3B6; // Light orange
     const bearingStroke = 0x666666;
     
-    const padWidth = 4; // 4 inches wide
-    const padHeight = 1; // 1 inch thick each
+    // Bearing width constraints: 6-12 inches, but not overhanging the breastwall
+    // Calculate maximum bearing width based on seat geometry
+    const maxBearingFromSeat = Math.min(seatWidth * 0.8, 12); // Max 80% of seat width or 12"
+    const bearingWidth = Math.max(6, Math.min(maxBearingFromSeat, 10)); // Default 10", constrained 6-12"
+    
+    // Each bearing plate should be 1.5x the flange height
+    const padHeight = profile.flangeThickness * 1.5;
 
-    const drawBearing = (x: number) => {
-      // Position just below the beam
+    const drawBearing = (x: number, bearingDistanceFromEnd: number) => {
+      // Use actual beam depth from profile
       const beamBottom = (profile.depth / 2) * scale;
       
-      // Upper bearing plate (green)
+      // Check if bearing would overhang breastwall
+      const breastwallX = ((length / 2) - (length - breastwallDistance) / 2);
+      const bearingEdge = (length / 2 - bearingDistanceFromEnd) + bearingWidth / 2;
+      
+      // Adjust bearing width if it would overhang
+      const actualBearingWidth = (bearingEdge > breastwallX) 
+        ? Math.max(6, bearingWidth - (bearingEdge - breastwallX))
+        : bearingWidth;
+      
+      // Upper bearing plate (green) - positioned directly below beam bottom
       const upperY = beamBottom + (padHeight / 2) * scale;
-      const upper = this.add.rectangle(x, upperY, padWidth * scale, padHeight * scale, upperBearingColor);
+      const upper = this.add.rectangle(x, upperY, actualBearingWidth * scale, padHeight * scale, upperBearingColor);
       upper.setStrokeStyle(1, bearingStroke);
       
-      // Lower bearing plate (orange)
+      // Lower bearing plate (orange) - positioned below upper plate
       const lowerY = beamBottom + (padHeight * 1.5) * scale;
-      const lower = this.add.rectangle(x, lowerY, padWidth * scale, padHeight * scale, lowerBearingColor);
+      const lower = this.add.rectangle(x, lowerY, actualBearingWidth * scale, padHeight * scale, lowerBearingColor);
       lower.setStrokeStyle(1, bearingStroke);
       
       this.beamContainer.add(upper);
       this.beamContainer.add(lower);
       
-      // Add centerline indicator for bearing
+      // Add centerline indicator for bearing (for span dimension)
       const clLine = this.add.line(
         x, beamBottom - 10 * scale,
         x, beamBottom,
-        x, beamBottom + 3 * scale,
+        x, beamBottom + (padHeight * 2) * scale,
         0xFF8B94, 0.5
       );
       clLine.setLineWidth(1);
       this.beamContainer.add(clLine);
     };
 
-    // Place bearings at correct positions from beam ends
-    drawBearing(-(length / 2 - leftBearing) * scale);
-    drawBearing((length / 2 - rightBearing) * scale);
+    // Position bearings at {backwall clearance} from beam ends
+    const leftBearingX = -(length / 2 - beam.backwallClearance) * scale;
+    const rightBearingX = (length / 2 - beam.backwallClearance) * scale;
+    
+    drawBearing(leftBearingX, beam.backwallClearance);
+    drawBearing(rightBearingX, beam.backwallClearance);
   }
 
   private drawAbutments(scale: number) {
     const { beam } = useStore.getState();
-    const { profile, length, backwallClearance, breastwallDistance, seatWidth, leftAbutmentHeight, rightAbutmentHeight } = beam;
+    const { profile, length, backwallClearance, breastwallDistance, seatWidth } = beam;
     if (!profile || !seatWidth) return;
-
+    
     const abutmentColor = 0xFFE66D; // Yellow matching the sketch
     const abutmentStroke = 0x999999;
-    const seatHeight = 7; // Height of bearing seat from base (inches)
-    const footingExtension = 2; // Footing extends beyond backwall (inches)
-    const baseY = (profile.depth / 2 + 2) * scale; // Position below bearings
+    
+    // Use actual beam profile dimensions from catalog
+    const beamDepth = profile.depth; // Actual depth from beam catalog (e.g., 12.22" for W12X26)
+    const beamTop = -(beamDepth / 2) * scale;  // Top of beam (negative Y)
+    const beamBottom = (beamDepth / 2) * scale; // Bottom of beam
+    
+    // Key geometry parameters - align with bearing positioning
+    const bearingPlateHeight = profile.flangeThickness * 1.5; // Each plate is 1.5x flange height
+    const bearingHeight = bearingPlateHeight * 2; // Total bearing stack height (2 plates)
+    const seatY = beamBottom + bearingHeight * scale; // Seat surface aligns with top of bearings
+    const backwallWidth = seatWidth / 3; // Backwall width is 1/3 of seat width
+    const breastwallBottom = seatY + seatWidth * scale; // Breastwall extends 1x seat width below seat
 
-    const drawAbutment = (isLeft: boolean, height: number) => {
-      const dir = isLeft ? 1 : -1; // Direction for left/right
+    const drawAbutment = (isLeft: boolean) => {
+      const dir = isLeft ? 1 : -1; // Direction multiplier
       
-      // Calculate key positions
+      // Calculate horizontal positions
       const beamEnd = (length / 2) * scale * dir;
-      const backwallX = beamEnd + (backwallClearance * scale * dir);
+      const backwallOuterX = beamEnd + (backwallClearance * scale * dir);
+      const backwallInnerX = backwallOuterX - (backwallWidth * scale * dir);
       const breastwallX = ((length / 2) - (length - breastwallDistance) / 2) * scale * dir;
       
-      // Stepped abutment shape (matching the JSON sketch)
-      const points = isLeft ? [
-        // Left abutment - clockwise from breastwall top
-        breastwallX, baseY,                                    // Breastwall top
-        breastwallX, baseY + seatHeight * scale,               // Breastwall at seat level
-        backwallX, baseY + seatHeight * scale,                 // Backwall at seat level
-        backwallX, baseY + height * scale,                     // Backwall bottom
-        backwallX - footingExtension * scale, baseY + height * scale,  // Footing extension
-        backwallX - footingExtension * scale, baseY,           // Footing top
-        breastwallX, baseY                                     // Close shape
-      ] : [
-        // Right abutment - clockwise from backwall bottom
-        backwallX, baseY + height * scale,                     // Backwall bottom
-        backwallX + footingExtension * scale, baseY + height * scale,  // Footing extension
-        backwallX + footingExtension * scale, baseY,           // Footing top
-        breastwallX, baseY,                                    // Breastwall top
-        breastwallX, baseY + seatHeight * scale,               // Breastwall at seat level
-        backwallX, baseY + seatHeight * scale,                 // Backwall at seat level
-        backwallX, baseY + height * scale                      // Close shape
+      // Stepped abutment shape matching the user's JSON sketch design:
+      // Backwall is truncated at beam top, breastwall extends below seat
+      const abutmentPoints = [
+        // Start at backwall outer edge, beam top
+        backwallOuterX, beamTop,
+        // Continue to backwall outer edge, seat level
+        backwallOuterX, seatY,
+        // Step in to backwall inner edge (backwall width)
+        backwallInnerX, seatY,
+        // Continue to breastwall face
+        breastwallX, seatY,
+        // Breastwall extends down 1x seat width below seat
+        breastwallX, breastwallBottom,
+        // Close back to starting point via a line across bottom (could add more complexity here)
+        backwallOuterX, breastwallBottom,
+        // Back to top
+        backwallOuterX, beamTop
       ];
-
-      const poly = this.add.polygon(0, 0, points, abutmentColor, 0.3);
-      poly.setStrokeStyle(2, abutmentStroke);
-      this.beamContainer.add(poly);
+      
+      const abutment = this.add.polygon(0, 0, abutmentPoints, abutmentColor, 0.8);
+      abutment.setStrokeStyle(1.5, abutmentStroke);
+      this.beamContainer.add(abutment);
       
       // Add seat surface highlight
       const seatLine = this.add.line(
         0, 0,
-        backwallX, baseY + seatHeight * scale,
-        breastwallX, baseY + seatHeight * scale,
+        backwallInnerX, seatY,
+        breastwallX, seatY,
         0x666666
       );
       seatLine.setLineWidth(2);
       this.beamContainer.add(seatLine);
+      
+      // Add vertical structure lines for clarity
+      const backwallLine = this.add.line(
+        0, 0,
+        backwallOuterX, beamTop,
+        backwallOuterX, seatY,
+        0x888888
+      );
+      backwallLine.setLineWidth(1);
+      this.beamContainer.add(backwallLine);
+      
+      const breastwallLine = this.add.line(
+        0, 0,
+        breastwallX, seatY,
+        breastwallX, breastwallBottom,
+        0x888888
+      );
+      breastwallLine.setLineWidth(1);
+      this.beamContainer.add(breastwallLine);
+      
+      // Add backwall inner face line
+      const backwallInnerLine = this.add.line(
+        0, 0,
+        backwallInnerX, seatY,
+        backwallInnerX, breastwallBottom,
+        0x888888
+      );
+      backwallInnerLine.setLineWidth(1);
+      this.beamContainer.add(backwallInnerLine);
     };
 
-    drawAbutment(true, leftAbutmentHeight);
-    drawAbutment(false, rightAbutmentHeight);
+    drawAbutment(true);  // Left abutment
+    drawAbutment(false); // Right abutment
   }
 
   private drawDimensions(scale: number) {
@@ -359,9 +413,9 @@ export class MainSceneRefactored extends Phaser.Scene {
     lengthText.setOrigin(0.5);
     this.beamContainer.add(lengthText);
 
-    // Span length between bearing centers
-    const spanStart = -(length / 2 - leftBearing) * scale;
-    const spanEnd = (length / 2 - rightBearing) * scale;
+    // Span: CL bearing to CL bearing (technical definition)
+    const spanStart = -(length / 2 - beam.backwallClearance) * scale;
+    const spanEnd = (length / 2 - beam.backwallClearance) * scale;
     const spanY = (profile.depth / 2 + 20) * scale;
     const spanLine = this.add.line(0, spanY, spanStart, spanY, spanEnd, spanY, dimColor);
     spanLine.setLineWidth(1);
@@ -371,8 +425,8 @@ export class MainSceneRefactored extends Phaser.Scene {
     const spanText = this.add.text(
       0,
       spanY - 20,
-      `${(length - leftBearing - rightBearing)}\"`,
-      { fontSize: '14px', color: '#000000', align: 'center' }
+      `Span (CL-CL): ${(length - 2 * beam.backwallClearance)}"`,
+      { fontSize: '12px', color: '#000000', align: 'center', fontStyle: 'bold' }
     );
     spanText.setOrigin(0.5);
     this.beamContainer.add(spanText);
