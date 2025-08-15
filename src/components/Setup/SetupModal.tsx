@@ -8,7 +8,16 @@ interface SetupModalProps {
 }
 
 export const SetupModal: React.FC<SetupModalProps> = ({ onClose }) => {
-  const { beam, project, setBeamProfile, setBeamLength, setBearings, setBeamDimensions, setProjectInfo } = useStore();
+  const { 
+    bridgeGeometry, 
+    project, 
+    setBeamProfile, 
+    setBeamLength, 
+    setBearingDistance, 
+    setBackwallClearance, 
+    setBreastwallDistance,
+    setProjectMetadata 
+  } = useStore();
   
   // Canvas refs for previews
   const sectionCanvasRef = useRef<HTMLCanvasElement>(null);
@@ -18,20 +27,22 @@ export const SetupModal: React.FC<SetupModalProps> = ({ onClose }) => {
   const [projectName, setProjectName] = useState(project.name);
   const [beamId, setBeamId] = useState(project.beamId || 'Beam 1');
   const [inspector, setInspector] = useState(project.inspector || '');
-  const [selectedProfile, setSelectedProfile] = useState(beam.profile?.id || 'W12X26');
+  const [selectedProfile, setSelectedProfile] = useState(bridgeGeometry.profile?.id || 'W12X26');
   
   // Beam dimensions
-  const [lengthFt, setLengthFt] = useState(Math.floor(beam.length / 12));
-  const [lengthIn, setLengthIn] = useState(beam.length % 12);
+  const [lengthFt, setLengthFt] = useState(Math.floor(bridgeGeometry.length / 12));
+  const [lengthIn, setLengthIn] = useState(bridgeGeometry.length % 12);
   
   // Substructure dimensions
-  const [bearingCLFt, setBearingCLFt] = useState(Math.floor((beam.length - 2 * beam.leftBearing) / 12));
-  const [bearingCLIn, setBearingCLIn] = useState((beam.length - 2 * beam.leftBearing) % 12);
-  const [bearingDistanceFt, setBearingDistanceFt] = useState(Math.floor(beam.leftBearing / 12));
-  const [bearingDistanceIn, setBearingDistanceIn] = useState(beam.leftBearing % 12);
-  const [backwallClearanceIn, setBackwallClearanceIn] = useState(beam.backwallClearance);
-  const [breastwallDistanceFt, setBreastwallDistanceFt] = useState(Math.floor(beam.breastwallDistance / 12));
-  const [breastwallDistanceIn, setBreastwallDistanceIn] = useState(beam.breastwallDistance % 12);
+  const leftBearing = bridgeGeometry.bearings.left.distance;
+  const rightBearing = bridgeGeometry.bearings.right.distance;
+  const [bearingCLFt, setBearingCLFt] = useState(Math.floor((bridgeGeometry.length - leftBearing - rightBearing) / 12));
+  const [bearingCLIn, setBearingCLIn] = useState((bridgeGeometry.length - leftBearing - rightBearing) % 12);
+  const [bearingDistanceFt, setBearingDistanceFt] = useState(Math.floor(leftBearing / 12));
+  const [bearingDistanceIn, setBearingDistanceIn] = useState(leftBearing % 12);
+  const [backwallClearanceIn, setBackwallClearanceIn] = useState(bridgeGeometry.abutments.left.backwallClearance);
+  const [breastwallDistanceFt, setBreastwallDistanceFt] = useState(Math.floor(bridgeGeometry.constraints.breastwallDistance / 12));
+  const [breastwallDistanceIn, setBreastwallDistanceIn] = useState(bridgeGeometry.constraints.breastwallDistance % 12);
   
   // Compute seat width based on current parameters
   const computedSeatWidth = () => {

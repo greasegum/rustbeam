@@ -3,6 +3,7 @@ import { devtools, persist } from 'zustand/middleware';
 import { AppStore } from './types';
 import { createProjectSlice } from './slices/projectSlice';
 import { createBeamSlice } from './slices/beamSlice';
+import { createBridgeGeometrySlice } from './slices/bridgeGeometrySlice';
 import { createGridSlice } from './slices/gridSlice';
 import { createToolSlice } from './slices/toolSlice';
 import { createAnnotationSlice } from './slices/annotationSlice';
@@ -26,6 +27,7 @@ export const useStore = create<AppStore>()(
         // Create initial slices
         const projectSlice = createProjectSlice(set, get, {} as any);
         const beamSlice = createBeamSlice(set, get, {} as any);
+        const bridgeGeometrySlice = createBridgeGeometrySlice(set, get, {} as any);
         const gridSlice = createGridSlice(set, get, {} as any);
         const toolSlice = createToolSlice(set, get, {} as any);
         const annotationSlice = createAnnotationSlice(set, get, {} as any);
@@ -42,6 +44,7 @@ export const useStore = create<AppStore>()(
         return {
         ...projectSlice,
         ...beamSlice,
+        ...bridgeGeometrySlice,
         ...gridSlice,
         ...toolSlice,
         ...annotationSlice,
@@ -79,6 +82,7 @@ export const useStore = create<AppStore>()(
           const fresh = {
             ...createProjectSlice(set, get, {} as any),
             ...createBeamSlice(set, get, {} as any),
+            ...createBridgeGeometrySlice(set, get, {} as any),
             ...createGridSlice(set, get, {} as any),
             ...createToolSlice(set, get, {} as any),
             ...createAnnotationSlice(set, get, {} as any),
@@ -88,6 +92,7 @@ export const useStore = create<AppStore>()(
           set(() => ({
             project: fresh.project,
             beam: fresh.beam,
+            bridgeGeometry: fresh.bridgeGeometry,
             grid: fresh.grid,
             tool: fresh.tool,
             annotations: fresh.annotations,

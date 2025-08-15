@@ -17,11 +17,18 @@ export class MainSceneRefactored extends Phaser.Scene {
   }
 
   create() {
+    console.log('🎬 MainScene create() called');
     this.cameras.main.setBackgroundColor('#f8f8f8');
     
     // Create containers
     this.gridContainer = this.add.container(0, 0);
     this.beamContainer = this.add.container(0, 0);
+    
+    console.log('📦 Containers created:', {
+      gridContainer: this.gridContainer,
+      beamContainer: this.beamContainer,
+      camera: this.cameras.main
+    });
     
     // Subscribe to store changes
     this.subscribeToStore();
@@ -34,6 +41,9 @@ export class MainSceneRefactored extends Phaser.Scene {
     
     // Center camera on beam
     this.centerCamera();
+    
+    // Add debug visualization
+    this.addDebugVisualization();
   }
 
   private subscribeToStore() {
@@ -127,10 +137,10 @@ export class MainSceneRefactored extends Phaser.Scene {
   }
 
   private drawBeam() {
-    const { beam, tool } = useStore.getState();
-    if (!beam.profile) return;
+    const { bridgeGeometry, tool } = useStore.getState();
+    if (!bridgeGeometry.profile) return;
     
-    const { profile, length, leftBearing, rightBearing } = beam;
+    const { profile, length } = bridgeGeometry;
     
     this.beamContainer.removeAll(true);
     
@@ -208,8 +218,8 @@ export class MainSceneRefactored extends Phaser.Scene {
   }
 
   private drawBearings(scale: number) {
-    const { beam } = useStore.getState();
-    const { profile, length, leftBearing, rightBearing, seatWidth, breastwallDistance } = beam;
+    const { bridgeGeometry } = useStore.getState();
+    const { profile, length, bearings, abutments, constraints } = bridgeGeometry;
     if (!profile) return;
     
     // Two-tone bearing colors matching the sketch
@@ -217,63 +227,76 @@ export class MainSceneRefactored extends Phaser.Scene {
     const lowerBearingColor = 0xFFD3B6; // Light orange
     const bearingStroke = 0x666666;
     
-    // Bearing width constraints: 6-12 inches, but not overhanging the breastwall
-    // Calculate maximum bearing width based on seat geometry
-    const maxBearingFromSeat = Math.min(seatWidth * 0.8, 12); // Max 80% of seat width or 12"
-    const bearingWidth = Math.max(6, Math.min(maxBearingFromSeat, 10)); // Default 10", constrained 6-12"
-    
-    // Each bearing plate should be 1.5x the flange height
-    const padHeight = profile.flangeThickness * 1.5;
-
-    const drawBearing = (x: number, bearingDistanceFromEnd: number) => {
+    const drawBearing = (side: 'left' | 'right') => {
+      const bearing = bearings[side];
+      const abutment = abutments[side];
+      
+      // Use bearing plate dimensions from the new structure
+      const lowerPlate = bearing.plates.lower;
+      const upperPlate = bearing.plates.upper;
+      
+      // Position calculation
+      const bearingDistanceFromEnd = bearing.distance;
+      const x = side === 'left' 
+        ? (-length / 2 + bearingDistanceFromEnd) * scale
+        : (length / 2 - bearingDistanceFromEnd) * scale;
+      
       // Use actual beam depth from profile
       const beamBottom = (profile.depth / 2) * scale;
       
       // Check if bearing would overhang breastwall
-      const breastwallX = ((length / 2) - (length - breastwallDistance) / 2);
-      const bearingEdge = (length / 2 - bearingDistanceFromEnd) + bearingWidth / 2;
+      const breastwallX = ((length / 2) - (length - constraints.breastwallDistance) / 2);
+      const bearingEdge = (length / 2 - bearingDistanceFromEnd) + lowerPlate.width / 2;
       
-      // Adjust bearing width if it would overhang
+      // Adjust bearing width if it would overhang  
       const actualBearingWidth = (bearingEdge > breastwallX) 
-        ? Math.max(6, bearingWidth - (bearingEdge - breastwallX))
-        : bearingWidth;
+        ? Math.max(6, lowerPlate.width - (bearingEdge - breastwallX))
+        : lowerPlate.width;
       
       // Upper bearing plate (green) - positioned directly below beam bottom
-      const upperY = beamBottom + (padHeight / 2) * scale;
-      const upper = this.add.rectangle(x, upperY, actualBearingWidth * scale, padHeight * scale, upperBearingColor);
+      const upperY = beamBottom + (upperPlate.thickness / 2) * scale;
+      const upper = this.add.rectangle(
+        x, upperY, 
+        Math.min(actualBearingWidth, upperPlate.width) * scale, 
+        upperPlate.thickness * scale, 
+        upperBearingColor
+      );
       upper.setStrokeStyle(1, bearingStroke);
       
       // Lower bearing plate (orange) - positioned below upper plate
-      const lowerY = beamBottom + (padHeight * 1.5) * scale;
-      const lower = this.add.rectangle(x, lowerY, actualBearingWidth * scale, padHeight * scale, lowerBearingColor);
+      const lowerY = beamBottom + (upperPlate.thickness + lowerPlate.thickness / 2) * scale;
+      const lower = this.add.rectangle(
+        x, lowerY, 
+        actualBearingWidth * scale, 
+        lowerPlate.thickness * scale, 
+        lowerBearingColor
+      );
       lower.setStrokeStyle(1, bearingStroke);
       
       this.beamContainer.add(upper);
       this.beamContainer.add(lower);
       
       // Add centerline indicator for bearing (for span dimension)
+      const totalBearingHeight = (upperPlate.thickness + lowerPlate.thickness) * scale;
       const clLine = this.add.line(
         x, beamBottom - 10 * scale,
         x, beamBottom,
-        x, beamBottom + (padHeight * 2) * scale,
+        x, beamBottom + totalBearingHeight,
         0xFF8B94, 0.5
       );
       clLine.setLineWidth(1);
       this.beamContainer.add(clLine);
     };
 
-    // Position bearings at {backwall clearance} from beam ends
-    const leftBearingX = -(length / 2 - beam.backwallClearance) * scale;
-    const rightBearingX = (length / 2 - beam.backwallClearance) * scale;
-    
-    drawBearing(leftBearingX, beam.backwallClearance);
-    drawBearing(rightBearingX, beam.backwallClearance);
+    // Draw left and right bearings using the new structure
+    drawBearing('left');
+    drawBearing('right');
   }
 
   private drawAbutments(scale: number) {
-    const { beam } = useStore.getState();
-    const { profile, length, backwallClearance, breastwallDistance, seatWidth } = beam;
-    if (!profile || !seatWidth) return;
+    const { bridgeGeometry } = useStore.getState();
+    const { profile, length, abutments, constraints } = bridgeGeometry;
+    if (!profile) return;
     
     const abutmentColor = 0xFFE66D; // Yellow matching the sketch
     const abutmentStroke = 0x999999;
@@ -283,21 +306,27 @@ export class MainSceneRefactored extends Phaser.Scene {
     const beamTop = -(beamDepth / 2) * scale;  // Top of beam (negative Y)
     const beamBottom = (beamDepth / 2) * scale; // Bottom of beam
     
-    // Key geometry parameters - align with bearing positioning
-    const bearingPlateHeight = profile.flangeThickness * 1.5; // Each plate is 1.5x flange height
-    const bearingHeight = bearingPlateHeight * 2; // Total bearing stack height (2 plates)
-    const seatY = beamBottom + bearingHeight * scale; // Seat surface aligns with top of bearings
-    const backwallWidth = seatWidth / 3; // Backwall width is 1/3 of seat width
-    const breastwallBottom = seatY + seatWidth * scale; // Breastwall extends 1x seat width below seat
-
-    const drawAbutment = (isLeft: boolean) => {
-      const dir = isLeft ? 1 : -1; // Direction multiplier
+    const drawAbutment = (side: 'left' | 'right') => {
+      const abutmentData = abutments[side];
+      const dir = side === 'left' ? 1 : -1; // Direction multiplier
+      
+      // Use new bridge geometry structure
+      const seatWidth = abutmentData.seatWidth;
+      const backwallClearance = abutmentData.backwallClearance;
+      const chamfer = abutmentData.chamfer;
+      
+      // Key geometry parameters - align with bearing positioning  
+      const bearing = bridgeGeometry.bearings[side];
+      const bearingHeight = (bearing.plates.lower.thickness + bearing.plates.upper.thickness) * scale;
+      const seatY = beamBottom + bearingHeight; // Seat surface aligns with top of bearings
+      const backwallWidth = seatWidth / 3; // Backwall width is 1/3 of seat width
+      const breastwallBottom = seatY + seatWidth * scale; // Breastwall extends 1x seat width below seat
       
       // Calculate horizontal positions
       const beamEnd = (length / 2) * scale * dir;
       const backwallOuterX = beamEnd + (backwallClearance * scale * dir);
       const backwallInnerX = backwallOuterX - (backwallWidth * scale * dir);
-      const breastwallX = ((length / 2) - (length - breastwallDistance) / 2) * scale * dir;
+      const breastwallX = ((length / 2) - (length - constraints.breastwallDistance) / 2) * scale * dir;
       
       // Stepped abutment shape matching the user's JSON sketch design:
       // Backwall is truncated at beam top, breastwall extends below seat
@@ -362,13 +391,13 @@ export class MainSceneRefactored extends Phaser.Scene {
       this.beamContainer.add(backwallInnerLine);
     };
 
-    drawAbutment(true);  // Left abutment
-    drawAbutment(false); // Right abutment
+    drawAbutment('left');  // Left abutment
+    drawAbutment('right'); // Right abutment
   }
 
   private drawDimensions(scale: number) {
-    const { beam } = useStore.getState();
-    const { profile, length, leftBearing, rightBearing, backwallClearance, breastwallDistance, seatWidth } = beam;
+    const { bridgeGeometry } = useStore.getState();
+    const { profile, length, bearings, abutments, constraints } = bridgeGeometry;
     if (!profile) return;
     
     const dimColor = 0x4ECDC4;  // Cyan color for dimension lines
@@ -686,6 +715,56 @@ export class MainSceneRefactored extends Phaser.Scene {
     cam.scrollX = view.panX;
     cam.scrollY = view.panY;
     cam.rotation = view.rotation * Math.PI / 180;
+  }
+
+  private addDebugVisualization() {
+    // Add visual indicators to show what's being rendered
+    const { beam } = useStore.getState();
+    
+    console.log('🔍 Debug visualization - Current beam state:', beam);
+    
+    // Add red dot at origin
+    const originDot = this.add.circle(0, 0, 5, 0xff0000);
+    originDot.setStrokeStyle(2, 0x000000);
+    console.log('📍 Origin dot created at (0,0)');
+    
+    // Add coordinate system indicators
+    const xAxis = this.add.line(0, 0, 0, 0, 100, 0, 0x00ff00);
+    xAxis.setLineWidth(2);
+    const yAxis = this.add.line(0, 0, 0, 0, 0, 100, 0x0000ff);
+    yAxis.setLineWidth(2);
+    
+    console.log('📐 Coordinate axes created (green=X, blue=Y)');
+    
+    // Add text labels showing what should be visible
+    const debugText = this.add.text(10, 10, '', {
+      fontSize: '12px',
+      color: '#000000',
+      backgroundColor: '#ffffff',
+      padding: { x: 5, y: 5 }
+    });
+    
+    // Update debug text every frame
+    const updateDebugText = () => {
+      const state = useStore.getState();
+      const cam = this.cameras.main;
+      
+      debugText.setText([
+        `Camera: (${cam.scrollX.toFixed(1)}, ${cam.scrollY.toFixed(1)}) zoom: ${cam.zoom.toFixed(2)}`,
+        `Beam: ${state.beam.profile} L=${state.beam.length}"`,
+        `Grid: ${state.grid.size.rows}x${state.grid.size.cols}`,
+        `Containers: Grid=${this.gridContainer.list.length} Beam=${this.beamContainer.list.length}`,
+        `Scene objects: ${this.children.list.length}`
+      ].join('\n'));
+    };
+    
+    this.time.addEvent({
+      delay: 100,
+      callback: updateDebugText,
+      loop: true
+    });
+    
+    console.log('📊 Debug text overlay created');
   }
 
   destroy() {

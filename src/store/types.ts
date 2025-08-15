@@ -1,4 +1,5 @@
 import { BeamProfile, DefectType, Annotation } from '../types';
+import { BridgeGeometry, BridgeGeometrySlice } from './slices/bridgeGeometrySlice';
 
 export interface ProjectMetadata {
   id: string;
@@ -11,6 +12,8 @@ export interface ProjectMetadata {
   version: string;
 }
 
+// Legacy interface - maintained for compatibility during migration
+// TODO: Remove after migration to BridgeGeometry is complete
 export interface BeamState {
   profile: BeamProfile | null;
   length: number;
@@ -61,12 +64,13 @@ export interface ViewState {
   rotation: number;
 }
 
-export interface AppStore {
+export interface AppStore extends BridgeGeometrySlice {
   // Project
   project: ProjectMetadata;
   setProjectMetadata: (metadata: Partial<ProjectMetadata>) => void;
   
-  // Beam
+  // Legacy Beam (maintained for compatibility during migration)
+  // TODO: Remove after migration to bridgeGeometry is complete
   beam: BeamState;
   setBeamProfile: (profile: BeamProfile) => void;
   setBeamDimensions: (dims: Partial<BeamState>) => void;
