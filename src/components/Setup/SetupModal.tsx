@@ -182,37 +182,65 @@ export const SetupModal: React.FC<SetupModalProps> = ({ onClose }) => {
     ctx.fillRect(startX, centerY - beamHeight / 2, totalLength * scale, beamHeight);
     ctx.strokeRect(startX, centerY - beamHeight / 2, totalLength * scale, beamHeight);
     
-    // Draw L-shaped abutments
-    ctx.fillStyle = '#66666620';
-    ctx.strokeStyle = '#666';
+    // Draw stepped abutments (matching main scene geometry)
+    ctx.fillStyle = '#FFE66D80'; // Light yellow matching main scene
+    ctx.strokeStyle = '#999999';
     ctx.lineWidth = 1.5;
     
-    const abutmentHeight = beamHeight * 1.5;
-    const abutmentWidth = 20;
-    const abutmentBase = breastwallDist * scale;
+    // Calculate proper abutment dimensions
+    const seatWidth = computedSeatWidth();
+    const abutmentHeight = beamHeight * 2; // Taller for better visibility
+    const backwallWidth = Math.max(seatWidth * 0.3, 15); // At least 15px wide
+    const beamTop = centerY - beamHeight / 2;
+    const beamBottom = centerY + beamHeight / 2;
+    const seatY = beamBottom + 8; // 8px below beam for bearing space
     
-    // Left abutment (L-shape)
-    const leftBackwallX = startX - backwallClear * scale;
+    // Left abutment (stepped shape)
+    const leftBeamEnd = startX;
+    const leftBackwallOuter = leftBeamEnd - backwallClear * scale;
+    const leftBackwallInner = leftBackwallOuter + backwallWidth;
+    const leftBreastwall = startX + (totalLength - breastwallDist) * scale / 2;
+    
     ctx.beginPath();
-    ctx.moveTo(leftBackwallX - abutmentWidth, centerY - abutmentHeight / 2);
-    ctx.lineTo(leftBackwallX, centerY - abutmentHeight / 2);
-    ctx.lineTo(leftBackwallX, centerY + beamHeight / 2);
-    ctx.lineTo(leftBackwallX - abutmentBase, centerY + beamHeight / 2);
-    ctx.lineTo(leftBackwallX - abutmentBase, centerY + abutmentHeight / 2);
-    ctx.lineTo(leftBackwallX - abutmentWidth, centerY + abutmentHeight / 2);
+    // Start at backwall top-outer
+    ctx.moveTo(leftBackwallOuter, beamTop);
+    // Top edge to backwall inner
+    ctx.lineTo(leftBackwallInner, beamTop);
+    // Down to seat level 
+    ctx.lineTo(leftBackwallInner, seatY);
+    // Across seat to breastwall
+    ctx.lineTo(leftBreastwall, seatY);
+    // Down breastwall
+    ctx.lineTo(leftBreastwall, seatY + seatWidth * scale);
+    // Bottom edge back to backwall
+    ctx.lineTo(leftBackwallOuter, seatY + seatWidth * scale);
+    // Up backwall outer edge
+    ctx.lineTo(leftBackwallOuter, beamTop);
     ctx.closePath();
     ctx.fill();
     ctx.stroke();
     
-    // Right abutment (L-shape mirrored)
-    const rightBackwallX = startX + totalLength * scale + backwallClear * scale;
+    // Right abutment (stepped shape mirrored)
+    const rightBeamEnd = startX + totalLength * scale;
+    const rightBackwallOuter = rightBeamEnd + backwallClear * scale;
+    const rightBackwallInner = rightBackwallOuter - backwallWidth;
+    const rightBreastwall = startX + totalLength * scale - (totalLength - breastwallDist) * scale / 2;
+    
     ctx.beginPath();
-    ctx.moveTo(rightBackwallX + abutmentWidth, centerY - abutmentHeight / 2);
-    ctx.lineTo(rightBackwallX, centerY - abutmentHeight / 2);
-    ctx.lineTo(rightBackwallX, centerY + beamHeight / 2);
-    ctx.lineTo(rightBackwallX + abutmentBase, centerY + beamHeight / 2);
-    ctx.lineTo(rightBackwallX + abutmentBase, centerY + abutmentHeight / 2);
-    ctx.lineTo(rightBackwallX + abutmentWidth, centerY + abutmentHeight / 2);
+    // Start at backwall top-outer
+    ctx.moveTo(rightBackwallOuter, beamTop);
+    // Top edge to backwall inner
+    ctx.lineTo(rightBackwallInner, beamTop);
+    // Down to seat level
+    ctx.lineTo(rightBackwallInner, seatY);
+    // Across seat to breastwall
+    ctx.lineTo(rightBreastwall, seatY);
+    // Down breastwall
+    ctx.lineTo(rightBreastwall, seatY + seatWidth * scale);
+    // Bottom edge back to backwall
+    ctx.lineTo(rightBackwallOuter, seatY + seatWidth * scale);
+    // Up backwall outer edge
+    ctx.lineTo(rightBackwallOuter, beamTop);
     ctx.closePath();
     ctx.fill();
     ctx.stroke();
@@ -275,8 +303,10 @@ export const SetupModal: React.FC<SetupModalProps> = ({ onClose }) => {
   }, [selectedProfile, lengthFt, lengthIn, bearingCLFt, bearingCLIn, bearingDistanceFt, bearingDistanceIn, backwallClearanceIn, breastwallDistanceFt, breastwallDistanceIn]);
   
   const handleApply = () => {
+    console.log('🔧 Apply button clicked - updating bridge geometry');
+    
     // Update project info
-    setProjectInfo({
+    setProjectMetadata({
       name: projectName,
       beamId: beamId,
       inspector: inspector
@@ -285,25 +315,32 @@ export const SetupModal: React.FC<SetupModalProps> = ({ onClose }) => {
     // Update beam profile
     const profile = BEAM_CATALOG.find(b => b.id === selectedProfile);
     if (profile) {
+      console.log('📏 Setting beam profile:', profile.id);
       setBeamProfile(profile);
     }
     
     // Update beam length
     const totalLength = lengthFt * 12 + lengthIn;
+    console.log('📐 Setting beam length:', totalLength);
     setBeamLength(totalLength);
     
-    // Update bearings
+    // Update bearings for both sides
     const bearingDistance = bearingDistanceFt * 12 + bearingDistanceIn;
-    setBearings(bearingDistance, bearingDistance);
+    console.log('🔗 Setting bearing distance:', bearingDistance);
+    setBearingDistance('left', bearingDistance);
+    setBearingDistance('right', bearingDistance);
 
-    // Update abutments
+    // Update abutments (both sides use same backwall clearance for now)
+    console.log('🏗️ Setting backwall clearance:', backwallClearanceIn);
+    setBackwallClearance('left', backwallClearanceIn);
+    setBackwallClearance('right', backwallClearanceIn);
+    
+    // Update breastwall distance (global constraint)
     const breastwallDistance = breastwallDistanceFt * 12 + breastwallDistanceIn;
-    setBeamDimensions({
-      backwallClearance: backwallClearanceIn,
-      breastwallDistance
-      // seatWidth is automatically computed in the store
-    });
+    console.log('📏 Setting breastwall distance:', breastwallDistance);
+    setBreastwallDistance(breastwallDistance);
 
+    console.log('✅ Bridge geometry updated successfully');
     onClose();
   };
   

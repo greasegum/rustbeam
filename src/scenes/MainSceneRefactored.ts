@@ -559,7 +559,7 @@ export class MainSceneRefactored extends Phaser.Scene {
     const seatText = this.add.text(
       (seatStartX + seatEndX) / 2,
       seatY - 20,
-      `Seat: ${seatWidth}"`,
+      `Seat: ${abutments.left.seatWidth}"`,
       { fontSize: '11px', color: '#FF8B00', align: 'center' }
     );
     seatText.setOrigin(0.5);

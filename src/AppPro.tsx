@@ -15,7 +15,7 @@ export const AppPro: React.FC = () => {
   const gameRef = useRef<Phaser.Game | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const [currentMode, setCurrentMode] = useState<'edit' | 'annotate' | 'view'>('edit');
-  const [showSetup, setShowSetup] = useState(false);
+  const [showSetup, setShowSetup] = useState(true); // Open setup modal on app start
   const [showExport, setShowExport] = useState(false);
   const [showContourConfig, setShowContourConfig] = useState(false);
   
