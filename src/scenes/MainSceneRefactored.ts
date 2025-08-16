@@ -75,10 +75,20 @@ export class MainSceneRefactored extends Phaser.Scene {
   }
 
   private syncWithStore() {
+    console.log('🔄 syncWithStore() called');
+    const state = useStore.getState();
+    console.log('📊 Store state:', {
+      bridgeGeometry: state.bridgeGeometry,
+      grid: state.grid,
+      hasProfile: !!state.bridgeGeometry?.profile
+    });
+    
     this.createGrid();
     this.drawBeam();
     this.updateGridVisuals();
     this.updateCamera();
+    
+    console.log('✅ syncWithStore() completed');
   }
 
   private createGrid() {
@@ -137,10 +147,17 @@ export class MainSceneRefactored extends Phaser.Scene {
   }
 
   private drawBeam() {
+    console.log('🏗️ drawBeam() called');
     const { bridgeGeometry, tool } = useStore.getState();
-    if (!bridgeGeometry.profile) return;
+    console.log('🔍 drawBeam - bridgeGeometry:', bridgeGeometry);
+    
+    if (!bridgeGeometry.profile) {
+      console.log('❌ drawBeam - No profile found, returning');
+      return;
+    }
     
     const { profile, length } = bridgeGeometry;
+    console.log('✅ drawBeam - Profile found:', profile.id, 'Length:', length);
     
     this.beamContainer.removeAll(true);
     

@@ -41,6 +41,51 @@ export const useStore = create<AppStore>()(
           annotationSlice.annotations.annotations = new Map();
         }
         
+        // Migration: Initialize bridgeGeometry from legacy beam state if missing
+        if (!bridgeGeometrySlice.bridgeGeometry.profile && beamSlice.beam.profile) {
+          console.log('🔄 Migrating legacy beam state to bridgeGeometry');
+          bridgeGeometrySlice.bridgeGeometry = {
+            profile: beamSlice.beam.profile,
+            length: beamSlice.beam.length,
+            units: beamSlice.beam.units,
+            bearings: {
+              left: {
+                distance: beamSlice.beam.leftBearing,
+                plates: {
+                  lower: { width: 8, length: 8, thickness: 1 },
+                  upper: { width: 8, length: 8, thickness: 1 }
+                }
+              },
+              right: {
+                distance: beamSlice.beam.rightBearing,
+                plates: {
+                  lower: { width: 8, length: 8, thickness: 1 },
+                  upper: { width: 8, length: 8, thickness: 1 }
+                }
+              }
+            },
+            abutments: {
+              left: {
+                height: beamSlice.beam.leftAbutmentHeight,
+                backwallClearance: beamSlice.beam.backwallClearance,
+                seatWidth: beamSlice.beam.seatWidth,
+                chamfer: 4
+              },
+              right: {
+                height: beamSlice.beam.rightAbutmentHeight,
+                backwallClearance: beamSlice.beam.backwallClearance,
+                seatWidth: beamSlice.beam.seatWidth,
+                chamfer: 4
+              }
+            },
+            constraints: {
+              breastwallDistance: beamSlice.beam.breastwallDistance,
+              minimumClearance: 1
+            }
+          };
+          console.log('✅ Migration completed, bridgeGeometry:', bridgeGeometrySlice.bridgeGeometry);
+        }
+        
         return {
         ...projectSlice,
         ...beamSlice,
@@ -96,7 +141,9 @@ export const useStore = create<AppStore>()(
             grid: fresh.grid,
             tool: fresh.tool,
             annotations: fresh.annotations,
-            view: fresh.view
+            view: fresh.view,
+            // Include all slice methods
+            ...fresh
           }));
         }
       };
@@ -105,7 +152,8 @@ export const useStore = create<AppStore>()(
         name: 'visualbeam-storage',
         partialize: (state) => ({
           project: state.project,
-          beam: state.beam,
+          beam: state.beam, // Legacy - maintain for compatibility
+          bridgeGeometry: state.bridgeGeometry, // New unified geometry state
           grid: { 
             ...state.grid, 
             cells: state.grid.cells instanceof Map 
