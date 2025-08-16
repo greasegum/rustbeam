@@ -307,3 +307,56 @@
 .primary-btn:hover {
   background: var(--primary-dark) !important;
 }
+
+/* Defect Type Selector */
+.defect-type-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.defect-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px;
+  border: 2px solid;
+  border-radius: 6px;
+  background: transparent;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-width: 40px;
+  height: 40px;
+}
+
+.defect-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+.defect-btn.active {
+  font-weight: bold;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+}
+
+.defect-icon {
+  font-size: 18px;
+}
+
+.defect-label {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.zoom-level {
+  font-size: 12px;
+  font-weight: 500;
+  color: #666;
+  min-width: 40px;
+  text-align: center;
+  padding: 4px 8px;
+  background: #f5f5f5;
+  border-radius: 4px;
+  border: 1px solid #ddd;
+}

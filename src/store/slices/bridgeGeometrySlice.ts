@@ -60,6 +60,11 @@ const computeSeatWidth = (
   return (beamLength + 2 * backwallClearance - breastwallDistance) / 2;
 };
 
+// Ensure seat width is always positive and reasonable
+const validateSeatWidth = (seatWidth: number): number => {
+  return Math.max(seatWidth, 6); // Minimum 6 inches
+};
+
 const computeBearingPlateSize = (profile: BeamProfile | null) => {
   if (!profile) return { width: 8, length: 8, thickness: 1 };
   
@@ -100,10 +105,10 @@ export interface BridgeGeometrySlice {
 // Default bridge geometry state
 const createDefaultBridgeGeometry = (): BridgeGeometry => {
   const defaultProfile = getBeamById('W12X26');
-  const defaultPlateSize = computeBearingPlateSize(defaultProfile);
+  const defaultPlateSize = computeBearingPlateSize(defaultProfile || null);
   
   return {
-    profile: defaultProfile,
+    profile: defaultProfile || null,
     length: 240,
     units: 'imperial',
     
@@ -198,16 +203,16 @@ export const createBridgeGeometrySlice: StateCreator<
       const geometry = state.bridgeGeometry;
       
       // Recalculate seat widths with new length
-      const leftSeatWidth = computeSeatWidth(
+      const leftSeatWidth = validateSeatWidth(computeSeatWidth(
         length, 
         geometry.abutments.left.backwallClearance, 
         geometry.constraints.breastwallDistance
-      );
-      const rightSeatWidth = computeSeatWidth(
+      ));
+      const rightSeatWidth = validateSeatWidth(computeSeatWidth(
         length,
         geometry.abutments.right.backwallClearance,
         geometry.constraints.breastwallDistance
-      );
+      ));
       
       // Update grid columns
       const grid = state.grid;
@@ -328,16 +333,16 @@ export const createBridgeGeometrySlice: StateCreator<
       const geometry = state.bridgeGeometry;
       
       // Recalculate both seat widths
-      const leftSeatWidth = computeSeatWidth(
+      const leftSeatWidth = validateSeatWidth(computeSeatWidth(
         geometry.length,
         geometry.abutments.left.backwallClearance,
         distance
-      );
-      const rightSeatWidth = computeSeatWidth(
+      ));
+      const rightSeatWidth = validateSeatWidth(computeSeatWidth(
         geometry.length,
         geometry.abutments.right.backwallClearance,
         distance
-      );
+      ));
       
       return {
         bridgeGeometry: {
@@ -369,16 +374,16 @@ export const createBridgeGeometrySlice: StateCreator<
       if (geometry.length || geometry.constraints?.breastwallDistance || 
           geometry.abutments?.left?.backwallClearance || geometry.abutments?.right?.backwallClearance) {
         
-        const leftSeatWidth = computeSeatWidth(
+        const leftSeatWidth = validateSeatWidth(computeSeatWidth(
           newGeometry.length,
           newGeometry.abutments.left.backwallClearance,
           newGeometry.constraints.breastwallDistance
-        );
-        const rightSeatWidth = computeSeatWidth(
+        ));
+        const rightSeatWidth = validateSeatWidth(computeSeatWidth(
           newGeometry.length,
           newGeometry.abutments.right.backwallClearance,
           newGeometry.constraints.breastwallDistance
-        );
+        ));
         
         newGeometry.abutments.left.seatWidth = leftSeatWidth;
         newGeometry.abutments.right.seatWidth = rightSeatWidth;

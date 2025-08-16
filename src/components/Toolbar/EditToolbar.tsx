@@ -9,27 +9,26 @@ interface EditToolbarProps {
 export const EditToolbar: React.FC<EditToolbarProps> = ({ onConfigure }) => {
   const [activeTool, setActiveTool] = useState<string>('brush');
   const [activeCS, setActiveCS] = useState<number>(1);
-  const [brushRadius, setBrushRadius] = useState<number>(1);
-  const [holesPercentage, setHolesPercentage] = useState<number>(50);
   
-  const { setCurrentTool, setSeverity, setDefectType, clearAllCells } = useStore();
+  const { setCurrentTool, setSeverity, setDefectType, clearAllCells, view, setZoom, setPan } = useStore();
   
   const handleToolChange = (tool: string) => {
     setActiveTool(tool);
-    // Map to store tool types
     const toolMap: { [key: string]: any } = {
       'brush': 'mark',
+      'holes': 'mark',
       'rectangle': 'select',
       'region': 'select',
       'erase': 'mark'
     };
     setCurrentTool(toolMap[tool] || 'select');
     
-    // When selecting erase tool, set defect type to 'none'
     if (tool === 'erase') {
       setDefectType('none');
     } else if (tool === 'brush') {
-      setDefectType('corrosion'); // Default defect type
+      setDefectType('corrosion');
+    } else if (tool === 'holes') {
+      setDefectType('missing');
     }
   };
   
@@ -38,13 +37,26 @@ export const EditToolbar: React.FC<EditToolbarProps> = ({ onConfigure }) => {
     setSeverity(cs);
   };
   
+  const handleZoomIn = () => {
+    const newZoom = Math.min(5, view.zoom * 1.2);
+    setZoom(newZoom);
+  };
+  
+  const handleZoomOut = () => {
+    const newZoom = Math.max(0.1, view.zoom * 0.8);
+    setZoom(newZoom);
+  };
+  
+  const handleResetView = () => {
+    setPan(0, 0);
+    setZoom(1);
+  };
+  
   return (
     <div className="mode-toolbar active" id="edit-toolbar">
       <div className="tool-group">
-        {/* Paintbrush tool */}
         <button 
           className={`tool-btn ${activeTool === 'brush' ? 'active' : ''}`}
-          data-tool="brush" 
           title="Paint Brush"
           onClick={() => handleToolChange('brush')}
         >
@@ -53,10 +65,19 @@ export const EditToolbar: React.FC<EditToolbarProps> = ({ onConfigure }) => {
           </svg>
         </button>
         
-        {/* Rectangle selection */}
+        <button 
+          className={`tool-btn ${activeTool === 'holes' ? 'active' : ''}`}
+          title="Holes"
+          onClick={() => handleToolChange('holes')}
+        >
+          <svg width="18" height="18" viewBox="0 0 18 18">
+            <circle cx="9" cy="9" r="6" stroke="currentColor" fill="none"/>
+            <circle cx="9" cy="9" r="2" stroke="currentColor" fill="currentColor"/>
+          </svg>
+        </button>
+        
         <button 
           className={`tool-btn ${activeTool === 'rectangle' ? 'active' : ''}`}
-          data-tool="rectangle" 
           title="Rectangle Select"
           onClick={() => handleToolChange('rectangle')}
         >
@@ -65,22 +86,8 @@ export const EditToolbar: React.FC<EditToolbarProps> = ({ onConfigure }) => {
           </svg>
         </button>
         
-        {/* Contiguous region selection */}
-        <button 
-          className={`tool-btn ${activeTool === 'region' ? 'active' : ''}`}
-          data-tool="region" 
-          title="Select Contiguous Region"
-          onClick={() => handleToolChange('region')}
-        >
-          <svg width="18" height="18" viewBox="0 0 18 18">
-            <path d="M9 3 L12 3 L12 6 L15 6 L15 9 L12 9 L12 12 L9 12 L9 15 L6 15 L6 12 L3 12 L3 9 L6 9 L6 6 L9 6 Z" stroke="currentColor" fill="none"/>
-          </svg>
-        </button>
-        
-        {/* Eraser */}
         <button 
           className={`tool-btn ${activeTool === 'erase' ? 'active' : ''}`}
-          data-tool="erase" 
           title="Erase"
           onClick={() => handleToolChange('erase')}
         >
@@ -92,85 +99,45 @@ export const EditToolbar: React.FC<EditToolbarProps> = ({ onConfigure }) => {
       
       <div className="tool-divider"></div>
       
-      {/* Condition States */}
       <div className="tool-group cs-group">
         <label>CS:</label>
-        <button 
-          className={`cs-btn cs-1 ${activeCS === 1 ? 'active' : ''}`}
-          data-cs="1"
-          onClick={() => handleCSChange(1)}
-        >
-          1
-        </button>
-        <button 
-          className={`cs-btn cs-2 ${activeCS === 2 ? 'active' : ''}`}
-          data-cs="2"
-          onClick={() => handleCSChange(2)}
-        >
-          2
-        </button>
-        <button 
-          className={`cs-btn cs-3 ${activeCS === 3 ? 'active' : ''}`}
-          data-cs="3"
-          onClick={() => handleCSChange(3)}
-        >
-          3
-        </button>
-        <button 
-          className={`cs-btn cs-4 ${activeCS === 4 ? 'active' : ''}`}
-          data-cs="4"
-          onClick={() => handleCSChange(4)}
-        >
-          4
-        </button>
-        
-        {/* Holes with percentage option */}
-        <div className="cs-holes-group">
+        {[1, 2, 3, 4].map(cs => (
           <button 
-            className={`cs-btn cs-holes ${activeCS === 5 ? 'active' : ''}`}
-            data-cs="holes"
-            onClick={() => handleCSChange(5)}
+            key={cs}
+            className={`cs-btn cs-${cs} ${activeCS === cs ? 'active' : ''}`}
+            onClick={() => handleCSChange(cs)}
           >
-            H
+            {cs}
           </button>
-          <input 
-            type="number" 
-            id="holes-percentage" 
-            className="holes-input" 
-            placeholder="%" 
-            min="1" 
-            max="100" 
-            value={holesPercentage}
-            onChange={(e) => setHolesPercentage(parseInt(e.target.value) || 50)}
-            title="Percentage of area to fill with holes"
-          />
-        </div>
+        ))}
       </div>
       
       <div className="tool-divider"></div>
       
-      {/* Brush Radius */}
+      {/* Zoom Controls */}
       <div className="tool-group">
-        <label>Radius:</label>
-        <select 
-          id="brush-radius" 
-          className="radius-select"
-          value={brushRadius}
-          onChange={(e) => setBrushRadius(parseInt(e.target.value))}
-        >
-          <option value="1">1"</option>
-          <option value="2">2"</option>
-          <option value="3">3"</option>
-          <option value="6">6"</option>
-          <option value="12">12"</option>
-        </select>
+        <label>Zoom:</label>
+        <button className="action-btn" onClick={handleZoomOut} title="Zoom Out (-)">
+          <svg width="16" height="16" viewBox="0 0 16 16">
+            <path d="M2 8 L14 8" stroke="currentColor" strokeWidth="2"/>
+          </svg>
+        </button>
+        <span className="zoom-level">{Math.round(view.zoom * 100)}%</span>
+        <button className="action-btn" onClick={handleZoomIn} title="Zoom In (+)">
+          <svg width="16" height="16" viewBox="0 0 16 16">
+            <path d="M2 8 L14 8 M8 2 L8 14" stroke="currentColor" strokeWidth="2"/>
+          </svg>
+        </button>
+        <button className="action-btn" onClick={handleResetView} title="Reset View (Home)">
+          <svg width="16" height="16" viewBox="0 0 16 16">
+            <path d="M8 2 L8 8 L14 8 M2 8 L8 8 L8 14" stroke="currentColor" fill="none"/>
+          </svg>
+        </button>
       </div>
       
       <div className="tool-group ml-auto">
-        {/* Configure button for contour generation settings */}
         <button
           className="action-btn"
-          id="contour-config-btn"
           title="Contour Generation Settings"
           onClick={onConfigure}
         >
@@ -184,7 +151,6 @@ export const EditToolbar: React.FC<EditToolbarProps> = ({ onConfigure }) => {
         </button>
         <button 
           className="action-btn" 
-          id="clear-all"
           onClick={() => {
             if (confirm('Clear all markings?')) {
               clearAllCells();

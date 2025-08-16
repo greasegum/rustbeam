@@ -25,7 +25,7 @@ export const createViewSlice: StateCreator<
     set((state) => ({
       view: { 
         ...state.view, 
-        zoom: Math.max(0.25, Math.min(4, zoom)) 
+        zoom: Math.max(0.1, Math.min(5, zoom)) 
       }
     })),
   

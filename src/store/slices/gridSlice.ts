@@ -25,11 +25,12 @@ export const createGridSlice: StateCreator<
   
   setGridSize: (size) =>
     set((state) => {
-      const beam = state.beam;
-      if (!beam.profile) return state;
+      // FIXED: Use bridgeGeometry instead of old beam state
+      const bridgeGeometry = state.bridgeGeometry;
+      if (!bridgeGeometry.profile) return state;
       
-      const newRows = Math.ceil(beam.profile.depth / size);
-      const newCols = Math.ceil(beam.length / size);
+      const newRows = Math.ceil(bridgeGeometry.profile.depth / size);
+      const newCols = Math.ceil(bridgeGeometry.length / size);
       
       // Remap cells to new grid
       const newCells = new Map<string, CellState>();

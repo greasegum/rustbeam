@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useStore } from '../../store';
 import './Toolbar.css';
 
 export const ViewToolbar: React.FC = () => {
@@ -7,6 +8,23 @@ export const ViewToolbar: React.FC = () => {
   const [showDimensions, setShowDimensions] = useState(true);
   const [showDefects, setShowDefects] = useState(true);
   const [showContours, setShowContours] = useState(false);
+  
+  const { view, setZoom, setPan } = useStore();
+  
+  const handleZoomIn = () => {
+    const newZoom = Math.min(5, view.zoom * 1.2);
+    setZoom(newZoom);
+  };
+  
+  const handleZoomOut = () => {
+    const newZoom = Math.max(0.1, view.zoom * 0.8);
+    setZoom(newZoom);
+  };
+  
+  const handleResetView = () => {
+    setPan(0, 0);
+    setZoom(1);
+  };
   
   return (
     <div className="mode-toolbar active" id="view-toolbar">
@@ -68,6 +86,29 @@ export const ViewToolbar: React.FC = () => {
             <path d="M2 8 L14 8 M2 6 L2 10 M14 6 L14 10" stroke="currentColor"/>
           </svg>
           Dimensions
+        </button>
+      </div>
+      
+      <div className="tool-divider"></div>
+      
+      {/* Zoom Controls */}
+      <div className="tool-group">
+        <label>Zoom:</label>
+        <button className="action-btn" onClick={handleZoomOut} title="Zoom Out (-)">
+          <svg width="16" height="16" viewBox="0 0 16 16">
+            <path d="M2 8 L14 8" stroke="currentColor" strokeWidth="2"/>
+          </svg>
+        </button>
+        <span className="zoom-level">{Math.round(view.zoom * 100)}%</span>
+        <button className="action-btn" onClick={handleZoomIn} title="Zoom In (+)">
+          <svg width="16" height="16" viewBox="0 0 16 16">
+            <path d="M2 8 L14 8 M8 2 L8 14" stroke="currentColor" strokeWidth="2"/>
+          </svg>
+        </button>
+        <button className="action-btn" onClick={handleResetView} title="Reset View (Home)">
+          <svg width="16" height="16" viewBox="0 0 16 16">
+            <path d="M8 2 L8 8 L14 8 M2 8 L8 8 L8 14" stroke="currentColor" fill="none"/>
+          </svg>
         </button>
       </div>
       

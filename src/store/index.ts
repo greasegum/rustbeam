@@ -87,13 +87,57 @@ export const useStore = create<AppStore>()(
         }
         
         return {
-        ...projectSlice,
-        ...beamSlice,
-        ...bridgeGeometrySlice,
-        ...gridSlice,
-        ...toolSlice,
-        ...annotationSlice,
-        ...viewSlice,
+        // Project and core state
+        project: projectSlice.project,
+        setProjectMetadata: projectSlice.setProjectMetadata,
+        
+        // Legacy beam state (for compatibility, but functions come from bridgeGeometrySlice)
+        beam: beamSlice.beam,
+        setBeamDimensions: beamSlice.setBeamDimensions, // Legacy function for compatibility
+        
+        // New bridge geometry (this provides the actual functions)
+        bridgeGeometry: bridgeGeometrySlice.bridgeGeometry,
+        setBeamProfile: bridgeGeometrySlice.setBeamProfile,
+        setBeamLength: bridgeGeometrySlice.setBeamLength,
+        setBeamUnits: bridgeGeometrySlice.setBeamUnits,
+        setBearingDistance: bridgeGeometrySlice.setBearingDistance,
+        setBearingPlates: bridgeGeometrySlice.setBearingPlates,
+        setAbutmentHeight: bridgeGeometrySlice.setAbutmentHeight,
+        setBackwallClearance: bridgeGeometrySlice.setBackwallClearance,
+        setAbutmentChamfer: bridgeGeometrySlice.setAbutmentChamfer,
+        setBreastwallDistance: bridgeGeometrySlice.setBreastwallDistance,
+        setMinimumClearance: bridgeGeometrySlice.setMinimumClearance,
+        setBridgeGeometry: bridgeGeometrySlice.setBridgeGeometry,
+        resetBridgeGeometry: bridgeGeometrySlice.resetBridgeGeometry,
+        
+        // Grid
+        grid: gridSlice.grid,
+        setGridSize: gridSlice.setGridSize,
+        markCell: gridSlice.markCell,
+        clearCell: gridSlice.clearCell,
+        clearAllCells: gridSlice.clearAllCells,
+        
+        // Tools
+        tool: toolSlice.tool,
+        setCurrentTool: toolSlice.setCurrentTool,
+        setDefectType: toolSlice.setDefectType,
+        setSeverity: toolSlice.setSeverity,
+        toggleGrid: toolSlice.toggleGrid,
+        toggleDimensions: toolSlice.toggleDimensions,
+        toggleSnap: toolSlice.toggleSnap,
+        
+        // Annotations
+        annotations: annotationSlice.annotations,
+        addAnnotation: annotationSlice.addAnnotation,
+        updateAnnotation: annotationSlice.updateAnnotation,
+        removeAnnotation: annotationSlice.removeAnnotation,
+        selectAnnotation: annotationSlice.selectAnnotation,
+        
+        // View
+        view: viewSlice.view,
+        setZoom: viewSlice.setZoom,
+        setPan: viewSlice.setPan,
+        setRotation: viewSlice.setRotation,
         
         exportToXML: () => {
           const state = get();
@@ -135,15 +179,57 @@ export const useStore = create<AppStore>()(
           };
           
           set(() => ({
+            // Project
             project: fresh.project,
+            setProjectMetadata: fresh.setProjectMetadata,
+            
+            // Legacy beam (for compatibility)
             beam: fresh.beam,
+            setBeamDimensions: fresh.setBeamDimensions,
+            
+            // Bridge geometry (new)
             bridgeGeometry: fresh.bridgeGeometry,
+            setBeamProfile: fresh.setBeamProfile,
+            setBeamLength: fresh.setBeamLength,
+            setBeamUnits: fresh.setBeamUnits,
+            setBearingDistance: fresh.setBearingDistance,
+            setBearingPlates: fresh.setBearingPlates,
+            setAbutmentHeight: fresh.setAbutmentHeight,
+            setBackwallClearance: fresh.setBackwallClearance,
+            setAbutmentChamfer: fresh.setAbutmentChamfer,
+            setBreastwallDistance: fresh.setBreastwallDistance,
+            setMinimumClearance: fresh.setMinimumClearance,
+            setBridgeGeometry: fresh.setBridgeGeometry,
+            resetBridgeGeometry: fresh.resetBridgeGeometry,
+            
+            // Grid
             grid: fresh.grid,
+            setGridSize: fresh.setGridSize,
+            markCell: fresh.markCell,
+            clearCell: fresh.clearCell,
+            clearAllCells: fresh.clearAllCells,
+            
+            // Tools
             tool: fresh.tool,
+            setCurrentTool: fresh.setCurrentTool,
+            setDefectType: fresh.setDefectType,
+            setSeverity: fresh.setSeverity,
+            toggleGrid: fresh.toggleGrid,
+            toggleDimensions: fresh.toggleDimensions,
+            toggleSnap: fresh.toggleSnap,
+            
+            // Annotations
             annotations: fresh.annotations,
+            addAnnotation: fresh.addAnnotation,
+            updateAnnotation: fresh.updateAnnotation,
+            removeAnnotation: fresh.removeAnnotation,
+            selectAnnotation: fresh.selectAnnotation,
+            
+            // View
             view: fresh.view,
-            // Include all slice methods
-            ...fresh
+            setZoom: fresh.setZoom,
+            setPan: fresh.setPan,
+            setRotation: fresh.setRotation
           }));
         }
       };
@@ -169,21 +255,17 @@ export const useStore = create<AppStore>()(
           },
           view: state.view
         }),
-        deserialize: (str) => {
-          const data = JSON.parse(str);
-          if (data.state?.grid?.cells) {
-            data.state.grid.cells = new Map(Array.isArray(data.state.grid.cells) ? data.state.grid.cells : []);
-          } else if (data.state?.grid) {
-            data.state.grid.cells = new Map();
+        onRehydrateStorage: () => (state) => {
+          if (state?.grid?.cells) {
+            state.grid.cells = new Map(Array.isArray(state.grid.cells) ? state.grid.cells : []);
+          } else if (state?.grid) {
+            state.grid.cells = new Map();
           }
-          if (data.state?.annotations?.annotations) {
-            data.state.annotations.annotations = new Map(
-              Array.isArray(data.state.annotations.annotations) ? data.state.annotations.annotations : []
-            );
-          } else if (data.state?.annotations) {
-            data.state.annotations.annotations = new Map();
+          if (state?.annotations?.annotations) {
+            state.annotations.annotations = new Map(Array.isArray(state.annotations.annotations) ? state.annotations.annotations : []);
+          } else if (state?.annotations) {
+            state.annotations.annotations = new Map();
           }
-          return data;
         }
       }
     )

@@ -10,7 +10,11 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "start": "node server.cjs"
+    "start": "node server.cjs",
+    "test": "vitest",
+    "test:ui": "vitest --ui",
+    "test:run": "vitest run",
+    "test:coverage": "vitest run --coverage"
   },
   "dependencies": {
     "@types/react": "^19.1.10",
@@ -24,9 +28,15 @@
     "zustand": "^5.0.7"
   },
   "devDependencies": {
+    "@testing-library/dom": "^10.4.1",
+    "@testing-library/jest-dom": "^6.7.0",
+    "@testing-library/react": "^16.3.0",
     "@types/node": "^20.10.0",
     "@typescript-eslint/eslint-plugin": "^6.13.0",
     "@typescript-eslint/parser": "^6.13.0",
-    "eslint": "^8.55.0"
+    "@vitest/ui": "^3.2.4",
+    "eslint": "^8.55.0",
+    "jsdom": "^26.1.0",
+    "vitest": "^3.2.4"
   }
 }

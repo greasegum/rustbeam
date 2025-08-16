@@ -179,12 +179,32 @@ export const SetupModal: React.FC<SetupModalProps> = ({ onClose }) => {
     ctx.lineWidth = 2;
     
     const beamHeight = profile.depth * scale;
-    ctx.fillRect(startX, centerY - beamHeight / 2, totalLength * scale, beamHeight);
-    ctx.strokeRect(startX, centerY - beamHeight / 2, totalLength * scale, beamHeight);
+    const beamWidth = totalLength * scale;
+    const flangeThickness = profile.flangeThickness * scale;
+    const flangeWidth = profile.flangeWidth * scale;
+    
+    // Draw main beam body
+    ctx.fillRect(startX, centerY - beamHeight / 2, beamWidth, beamHeight);
+    ctx.strokeRect(startX, centerY - beamHeight / 2, beamWidth, beamHeight);
+    
+    // Draw flange edges at top and bottom (matching main scene)
+    ctx.fillStyle = '#4CAF5090';
+    ctx.strokeStyle = '#2E7D32';
+    ctx.lineWidth = 1.5;
+    
+    // Top flange edge - full beam length × flange thickness
+    const topFlangeY = centerY - beamHeight / 2 + flangeThickness / 2;
+    ctx.fillRect(startX, topFlangeY, beamWidth, flangeThickness);
+    ctx.strokeRect(startX, topFlangeY, beamWidth, flangeThickness);
+    
+    // Bottom flange edge - full beam length × flange thickness
+    const bottomFlangeY = centerY + beamHeight / 2 - flangeThickness - flangeThickness / 2;
+    ctx.fillRect(startX, bottomFlangeY, beamWidth, flangeThickness);
+    ctx.strokeRect(startX, bottomFlangeY, beamWidth, flangeThickness);
     
     // Draw stepped abutments (matching main scene geometry)
-    ctx.fillStyle = '#FFE66D80'; // Light yellow matching main scene
-    ctx.strokeStyle = '#999999';
+    ctx.fillStyle = '#88888880'; // Grey matching main scene
+    ctx.strokeStyle = '#666666';
     ctx.lineWidth = 1.5;
     
     // Calculate proper abutment dimensions
@@ -195,11 +215,11 @@ export const SetupModal: React.FC<SetupModalProps> = ({ onClose }) => {
     const beamBottom = centerY + beamHeight / 2;
     const seatY = beamBottom + 8; // 8px below beam for bearing space
     
-    // Left abutment (stepped shape)
+    // Left abutment (stepped shape) - OUTBOARD of beam end
     const leftBeamEnd = startX;
-    const leftBackwallOuter = leftBeamEnd - backwallClear * scale;
+    const leftBackwallOuter = leftBeamEnd - backwallClear * scale; // Outboard with clearance
     const leftBackwallInner = leftBackwallOuter + backwallWidth;
-    const leftBreastwall = startX + (totalLength - breastwallDist) * scale / 2;
+    const leftBreastwall = leftBackwallInner + backwallWidth; // Further inboard
     
     ctx.beginPath();
     // Start at backwall top-outer
@@ -220,11 +240,11 @@ export const SetupModal: React.FC<SetupModalProps> = ({ onClose }) => {
     ctx.fill();
     ctx.stroke();
     
-    // Right abutment (stepped shape mirrored)
+    // Right abutment (stepped shape mirrored) - OUTBOARD of beam end
     const rightBeamEnd = startX + totalLength * scale;
-    const rightBackwallOuter = rightBeamEnd + backwallClear * scale;
+    const rightBackwallOuter = rightBeamEnd + backwallClear * scale; // Outboard with clearance
     const rightBackwallInner = rightBackwallOuter - backwallWidth;
-    const rightBreastwall = startX + totalLength * scale - (totalLength - breastwallDist) * scale / 2;
+    const rightBreastwall = rightBackwallInner - backwallWidth; // Further inboard
     
     ctx.beginPath();
     // Start at backwall top-outer
@@ -304,6 +324,13 @@ export const SetupModal: React.FC<SetupModalProps> = ({ onClose }) => {
   
   const handleApply = () => {
     console.log('🔧 Apply button clicked - updating bridge geometry');
+    console.log('📊 Current form values:', {
+      selectedProfile,
+      lengthFt, lengthIn,
+      bearingDistanceFt, bearingDistanceIn,
+      backwallClearanceIn,
+      breastwallDistanceFt, breastwallDistanceIn
+    });
     
     // Update project info
     setProjectMetadata({
@@ -317,6 +344,8 @@ export const SetupModal: React.FC<SetupModalProps> = ({ onClose }) => {
     if (profile) {
       console.log('📏 Setting beam profile:', profile.id);
       setBeamProfile(profile);
+    } else {
+      console.error('❌ Profile not found:', selectedProfile);
     }
     
     // Update beam length
@@ -341,6 +370,7 @@ export const SetupModal: React.FC<SetupModalProps> = ({ onClose }) => {
     setBreastwallDistance(breastwallDistance);
 
     console.log('✅ Bridge geometry updated successfully');
+    console.log('🚪 Closing modal...');
     onClose();
   };
   
